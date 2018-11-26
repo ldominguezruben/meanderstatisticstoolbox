@@ -1,4 +1,4 @@
-function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,Tools)
+function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,Tools,level)
 
 %This function calculate diferents methods of determination of bends
 %by Dominguez Ruben 01/20/2017
@@ -15,7 +15,6 @@ elseif sel==2
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
 end
-
 
 nFiles=1;
 %--------------------------------------------------------------------------
@@ -38,7 +37,7 @@ waitbar(10/100,hwait);
 % The level below will have to be user input until a better approach
 % has been found (4 works well for Ucayali).
 
-level = 4; 
+%level = 4; 
 wname = 'db10';  
 npc = 'nodet'; 
 theXYCenterScatter = complex(equallySpacedX,equallySpacedY);
@@ -57,7 +56,7 @@ yValleyCenter = imag(x_sim(:,1));
 % Waitbar shows the the user the status
 waitbar(50/100,hwait);
 
-dimlessCurvature = cResample*width;%dimlees curature with width C*=CBave
+dimlessCurvature = cResample*width;%dimlees curvature with width C*=CBave
 equallySpaced = [equallySpacedX, equallySpacedY];
 
 % Now, get the indices for the different intersection points.
@@ -96,13 +95,13 @@ inflectionY = inflectionY';
 inflectionPts = [inflectionX, inflectionY];
 
 if sel==1 %valley line
-        geovar.methodIntersection='Intersection Valley Line';
+        geovar.methodIntersection='Intersection Mean Center';
 
         % Now, get the intersection points of the equally spaced data and
         % valley centerline by calling the "intersections" function and initializing
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
-        robust = 0;
+        robust = 1;
         active.ac=0;
         setappdata(0, 'active', active);
         [x0, y0, iout, jout] = intersections(equallySpacedX,...
@@ -112,21 +111,96 @@ if sel==1 %valley line
         
 elseif sel==2 %inflection points
         
-        handles.methodIntersection='Intersection Inflection Line';
+        geovar.methodIntersection='Intersection Inflection Points';
         % Now, get the intersection points of the equally spaced data and
         % inflection points by calling the "intersections" function and initializing
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
-        robust = 0;
+        robust = 4;
         active.ac=0;
-        setappdata(0, 'active', active);
-        [x0, y0, iout, jout] = intersections(equallySpacedX,...
-            equallySpacedY, inflectionX', inflectionY', robust);
+%         equallySpacedX=round(equallySpacedX,4);
+%         equallySpacedY=round(equallySpacedY,4);
+%         inflectionX=inflectionX;
+%         inflectionY=inflectionY;
         
-        x0(isnan(iout))=[];
-        y0(isnan(iout))=[];
-        iout(isnan(iout))=[];
-        jout(isnan(iout))=[];
+        setappdata(0, 'active', active);
+
+          [x0, y0, iout, jout] = intersections(...
+       equallySpacedX, equallySpacedY,inflectionX, inflectionY,robust);
+           
+%%
+g=1;
+        while 1
+             if isnan(x0(g)) %| isnan(y02(g)) |isnan(iout2(g)) |isnan(jout2(g))
+                x0(g)=x0(g-1);
+            end
+            if isnan(y0(g))
+                y0(g)=y0(g-1);
+            end
+            if isnan(iout(g))
+                iout(g)=iout(g-1);
+            end
+            if isnan(jout(g))
+                jout(g)=jout(g-1);
+            end
+%             else
+                 g=g+1;
+%             end
+             if g>size(x0,1)
+                 break;
+             end
+        end
+                
+        for i=1:length(x0)
+            if i==1
+              x01(i)=1;
+              y01(i)=1;
+              iout1(i)=1;
+              jout1(i)=1;
+            else
+            if abs(x0(i)-x0(i-1))>1
+              x01(i)=1;
+              y01(i)=1;
+              iout1(i)=1;
+              jout1(i)=1;
+            else
+              x01(i)=nan;
+              y01(i)=nan;
+              iout1(i)=nan;
+              jout1(i)=nan;
+            end
+            end
+        end
+
+        x02=x0.*x01';
+        y02=y0.*y01';
+        iout2=iout.*iout1';
+        jout2=jout.*jout1';
+        
+        %delete errors
+        g=1;
+        while 1
+            if isnan(x02(g)) | isnan(x02(g)) |isnan(x02(g)) |isnan(x02(g))
+                x02(g)=[];
+                y02(g)=[];
+                iout2(g)=[];
+                jout2(g)=[];
+            else
+                g=g+1;
+            end
+             if g>size(x02,1)
+                 break;
+             end
+        end
+
+        clear x0 y0 iout jout
+
+        x0=x02;
+        y0=y02;
+        iout=iout2;
+        jout=jout2;
+
+        clear x01 y01 iout1 jout1 x02 y02 iout2 jout2
 
         waitbar(70/100,hwait);
 end
@@ -144,11 +218,9 @@ end
     mStat_bends(maxCurvS, maxCurvXY, x0, y0,...
     sResample, iout, jout, inflectionX', inflectionY',...
     inflectionPts,equallySpacedX, equallySpacedY);
+%     
+%     
 
-% strcmp uStreamIndex='none'
-%     
-%     
-    
 % Waitbar shows the the user the status
 waitbar(80/100,hwait);
 
@@ -212,8 +284,6 @@ end
 
 [na,ma]=size(newMaxCurvS);
 
-
-%dstreamL ustreamL flow
 s11='C';
 
 

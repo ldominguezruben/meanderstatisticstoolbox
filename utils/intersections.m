@@ -276,8 +276,6 @@ else % non-robust option
 end
 
 
-
-
 if isempty(x0) & isempty(y0) & isempty(iout) & isempty(jout)
     x0=nan;
     y0=nan;
@@ -307,4 +305,5 @@ end
 
     
 % Plot the results (useful for debugging).
-% plot(x1,y1,x2,y2,x0,y0,'ok');
+% figure(5)
+%  plot(x1,y1,x2,y2,x0,y0,'ok');

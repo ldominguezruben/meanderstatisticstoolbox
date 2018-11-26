@@ -105,6 +105,14 @@ set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
 set(dcm_obj,'Displaystyle','Window','Enable','on');
 pos = get(0,'userdata');
 
+% Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+        '';...
+        ['%----------- ' datestr(now) ' ------------%'];...
+        'LETs START!!!'};
+    statusLogging(handles.LogWindow, log_text)
+
 guidata(hObject, handles);%      Updates handles structure.
 
 %--------------------------------------------------------------------------
@@ -169,35 +177,31 @@ set_enable(handles,'init')
 
 % -------------------------------------------------------------------------
 function openfunction_Callback(hObject, eventdata, handles)
-%Empty    
     
-% -------------------------------------------------------------------------
-function openfiletxt_Callback(hObject, eventdata, handles)
-% 
-axes(handles.pictureReach)
-cla(handles.pictureReach)
-clear selectBend
-clc
 set_enable(handles,'init')
-% set_enable(handles,'loadfiles')
-guidata(hObject,handles)
 
 %This function incorporate the initial data
-[handles.FileName,handles.PathName] = uigetfile({'*.txt';'*.*'},'Select .txt File');
-guidata(hObject,handles)
+[ReadVar]=mStat_ReadInputFiles;
+if ReadVar.File==0
+else
 
-
-
-% Filename
-  if handles.FileName==0     
-      
-  else
+    % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+                '';...
+                ['%--- ' datestr(now) ' ---%'];...
+                'File Loaded:';[cell2mat({ReadVar.File})]};
+                statusLogging(handles.LogWindow, log_text)
+                
+    handles.xCoord=ReadVar.xCoord{:};
+    handles.yCoord=ReadVar.yCoord{:};
+    guidata(hObject, handles);
+    set_enable(handles,'loadfiles')
 
     % Input the average width of channel
     x= newid('Channel average width [meters]:', 'MStaT', [1 50]);
     handles.width = str2num(x{:}); 
 
- 
     %Control the average width input
     if handles.width == 0 
         handles.warning = warndlg('Please enter a value for the river width.',...
@@ -207,44 +211,25 @@ guidata(hObject,handles)
     else
     end
 
-    
-    % Load the centerline file
-    handles.xyCl=importdata(fullfile(handles.PathName,handles.FileName));
-        handles.xCoord = handles.xyCl(:,1);
-        handles.yCoord = handles.xyCl(:,2);
-    guidata(hObject,handles)
-    
-    if isnumeric(handles.xCoord(1,1)) | isnumeric(handles.yCoord(1,1))
-    else
-        handles.xCoord(1,1) =[];
-        handles.yCoord(1,1) =[]; 
-    end
+    %       Write the width
+    set(handles.widthinput, 'String', handles.width);
 
-%     image_button = questdlg(...
-%         'Do you like incorporate background Image?',...
-%         'Exit MStaT?','No');
-%     switch image_button
-%         case 'Yes'
-%             [handles.FileImage,handles.PathImage] =...
-%                 uigetfile({'*.jpg';'*.tif';'*.*'},'Select the Graphic Format');
-%             guidata(hObject,handles)
-% 
-%             axes(handles.pictureReach);
-%             hold on;
-%             mapshow(fullfile(handles.PathImage,handles.FileImage))        
-%         otherwise
-%     end
+    %       Store width
+    setappdata( 0,'width', handles.width)
 
-    set_enable(handles,'loadfiles')
-
-    %Method of calculate Infletion or valley line
-    %Read selector
+    %       Method of calculate Infletion or valley line
+    %       Read selector
     sel=get(handles.selector,'Value');
 
-    Tools=1;
+    Tools=1;%Geometric parameters
+
+    level=5;%Decomposition level default
+    %       Write the level
+    set(handles.decompositionparameter, 'String', level);
 
     %Calculate and plot planar variables
-    [geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,handles.pictureReach,handles.bendSelect,Tools);
+    [geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
+        handles.pictureReach,handles.bendSelect,Tools,level);
 
     %save handles
     handles.geovar=geovar;
@@ -263,210 +248,30 @@ guidata(hObject,handles)
     %     "bendSelect" listbox. 
     handles.selectedBend = getappdata(0, 'selectedBend');
     handles.selectedBend = str2double(handles.selectedBend);
-
-    %     Write the width
-    set(handles.widthinput, 'String', handles.width);
-    
-    %  Store width
-    setappdata( 0,'width', handles.width)
-
-    set_enable(handles,'results')
-  end
-  
-  
-  function openkmlfile_Callback(hObject, eventdata, handles)
-
-% clear figures and data 
-axes(handles.pictureReach)
-cla(handles.pictureReach)
-clear selectBend
-clc
-guidata(hObject,handles)
-set_enable(handles,'init')
-
-
-%read file
-[handles.Filekml,handles.Pathkml] = uigetfile({'*.kml'},'Select .kml File');
-
-kmlFile=fullfile(handles.Pathkml,handles.Filekml);
-
-handles.kmlFile=kmlFile;
-guidata(hObject,handles)
-
-if handles.Filekml==0     
-      
-else
-      
-% Input the average width of channel
- x= newid('Channel average width [meters]:', 'MStaT', [1 50]);
- handles.width = str2num(x{:}); 
-
-
-    %Control the average width input
-    if handles.width == 0 
-        handles.warning = warndlg('Please enter a value for the river width.',...
-        'WARNING');
-    elseif isnan(handles.width)==1 
-        handles.warning = warndlg('Please enter a numeric value.','WARNING');
-    else
-    end
-
-    % read kml
-    kmlStruct = kml2struct(kmlFile);
-    handles.kmlStruct=kmlStruct;
-    %project kml in utm system
-    [handles.xCoord, handles.yCoord,handles.utmzone] = deg2utm(kmlStruct.Lat,kmlStruct.Lon);
-    guidata(hObject,handles)
-
-    
-%     image_button = questdlg(...
-%         'Do you like incorporate background Image?',...
-%         'Exit MStaT?','No');
-%     switch image_button
-%         case 'Yes'
-%             [handles.FileImage,handles.PathImage] =...
-%                 uigetfile({'*.jpg';'*.tif';'*.*'},'Select the Graphic File');
-%             guidata(hObject,handles)
-% 
-%             axes(handles.pictureReach);
-%             hold on;
-%             mapshow(fullfile(handles.PathImage,handles.FileImage))        
-%         otherwise
-%     end
-
-    set_enable(handles,'loadfiles')
-
-    %Method of calculate Infletion or valley line
-    %Read selector
-    sel=get(handles.selector,'Value');
-
-    Tools=1;
-
-    %Calculate and plot planar variables
-    [geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,handles.pictureReach,handles.bendSelect,Tools);
-
-    %save handles
-    handles.geovar=geovar;
     guidata(hObject, handles);
 
-
-    %      Retrieve the selected bend ID number from the "bendSelect" listbox.
-    selectedBend = get(handles.bendSelect,'Value');
-    handles.selectedBend = num2str(selectedBend);
-
-    %       setappdata is a function which allows the selected bend
-    %       to be accessed by multiple GUI windows.  
-    setappdata(0, 'selectedBend', handles.selectedBend);
-    guidata(hObject, handles);
-    
-    
-    %       Write the width
-    set(handles.widthinput, 'String', handles.width);
-    %       Store width
-    setappdata( 0,'width', handles.width)
-
-    
     set_enable(handles,'results')
-end
-
+    
+            % Push messages to Log Window:
+        % ----------------------------
+        log_text = {...
+                    '';...
+                    ['%--- ' datestr(now) ' ---%'];...
+                    'Summary';...
+                    'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
+                    'Bends Found:';[cell2mat({geovar.nBends})];...
+                    'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
+                    'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+                    'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+                    'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+                    statusLogging(handles.LogWindow, log_text)
+                    
+end  
+    
 
 % --------------------------------------------------------------------
-function excelopen_Callback(hObject, eventdata, handles)
-%Open excel 
-
-% clear figures and data 
-axes(handles.pictureReach)
-cla(handles.pictureReach)
-clear selectBend
-clc
-guidata(hObject,handles)
-set_enable(handles,'init')
-
-%read file
-[handles.Filexlsx,handles.Pathxlsx] = uigetfile({'*.xlsx'},'Select Excel File');
-
-xlsxFile=fullfile(handles.Pathxlsx,handles.Filexlsx);
-
-
-if handles.Filexlsx==0     
-      
-else
-    
-    Ex=xlsread(xlsxFile);
-    
-    handles.xCoord = Ex(:,1);
-    handles.yCoord = Ex(:,2);
-    guidata(hObject,handles)   
-
-        if isnumeric(handles.xCoord(1,1)) | isnumeric(handles.yCoord(1,1))
-        else
-        handles.xCoord(1,1) =[];
-        handles.yCoord(1,1) =[]; 
-        end
-    
-% Input the average width of channel
- x= newid('Channel average width [meters]:', 'MStaT', [1 50]);
- handles.width = str2num(x{:}); 
-
-    %Control the average width input
-    if handles.width == 0 
-        handles.warning = warndlg('Please enter a value for the river width.',...
-        'WARNING');
-    elseif isnan(handles.width)==1 
-        handles.warning = warndlg('Please enter a numeric value.','WARNING');
-    else
-    end
-
-    
-% image_button = questdlg(...
-%     'Do you like incorporate background Image?',...
-%     'Exit MStaT?','No');
-% switch image_button
-%     case 'Yes'
-%         [handles.FileImage,handles.PathImage] =...
-%             uigetfile({'*.jpg';'*.tif';'*.*'},'Select Graphic File');
-%         guidata(hObject,handles)
-% 
-%         axes(handles.pictureReach);
-%         hold on;
-%         mapshow(fullfile(handles.PathImage,handles.FileImage))        
-%     otherwise
-% end
-
-set_enable(handles,'loadfiles')
-
-%Method of calculate Infletion or valley line
-%Read selector
-sel=get(handles.selector,'Value');
-
-Tools=1;
-
-%Calculate and plot planar variables
-[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,handles.pictureReach,handles.bendSelect,Tools);
-
-%save handles
-handles.geovar=geovar;
-guidata(hObject, handles);
-
-
-%      Retrieve the selected bend ID number from the "bendSelect" listbox.
-selectedBend = get(handles.bendSelect,'Value');
-handles.selectedBend = num2str(selectedBend);
-
-%       setappdata is a function which allows the selected bend
-%       to be accessed by multiple GUI windows.  
-setappdata(0, 'selectedBend', handles.selectedBend);
-guidata(hObject, handles);
-
-%       Write the width
-set(handles.widthinput, 'String', handles.width);
-
-%       Store width
-setappdata( 0,'width', handles.width)
-
-set_enable(handles,'results')
-end
-
+function close_Callback(hObject, eventdata, handles)
+close
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Export function
@@ -506,43 +311,44 @@ mStat_savexlsx(handles.geovar)
 % --------------------------------------------------------------------
 function exportkmzfile_Callback(hObject, eventdata, handles)
 
-    if handles.Filekml==0
-    else
-        
-    [file,path] = uiputfile('*','Save Google Earth File kml');
+% if handles.Filekml==0
+% else
 
-    namekml=(fullfile(path,file));
+[file,path] = uiputfile('*','Save Google Earth File kml');
+
+namekml=(fullfile(path,file));
+
+% 3 file export function
+%first
+[xcoord,ycoord]=utm2deg(handles.xCoord,handles.xCoord,char(handles.utmzone(1,1:4)));
+latlon1=[xcoord ycoord];
+
+%latlon1=[handles.kmlStruct.Lat handles.kmlStruct.Lon];
+
+%second
+for i=1:length(handles.geovar.xValleyCenter)
+    utmzoneva(i,1)=cellstr(handles.utmzone(1,1:4));
+end
+utmva=char(utmzoneva);
+
+[xvalley,yvalley]=utm2deg(handles.geovar.xValleyCenter,handles.geovar.yValleyCenter,char(utmzoneva));
+latlon2=[xvalley yvalley];
+
+%third
+for i=1:length(handles.geovar.inflectionX)
+    utmzoneinf(i,1)=cellstr(handles.utmzone(1,1:4));
+end
+
+[xinflectionY,yinflectionY]=utm2deg(handles.geovar.inflectionX,handles.geovar.inflectionY,char(utmzoneinf));
+latlon3=[xinflectionY yinflectionY];
+
+    % Write latitude and longitude into a KML file
+    %msgbox('Writing KML Files...','Conversion Status','helpfunction','replace');
+    mStat_kml(namekml,latlon1,latlon2,latlon3);
 
 
-    % 3 file exportfunction
-    %first
-    
-    latlon1=[handles.kmlStruct.Lat handles.kmlStruct.Lon];
-
-    %second
-    for i=1:length(handles.geovar.xValleyCenter)
-        utmzoneva(i,1)=cellstr(handles.utmzone(1,1:4));
-    end
-    utmva=char(utmzoneva);
-    
-    [xvalley,yvalley]=utm2deg(handles.geovar.xValleyCenter,handles.geovar.yValleyCenter,char(utmzoneva));
-    latlon2=[xvalley yvalley];
-    
-    %third
-    for i=1:length(handles.geovar.inflectionX)
-        utmzoneinf(i,1)=cellstr(handles.utmzone(1,1:4));
-    end
-    
-    [xinflectionY,yinflectionY]=utm2deg(handles.geovar.inflectionX,handles.geovar.inflectionY,char(utmzoneinf));
-    latlon3=[xinflectionY yinflectionY];
-
-        % Write latitude and longitude into a KML file
-        %msgbox('Writing KML Files...','Conversion Status','helpfunction','replace');
-        mStat_kml(namekml,latlon1,latlon2,latlon3);
-
-
-    warndlg('Export succesfully!')
-    end
+warndlg('Export succesfully!')
+% end
     
 
 %Export Figures    
@@ -561,6 +367,9 @@ imwrite(Image, fullfile(path,file),'Resolution',500)
 function tools_Callback(hObject, eventdata, handles)
 % Empty
 
+% --------------------------------------------------------------------
+function evaldecomp_Callback(hObject, eventdata, handles)
+% Empty
 
 % --------------------------------------------------------------------
 function waveletanalysis_Callback(hObject, eventdata, handles)
@@ -654,12 +463,12 @@ guidata(hObject, handles);
 
 % Set the statistics to the "IndividualStats" table in 
 % the main GUI.  
-set(handles.sinuosity, 'String', handles.geovar.sinuosityOfBends(selectedBend));
-set(handles.curvaturel, 'String', handles.geovar.lengthCurved(selectedBend));
-set(handles.wavel, 'String', handles.geovar.wavelengthOfBends(selectedBend));
-set(handles.amplitude, 'String', handles.geovar.amplitudeOfBends(selectedBend));
-set(handles.dstreamL, 'String',handles.geovar.downstreamSlength(selectedBend));
-set(handles.ustreamL, 'String', handles.geovar.upstreamSlength(selectedBend));
+set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend)),2);
+set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
+set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
+set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
+set(handles.dstreamL, 'String', round(handles.geovar.downstreamSlength(selectedBend),2));
+set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
 guidata(hObject, handles);
 
 
@@ -699,12 +508,12 @@ guidata(hObject, handles);
 
 % Set the statistics to the "IndividualStats" table in 
 % the main GUI.  
-set(handles.sinuosity, 'String', handles.geovar.sinuosityOfBends(selectedBend));
-set(handles.curvaturel, 'String', handles.geovar.lengthCurved(selectedBend));
-set(handles.wavel, 'String', handles.geovar.wavelengthOfBends(selectedBend));
-set(handles.amplitude, 'String', handles.geovar.amplitudeOfBends(selectedBend));
-set(handles.dstreamL, 'String',handles.geovar.downstreamSlength(selectedBend));
-set(handles.ustreamL, 'String', handles.geovar.upstreamSlength(selectedBend));
+set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
+set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
+set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
+set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
+set(handles.dstreamL, 'String',round(handles.geovar.downstreamSlength(selectedBend),2));
+set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
 guidata(hObject, handles);
     
 
@@ -807,15 +616,33 @@ setappdata( 0,'width', handles.width)
 %Method selected
 sel=get(handles.selector,'Value');
 
-Tools=1;
+Tools=1;%Geometry parameter
+
+% Read the decompouse parameter
+level = str2double(get(handles.decompositionparameter,'String'));
 
 %Calculate and plot planar variables
-[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,handles.pictureReach,handles.bendSelect,Tools);
+[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
+    handles.pictureReach,handles.bendSelect,Tools,level);
 
 %save handles
 handles.geovar=geovar;
 guidata(hObject, handles);
 
+    % Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Summary';...
+            'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
+            'Bends Found:';[cell2mat({geovar.nBends})];...
+            'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
+            'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+            'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+            'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+            statusLogging(handles.LogWindow, log_text)
+                    
 set_enable(handles,'results')
 
 % --------------------------------------------------------------------
@@ -904,12 +731,13 @@ guidata(hObject, handles);
 
 % Set the statistics to the "IndividualStats" table in 
 % the main GUI.  
-set(handles.sinuosity, 'String', handles.geovar.sinuosityOfBends(selectedBend));
-set(handles.curvaturel, 'String', handles.geovar.lengthCurved(selectedBend));
-set(handles.wavel, 'String', handles.geovar.wavelengthOfBends(selectedBend));
-set(handles.amplitude, 'String', handles.geovar.amplitudeOfBends(selectedBend));
-set(handles.dstreamL, 'String',handles.geovar.downstreamSlength(selectedBend));
-set(handles.ustreamL, 'String', handles.geovar.upstreamSlength(selectedBend));
+set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
+set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
+set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
+set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
+set(handles.dstreamL, 'String',round(handles.geovar.downstreamSlength(selectedBend),2));
+set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
+set(handles.condition, 'String', handles.geovar.condition(selectedBend));
 guidata(hObject, handles);
     
 uiresume(gcbf);
@@ -929,7 +757,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), ...
         get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-% %--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 
 function selectData_CreateFcn(hObject, eventdata, handles)
@@ -944,15 +772,34 @@ cla(handles.pictureReach)
 guidata(hObject,handles)
 
 %Read selector
-sel=get(handles.selector,'Value');
+sel=get(handles.selector,'Value');%1 Inflectionmethod or MCM
 
-Tools=1;
+Tools=1;%Geometry parameter
+
+% Read the decompouse parameter
+level = str2double(get(handles.decompositionparameter,'String'));
+
 %Function of calculate
-[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,handles.pictureReach,handles.bendSelect,Tools);
+[geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
+    handles.pictureReach,handles.bendSelect,Tools,level);
 
 %save handles
 handles.geovar=geovar;
 guidata(hObject, handles);
+
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+        '';...
+        ['%--- ' datestr(now) ' ---%'];...
+        'Summary';...
+        'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
+        'Bends Found:';[cell2mat({geovar.nBends})];...
+        'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
+        'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+        'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+        'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+        statusLogging(handles.LogWindow, log_text)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1124,18 +971,22 @@ case 'init'
     set(handles.amplitude,'String','','Enable','off')
     set(handles.ustreamL,'String','','Enable','off')
     set(handles.dstreamL,'String','','Enable','off')
+    set(handles.condition,'String','','Enable','off')
     set(handles.bendSelect,'String','','Enable','off')
     set(handles.exportfunction,'Enable','off')
-    %set(handles.tools,'Enable','off')
     set(handles.setti,'Enable','off') 
     set(handles.recalculate,'Enable','off')    
     set(handles.gobend,'Enable','off')   
     set(handles.selector,'Enable','off')  
     set(handles.bendSelect,'Enable','off') 
     set(handles.waveletanalysis,'Enable','off')
+    set(handles.decompositionparameter,'String','','Enable','off')
     set(handles.riverstatistics,'Enable','off')
     set(handles.backgroundimage,'Enable','off')
-    %set(handles.migrationanalyzer,'Enable','off')
+    axes(handles.pictureReach)
+    cla(handles.pictureReach)
+    clear selectBend
+    clc
     case 'loadfiles'
     set(handles.widthinput,'Enable','on')
     set(handles.sinuosity,'Enable','on')
@@ -1145,7 +996,9 @@ case 'init'
     set(handles.ustreamL,'Enable','on')
     set(handles.dstreamL,'Enable','on')
     set(handles.bendSelect,'Enable','on')
+    set(handles.condition,'String','','Enable','on')
     %set(handles.tools,'Enable','on')
+    set(handles.decompositionparameter,'Enable','on')
     set(handles.setti,'Enable','on')
     set(handles.recalculate,'Enable','on') 
     set(handles.gobend,'Enable','on')
@@ -1183,23 +1036,45 @@ openfile_Callback(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% --- Executes on selection change in logwindow.
-function logwindow_Callback(hObject, eventdata, handles)
-% hObject    handle to logwindow (see GCBO)
+% --- Executes on selection change in LogWindow.
+function LogWindow_Callback(hObject, eventdata, handles)
+% hObject    handle to LogWindow (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns logwindow contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from logwindow
+% Hints: contents = cellstr(get(hObject,'String')) returns LogWindow contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from LogWindow
 
 
 % --- Executes during object creation, after setting all properties.
-function logwindow_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to logwindow (see GCBO)
+function LogWindow_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to LogWindow (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function decompositionparameter_Callback(hObject, eventdata, handles)
+% hObject    handle to decompositionparameter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of decompositionparameter as text
+%        str2double(get(hObject,'String')) returns contents of decompositionparameter as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function decompositionparameter_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to decompositionparameter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
