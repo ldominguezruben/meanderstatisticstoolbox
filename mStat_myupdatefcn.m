@@ -27,9 +27,6 @@ equallySpacedY = str2num(equallySpacedY);
 newInflectionPts = getappdata(0, 'newInflectionPts');
 newInflectionPts = str2num(newInflectionPts);
 
-
-
-
 %data window
 pos = get(event_obj,'Position');
 clickX=round(pos(1)*10000)/10000;
@@ -43,6 +40,7 @@ for hf=1:length(bendID)
  [highlightX, highlightY] = userSelectBend(intS, bendID (hf),...
     equallySpacedX,equallySpacedY,newInflectionPts,...
     sResample);
+% highlightPlot = line(highlightX(1,:), highlightY(1,:), 'color', 'y'); 
  len=length(highlightX);
  cursorX(hf,1:len)=highlightX;
  cursorY(hf,1:len)=highlightY;

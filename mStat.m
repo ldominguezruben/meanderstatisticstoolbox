@@ -76,7 +76,7 @@ addpath utils
 handles.output = hObject;
 handles.mStat_version='v1.00';
 % Set the name and version
-set(handles.figure1,'Name',['Meander Statistics Toolbox (MStaT) ' handles.mStat_version], ...
+set(handles.figure1,'Name',['Meander Statistics Tool-box (MStaT) ' handles.mStat_version], ...
     'DockControls','off')
 
 set_enable(handles,'init')
@@ -104,6 +104,15 @@ set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
 
 set(dcm_obj,'Displaystyle','Window','Enable','on');
 pos = get(0,'userdata');
+
+%Position
+% currentPoint = get(gca, 'CurrentPoint');
+% %show equation    
+% eq1 = uicontrol('style','text',...
+% 'position',[600 20 100 20],...
+% 'fontsize',12);
+% set(eq1,'string',['x=',currentPoint(1),'y=',currentPoint(3)]);
+
 
 % Push messages to Log Window:
     % ----------------------------
@@ -195,6 +204,7 @@ else
                 
     handles.xCoord=ReadVar.xCoord{:};
     handles.yCoord=ReadVar.yCoord{:};
+    handles.formatfileread=ReadVar.comp;
     guidata(hObject, handles);
     set_enable(handles,'loadfiles')
 
@@ -222,7 +232,7 @@ else
     sel=get(handles.selector,'Value');
 
     Tools=1;%Geometric parameters
-
+    
     level=5;%Decomposition level default
     %       Write the level
     set(handles.decompositionparameter, 'String', level);
@@ -249,22 +259,26 @@ else
     handles.selectedBend = getappdata(0, 'selectedBend');
     handles.selectedBend = str2double(handles.selectedBend);
     guidata(hObject, handles);
-
+    %to export kml
+    handles.utmzone=ReadVar.utmzone{1};%without data
+    guidata(hObject, handles);
+    
+    %enable results
     set_enable(handles,'results')
     
-            % Push messages to Log Window:
-        % ----------------------------
-        log_text = {...
-                    '';...
-                    ['%--- ' datestr(now) ' ---%'];...
-                    'Summary';...
-                    'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
-                    'Bends Found:';[cell2mat({geovar.nBends})];...
-                    'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
-                    'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
-                    'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
-                    'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
-                    statusLogging(handles.LogWindow, log_text)
+    % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+                '';...
+                ['%--- ' datestr(now) ' ---%'];...
+                'Summary';...
+                'Total Length Analyzed [km]:';[cell2mat({geovar.intS(end,1)/1000})];...
+                'Bends Found:';[cell2mat({geovar.nBends})];...
+                'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
+                'Mean Amplitude [m]:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+                'Mean Arc-Wavelength [m]:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+                'Mean Wavelength [m]:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+                statusLogging(handles.LogWindow, log_text)
                     
 end  
     
@@ -320,7 +334,7 @@ namekml=(fullfile(path,file));
 
 % 3 file export function
 %first
-[xcoord,ycoord]=utm2deg(handles.xCoord,handles.xCoord,char(handles.utmzone(1,1:4)));
+[xcoord,ycoord]=utm2deg(handles.xCoord,handles.xCoord,char(handles.utmzone(:,1:4)));
 latlon1=[xcoord ycoord];
 
 %latlon1=[handles.kmlStruct.Lat handles.kmlStruct.Lon];
@@ -635,12 +649,12 @@ log_text = {...
             '';...
             ['%--- ' datestr(now) ' ---%'];...
             'Summary';...
-            'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
+            'Total Length Analyzed [km]:';[cell2mat({geovar.intS(end,1)/1000})];...
             'Bends Found:';[cell2mat({geovar.nBends})];...
             'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
-            'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
-            'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
-            'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+            'Mean Amplitude [m]:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+            'Mean Arc-Wavelength [m]:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+            'Mean Wavelength[m]:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
             statusLogging(handles.LogWindow, log_text)
                     
 set_enable(handles,'results')
@@ -793,12 +807,12 @@ log_text = {...
         '';...
         ['%--- ' datestr(now) ' ---%'];...
         'Summary';...
-        'Total Length Analyzed:';[cell2mat({geovar.intS(end,1)/1000})];...
+        'Total Length Analyzed [km]:';[cell2mat({geovar.intS(end,1)/1000})];...
         'Bends Found:';[cell2mat({geovar.nBends})];...
         'Mean Sinuosity:';[cell2mat({nanmean(geovar.sinuosityOfBends)})];...
-        'Mean Amplitude:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
-        'Mean Arc-Wavelength:';[cell2mat({nanmean(geovar.lengthCurved)})];...
-        'Mean Wavelength:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
+        'Mean Amplitude [m]:';[cell2mat({nanmean(geovar.amplitudeOfBends)})];...
+        'Mean Arc-Wavelength[m]:';[cell2mat({nanmean(geovar.lengthCurved)})];...
+        'Mean Wavelength [m]:';[cell2mat({nanmean(geovar.wavelengthOfBends)})]};
         statusLogging(handles.LogWindow, log_text)
 
 
@@ -819,6 +833,7 @@ end
 % --- Executes on button press in gobend.
 function gobend_Callback(hObject, eventdata, handles)
 %go to bend selected
+%replot the picture
 cla(handles.pictureReach)
 mStat_plotplanar(handles.geovar.equallySpacedX, handles.geovar.equallySpacedY, handles.geovar.inflectionPts, ...
     handles.geovar.x0, handles.geovar.y0, handles.geovar.x_sim, handles.geovar.newMaxCurvX, handles.geovar.newMaxCurvY, ...
@@ -832,7 +847,7 @@ selectedBend = get(handles.bendSelect,'Value');
     %      selectdata text labels for all bends.    
     axes(handles.pictureReach); 
     set(gca, 'Color', 'w')
-    axis normal; 
+    %axis normal; 
     dx = 2000;
     dy = 2000;
     loc = find(handles.geovar.newMaxCurvS == handles.geovar.bend(selectedBend,2));
@@ -972,8 +987,9 @@ case 'init'
     set(handles.ustreamL,'String','','Enable','off')
     set(handles.dstreamL,'String','','Enable','off')
     set(handles.condition,'String','','Enable','off')
-    set(handles.bendSelect,'String','','Enable','off')
+    set(handles.bendSelect,'Visible','off','String','','Enable','off')
     set(handles.exportfunction,'Enable','off')
+    set(handles.exportkmzfile,'Enable','off')
     set(handles.setti,'Enable','off') 
     set(handles.recalculate,'Enable','off')    
     set(handles.gobend,'Enable','off')   
@@ -995,7 +1011,7 @@ case 'init'
     set(handles.amplitude,'Enable','on')
     set(handles.ustreamL,'Enable','on')
     set(handles.dstreamL,'Enable','on')
-    set(handles.bendSelect,'Enable','on')
+    set(handles.bendSelect,'Visible','on','Enable','on')
     set(handles.condition,'String','','Enable','on')
     %set(handles.tools,'Enable','on')
     set(handles.decompositionparameter,'Enable','on')
@@ -1008,6 +1024,9 @@ case 'init'
     set(handles.waveletanalysis,'Enable','on')  
     set(handles.riverstatistics,'Enable','on')  
     set(handles.exportfunction,'Enable','on')
+    if  handles.formatfileread(2)=='l'
+    set(handles.exportkmzfile,'Enable','on')
+    end
     set(handles.backgroundimage,'Enable','on')
     otherwise                
 end
