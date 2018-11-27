@@ -1,28 +1,5 @@
 function varargout = mStat_MigrationAnalyzer(varargin)
-% MSTAT_MIGRATIONANALYZER MATLAB code for mStat_MigrationAnalyzer.fig
-%      MSTAT_MIGRATIONANALYZER, by itself, creates a new MSTAT_MIGRATIONANALYZER or raises the existing
-%      singleton*.
-%
-%      H = MSTAT_MIGRATIONANALYZER returns the handle to a new MSTAT_MIGRATIONANALYZER or the handle to
-%      the existing singleton*.
-%
-%      MSTAT_MIGRATIONANALYZER('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MSTAT_MIGRATIONANALYZER.M with the given input arguments.
-%
-%      MSTAT_MIGRATIONANALYZER('Property','Value',...) creates a new MSTAT_MIGRATIONANALYZER or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mStat_MigrationAnalyzer_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mStat_MigrationAnalyzer_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help mStat_MigrationAnalyzer
-
-% Last Modified by GUIDE v2.5 01-Jan-2015 18:12:19
+% MStaT Migration Anlyzer
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,6 +48,13 @@ set(dcm_objt0,'UpdateFcn',@mStat_myupdatefcnMigration);
 set(dcm_objt0,'Displaystyle','Window','Enable','on');
 
 pos = get(0,'userdata');
+% Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+        '';...
+        ['%----------- ' datestr(now) ' ------------%'];...
+        'LETs START!!!'};
+    statusLogging(handles.LogWindows, log_text)
 
 
 % --- Outputs from this function are returned to the command line.

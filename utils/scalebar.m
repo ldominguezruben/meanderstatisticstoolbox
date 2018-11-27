@@ -35,6 +35,8 @@ function h = scalebar(varargin)
 %  - fixed bug: bold wasn't refreshing after zoom
 %  - added unit string
 
+
+
     % DELETE SCALEBAR IF ONE EXISTS
     delete(findobj(gca,'tag','scalebar'));
 
@@ -56,6 +58,7 @@ function h = scalebar(varargin)
     linewidth = 0.5;
     fontweight = 'normal';
     unitstring = '';
+    
 
     % PROCESS ARGUMENTS
     if nargin>0
@@ -202,6 +205,7 @@ function h = scalebar(varargin)
     end
             
     % DRAW SCALEBAR
+   
     set(gca,'xlimmode','manual','ylimmode','manual');
     hg = hggroup('tag','scalebar');
     line(linepos(:,1), linepos(:,2), 'color', colour, 'linewidth', linewidth, 'parent', hg);
@@ -209,6 +213,7 @@ function h = scalebar(varargin)
     line(ends(:,1,2), ends(:,2,2), 'color', colour, 'linewidth', linewidth, 'parent', hg);
     text(linepos(1,1),linepos(1,2),0,'0','verticalalignment',textalignment{1},'horizontalalignment',textalignment{2}, 'color', colour, 'fontweight', fontweight, 'parent', hg);
     text(linepos(2,1),linepos(2,2),0,[num2str(scalelength) unitstring],'verticalalignment',textalignment{1},'horizontalalignment',textalignment{2}, 'color', colour, 'fontweight', fontweight, 'parent', hg);
+   
     
     if nargout>0
         h = hg;
@@ -226,7 +231,8 @@ function h = scalebar(varargin)
              'Colour',colour;...
              'Listeners',hL;...
              'Bold',boldflag};
-    set(hg,'UserData',udata);    
+    set(hg,'UserData',udata);  
+
     
     % CALLBACK FUNCTIONS
     function deleteScaleBar(src,event)
