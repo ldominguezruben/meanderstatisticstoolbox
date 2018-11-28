@@ -103,7 +103,7 @@ function initialtime_Callback(hObject, eventdata, handles)
 set_enable(handles,'init')
 handles.celltable=cell(2,3);
 
-handles.celltable(1:2,2:3)={''};
+handles.celltable(2,2:3)={''};
 guidata(hObject,handles)
 
 %This function incorporate the initial data
@@ -131,7 +131,7 @@ else
     
     %Write data
     celltable(1,1)={ReadVar.File};
-    set(handles.sedtable,'Data',celltable)       
+    set(handles.inputtable,'Data',celltable)       
     
 end
 
@@ -139,9 +139,9 @@ end
 % --------------------------------------------------------------------
 function finaltime_Callback(hObject, eventdata, handles)
 
-celltable=get(handles.sedtable,'Data');
+celltable=get(handles.inputtable,'Data');
 
-celltable(1:2,2:3)={''};
+celltable(:,2:3)={''};
 
 % This function incorporate the initial data
 [ReadVar]=mStat_ReadInputFiles;
@@ -167,7 +167,7 @@ else
     
     %Write data
     celltable(2,1)={ReadVar.File};
-    set(handles.sedtable,'Data',celltable)              
+    set(handles.inputtable,'Data',celltable)              
 end
 
 
@@ -229,7 +229,7 @@ mStat_SummaryMigration(handles.Migra);
 %Calculate
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
-tableData = get(handles.sedtable, 'data');
+tableData = get(handles.inputtable, 'data');
 % 
 cla(handles.wavel_axes)
 % linkaxes(handles.wavel_axes)
@@ -279,9 +279,8 @@ set_enable(handles,'results')
     if isnan(Migra.cutoff)
         Cutoff=0;
     else
-        Cutoff=nansum(isfinite(Migra.cutoff));
-    end
-    
+        Cutoff=length(Migra.cutoff);
+        e
     % Push messages to Log Window:
     % ----------------------------
     log_text = {...
@@ -289,11 +288,24 @@ set_enable(handles,'results')
         ['%----------- ' datestr(now) ' ------------%'];...
         'Calculate finished';...
         'Summary';...
-        'Mean Migration/year';[cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat})];...
+        'Mean Migration';[cell2mat({nanmean(Migra.MigrationSignal)})];...
         'Maximum Migration';[cell2mat({nanmax(Migra.MigrationSignal)})];...
         'Minimum Migration';[cell2mat({nanmin(Migra.MigrationSignal)})];...
-        'Chute Cut off Found';[cell2mat({Cutoff})]};
+        'Cut off';[cell2mat({length(Migra.cutoff)})]};
     statusLogging(handles.LogWindow, log_text)
+    
+    
+    if isnan(Migra.cutoff)
+    else
+                % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+        '';...
+        ['%----------- ' datestr(now) ' ------------%'];...
+        'CUTOFF FOUND!!!'};
+    statusLogging(handles.LogWindow, log_text)
+    end
+    
 
 
 % --- Executes on button press in identifycutoff.
@@ -341,14 +353,13 @@ switch enable_state
     axes(handles.pictureReach)
     cla reset
     set(handles.calculate,'Enable','off');
-    set(handles.sedtable, 'Data', cell(2,3));
+    set(handles.inputtable, 'Data', cell(2,3));
     set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'off')
     set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')
     set(handles.summary,'Enable','off');
     set(handles.export,'Enable','off');
     case 'loadfiles'
     cla(handles.signalvariation)
-    %set(handles.sedtable, 'Data', cell(2,3));
     cla(handles.wavel_axes)
     set(handles.calculate,'Enable','on');
     set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'on')

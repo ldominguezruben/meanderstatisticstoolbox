@@ -336,7 +336,7 @@ waitbar(100/100,hwait);
 delete(hwait)
 %legend('Global Wavelet Spectrum','Significance','Fontsize',14,'Position','Best')
 elseif Tools==2% MIGRATION ANALYZER 
-    
+cla(axest(1))    
 axes(axest(1))
 Yticks = 2.^(fix(log2(min(period*DeltaCentS))):fix(log2(max(period*DeltaCentS))));
 Yticksav = num2str(Yticks);
@@ -358,15 +358,14 @@ else
 end
 
 contourf(Abscise*DeltaCentS,log2(period*DeltaCentS),sig95M,[1:max(max(sig95M))],'LineColor','none');
-    colormap('jet');
-    cc=colorbar;
-    cc.Label.String = 'WPS';
-    cc.FontSize=12;
-    cc.Location='SouthOutside';
+colormap('jet');
+cc=colorbar;
+cc.Label.String = 'WPS';
+cc.FontSize=8;
+cc.Location='EastOutside';
 
-    
 xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
-ylabel('Arc Wavelength [m]','fontsize',10);
+ylabel('Arc-Wavelength [m]','fontsize',10);
 title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
 set(gca,'XLim',xlim(:));
 set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
@@ -420,7 +419,7 @@ setappdata(0, 'T3', T3);
 colormap('white');
    
 xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
-ylabel('Arc Wavelength [m]','fontsize',10);
+ylabel('Arc-Wavelength [m]','fontsize',10);
 title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
 set(gca,'XLim',xlim(:));
 set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);

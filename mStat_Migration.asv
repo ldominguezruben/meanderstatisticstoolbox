@@ -309,7 +309,6 @@ ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
 grid on
 ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
 %ylabel(hAx(2),'Direction [º] ','Fontsize',10) % right y-axis
-hold off
 
 %hLine1.LineStyle = '-';
 %hLine2.LineStyle = '--';

@@ -80,7 +80,7 @@ set(0,'userdata',post1);
 %Re-Plot migration
  axes(handles.signalvariation);
 
- [hAx,hLine1,hLine2] = plotyy(geovar{1}.sResample(1:length(Migra.MigrationSignal),1),Migra.MigrationSignal/Migra.deltat,geovar{1}.sResample(1:length(Migra.MigrationSignal),1),Migra.Direction,'plot');
+ [hAx,hLine1] = plot(geovar{1}.sResample(1:length(Migra.MigrationSignal),1),Migra.MigrationSignal/Migra.deltat);%,geovar{1}.sResample(1:length(Migra.MigrationSignal),1),Migra.Direction,'plot');
 hold on
 if length(Migra.Indext1{1,migrarowt1}.ind)<3
     else

@@ -5,12 +5,12 @@ function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,T
 
 
 if sel==1 %valley linemean 
-hwait = waitbar(0,'Intersection Mean Centerline...','Name','MStaT V1.0',...
+hwait = waitbar(0,'Mean Center Method..','Name','MStaT V1.0',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
 elseif sel==2
-    hwait = waitbar(0,'Intersection Inflection points...','Name','MSTaT V1.0',...
+    hwait = waitbar(0,'Inflection Points Method...','Name','MStaT V1.0',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
@@ -116,91 +116,9 @@ elseif sel==2 %inflection points
         % inflection points by calling the "intersections" function and initializing
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
-        robust = 3;
-        active.ac=0;
-%         equallySpacedX=round(equallySpacedX,4);
-%         equallySpacedY=round(equallySpacedY,4);
-%         inflectionX=inflectionX;
-%         inflectionY=inflectionY;
-        
+
+        active.ac=0;       
         setappdata(0, 'active', active);
-% 
-%           [x0, y0, iout, jout] = intersections(...
-%        equallySpacedX, equallySpacedY,inflectionX, inflectionY,robust);
-%            
-% %%
-% g=1;
-%         while 1
-%              if isnan(x0(g)) %| isnan(y02(g)) |isnan(iout2(g)) |isnan(jout2(g))
-%                 x0(g)=x0(g-1);
-%             end
-%             if isnan(y0(g))
-%                 y0(g)=y0(g-1);
-%             end
-%             if isnan(iout(g))
-%                 iout(g)=iout(g-1);
-%             end
-%             if isnan(jout(g))
-%                 jout(g)=jout(g-1);
-%             end
-% %             else
-%                  g=g+1;
-% %             end
-%              if g>size(x0,1)
-%                  break;
-%              end
-%         end
-%                 
-%         for i=1:length(x0)
-%             if i==1
-%               x01(i)=1;
-%               y01(i)=1;
-%               iout1(i)=1;
-%               jout1(i)=1;
-%             else
-%             if abs(x0(i)-x0(i-1))>1
-%               x01(i)=1;
-%               y01(i)=1;
-%               iout1(i)=1;
-%               jout1(i)=1;
-%             else
-%               x01(i)=nan;
-%               y01(i)=nan;
-%               iout1(i)=nan;
-%               jout1(i)=nan;
-%             end
-%             end
-%         end
-% 
-%         x02=x0.*x01';
-%         y02=y0.*y01';
-%         iout2=iout.*iout1';
-%         jout2=jout.*jout1';
-%         
-%         %delete errors
-%         g=1;
-%         while 1
-%             if isnan(x02(g)) | isnan(x02(g)) |isnan(x02(g)) |isnan(x02(g))
-%                 x02(g)=[];
-%                 y02(g)=[];
-%                 iout2(g)=[];
-%                 jout2(g)=[];
-%             else
-%                 g=g+1;
-%             end
-%              if g>size(x02,1)
-%                  break;
-%              end
-%         end
-% 
-%         clear x0 y0 iout jout
-% 
-%         x0=x02;
-%         y0=y02;
-%         iout=iout2;
-%         jout=jout2;
-% 
-%         clear x01 y01 iout1 jout1 x02 y02 iout2 jout2
 
         x0=inflectionX;
         y0=inflectionY;
@@ -383,6 +301,7 @@ geovar.amplitudeOfBends = amplitudeOfBends;
 geovar.downstreamSlength = downstreamSlength;
 geovar.upstreamSlength = upstreamSlength;
 geovar.condition = condition;
+geovar.width = width;
 
 %put the bend on the table
 handles.bendListStr = bendID;
