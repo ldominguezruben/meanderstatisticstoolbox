@@ -103,7 +103,7 @@ function initialtime_Callback(hObject, eventdata, handles)
 set_enable(handles,'init')
 handles.celltable=cell(2,3);
 
-handles.celltable(1:2,2:3)={''};
+celltable(1:2,2:3)={''};
 guidata(hObject,handles)
 
 %This function incorporate the initial data
@@ -129,9 +129,11 @@ else
     guidata(hObject, handles);
     
     
-    %Write data
+    %Write File name
     celltable(1,1)={ReadVar.File};
-    set(handles.sedtable,'Data',celltable)       
+    set(handles.sedtable,'Data',celltable)      
+    
+    %set_enable(handles,'loadfiles')
     
 end
 
@@ -141,7 +143,7 @@ function finaltime_Callback(hObject, eventdata, handles)
 
 celltable=get(handles.sedtable,'Data');
 
-celltable(1:2,2:3)={''};
+%celltable(1:2,2:3)={''};
 
 % This function incorporate the initial data
 [ReadVar]=mStat_ReadInputFiles;
@@ -158,14 +160,13 @@ else
                 statusLogging(handles.LogWindow, log_text)
                 
     % Convert information            
-
     handles.xCoord{2}(:,1)=ReadVar.xCoord{:,1};
     handles.yCoord{2}(:,1)=ReadVar.yCoord{:,1};
     handles.formatfileread=ReadVar.comp;
     guidata(hObject, handles);
     set_enable(handles,'loadfiles')
     
-    %Write data
+    %Write File name
     celltable(2,1)={ReadVar.File};
     set(handles.sedtable,'Data',celltable)              
 end
@@ -180,44 +181,22 @@ function export_Callback(hObject, eventdata, handles)
 function matfiles_Callback(hObject, eventdata, handles)
 hwait = waitbar(0,'Exporting .mat File...');
 
-%save data
-geovar=getappdata(0, 'geovarf');
+%Read Data
+geovar = getappdata(0, 'geovarf');
+Migra = getappdata(0, 'Migra');
 
 [file,path] = uiputfile('*.mat','Save file');
-save([path file], 'geovar');
+save([path file], 'geovar','Migra');
 waitbar(1,hwait)
 delete(hwait)
 
-
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-        '';...
-        ['%----------- ' datestr(now) ' ------------%'];...
-        'Export MAT file succesfully'};
-    statusLogging(handles.LogWindow, log_text)
-
-
-% --------------------------------------------------------------------
-function htmlfiles_Callback(hObject, eventdata, handles)
-hwait = waitbar(0,'Exporting .mat File...');
-
-%save data
-options.format='html';
-options.showCode=false;
-publish('mStat_PublishHtml.m',options);
-
-waitbar(1,hwait)
-delete(hwait)
-
-
-        % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-        '';...
-        ['%----------- ' datestr(now) ' ------------%'];...
-        'Export html report file succesfully'};
-    statusLogging(handles.LogWindow, log_text)
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+    '';...
+    ['%----------- ' datestr(now) ' ------------%'];...
+    'Export MAT file succesfully'};
+statusLogging(handles.LogWindow, log_text)
 
 
 % --------------------------------------------------------------------
@@ -232,11 +211,6 @@ function calculate_Callback(hObject, eventdata, handles)
 tableData = get(handles.sedtable, 'data');
 % 
 cla(handles.wavel_axes)
-% linkaxes(handles.wavel_axes)
-% delete(allchild(handles.wavel_axes))
-% xlh = get(cb,'XLabel');
-% delete(xlh);
-
 cla(handles.pictureReach)
 cla(handles.signalvariation)
 linkaxes(handles.signalvariation)
@@ -246,8 +220,8 @@ handles.width=str2double(cellstr(tableData(:,3)));
 handles.year=str2double(cellstr(tableData(:,2)));
 
 %Calculate
-sel=2;%Inflection points
-handles.bendSelect=[];
+sel=2;%Inflection points default method
+handles.bendSelect=[];%none data
 Tools=2;%Migration Module
 level=5;%filter level default
 for i=1:2
@@ -257,8 +231,6 @@ end
 
 %save data
 setappdata(0, 'geovarf', geovar);
-
-%obj=datacursormode(gcf);
 
 handles.geovar=geovar;
 guidata(hObject,handles)
@@ -275,25 +247,25 @@ setappdata(0, 'handles', handles);
 
 set_enable(handles,'results')
 
-    %Define how much cut off foun it
-    if isnan(Migra.cutoff)
-        Cutoff=0;
-    else
-        Cutoff=nansum(isfinite(Migra.cutoff));
-    end
-    
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-        '';...
-        ['%----------- ' datestr(now) ' ------------%'];...
-        'Calculate finished';...
-        'Summary';...
-        'Mean Migration/year';[cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat})];...
-        'Maximum Migration';[cell2mat({nanmax(Migra.MigrationSignal)})];...
-        'Minimum Migration';[cell2mat({nanmin(Migra.MigrationSignal)})];...
-        'Chute Cut off Found';[cell2mat({Cutoff})]};
-    statusLogging(handles.LogWindow, log_text)
+%Define how much cut off foun it
+if isnan(Migra.cutoff)
+    Cutoff=0;
+else
+    Cutoff=nansum(isfinite(Migra.cutoff));
+end
+
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+    '';...
+    ['%----------- ' datestr(now) ' ------------%'];...
+    'Calculate finished';...
+    'Summary';...
+    'Mean Migration/year';[cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat})];...
+    'Maximum Migration';[cell2mat({nanmax(Migra.MigrationSignal)})];...
+    'Minimum Migration';[cell2mat({nanmin(Migra.MigrationSignal)})];...
+    'Chute Cut off Found';[cell2mat({Cutoff})]};
+statusLogging(handles.LogWindow, log_text)
 
 
 % --- Executes on button press in identifycutoff.
@@ -341,6 +313,7 @@ switch enable_state
     axes(handles.pictureReach)
     cla reset
     set(handles.calculate,'Enable','off');
+    set(handles.sedtable, 'RowName', {'t0','t1'});
     set(handles.sedtable, 'Data', cell(2,3));
     set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'off')
     set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')

@@ -37,8 +37,9 @@ if Tools==1 | Tools==3;
 FileBed_dataMX = geovar.sResample(:,1); % S-coordinate
 FileBed_dataMZ = geovar.cResample(:,1); % C-curvature
 elseif Tools==2
-    FileBed_dataMX=geovar.sResample(1:length(vars.MigrationSignal),1);
-    FileBed_dataMZ= vars.MigrationSignal/vars.deltat;
+    FileBed_dataMX = vars.MigrationDistance;
+    vars.MigrationSignal(isnan(vars.MigrationSignal))=-999;
+    FileBed_dataMZ = vars.MigrationSignal/vars.deltat;
 % elseif Tools==3;
 %     FileBed_dataMX = geovar{1}.sResample(:,1); % S-coordinate
 %     FileBed_dataMZ = geovar{1}.cResample(:,1); % C-curvature

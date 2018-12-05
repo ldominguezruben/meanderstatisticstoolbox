@@ -1,26 +1,6 @@
 function varargout = mStat_WaveletAnalysis(varargin)
-% MSTAT_WAVELETANALYSIS MATLAB code for mstat_WaveletAnalysis.fig
-%      MSTAT_WAVELETANALYSIS, by itself, creates a new MSTAT_WAVELETANALYSIS or raises the existing
-%      singleton*.
-%
-%      H = MSTAT_WAVELETANALYSIS returns the handle to a new MSTAT_WAVELETANALYSIS or the handle to
-%      the existing singleton*.
-%
-%      MSTAT_WAVELETANALYSIS('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MSTAT_WAVELETANALYSIS.M with the given input arguments.
-%
-%      MSTAT_WAVELETANALYSIS('Property','Value',...) creates a new MSTAT_WAVELETANALYSIS or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mstat_WaveletAnalysis_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mstat_WaveletAnalysis_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help mstat_WaveletAnalysis
+%MStaT mStat_WaveletAnalysis function determinate and graphs the wavelet
+%analyzes
 
 % Last Modified by GUIDE v2.5 20-Nov-2018 16:32:11
 
