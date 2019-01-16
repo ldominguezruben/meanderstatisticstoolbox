@@ -189,7 +189,7 @@ bends1(symmetricIndex1)=15;
 end
 
 % Array conditions
-for ii=1:ms
+for ii=1:ms-1
     if bends1(ii,1)==12
         condition(ii,1)={'DS'};
     else if bends1(ii,1)==13

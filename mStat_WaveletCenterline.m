@@ -107,7 +107,7 @@ if sel1==1 %CURVATURE PLOT
    
 %[1] Plot curvature variation
 axes(axest(1))
-dimlessx=Abscise*DeltaCentS./width;
+dimlessx=Abscise*DeltaCentS;%./width;
 dimlessy=ssto.*width;
 plot(dimlessx,dimlessy,'black -','linewidth',1.0);
 
@@ -128,7 +128,7 @@ hold on
         text([(Abscise(handles.indi(i,1))*DeltaCentS)./width],[ssto(handles.indi(i,1)).*width],num2str(handles.bendwavelength(i)),'FontSize',14)
     end
 end
-set(gca,'XLim',xlim(:)./width);
+set(gca,'XLim',xlim(:));%./width);
 xlabel('S*','fontsize',10);
 ylabel('C*','fontsize',10);
 title('Signature of the channel curvature','fontsize',13);

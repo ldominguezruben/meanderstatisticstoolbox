@@ -76,7 +76,7 @@ addpath utils
 handles.output = hObject;
 handles.mStat_version='v1.00';
 % Set the name and version
-set(handles.figure1,'Name',['Meander Statistics Tool-box (MStaT) ' handles.mStat_version], ...
+set(handles.figure1,'Name',['Meander Statistics Toolbox (MStaT) ' handles.mStat_version], ...
     'DockControls','off')
 
 set_enable(handles,'init')
@@ -104,6 +104,8 @@ set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
 
 set(dcm_obj,'Displaystyle','Window','Enable','on');
 pos = get(0,'userdata');
+
+%scalebar
 
 %Position
 % currentPoint = get(gca, 'CurrentPoint');
@@ -542,7 +544,7 @@ function helpfunction_Callback(hObject, eventdata, handles)
 function usersguide_Callback(hObject, eventdata, handles)
 %Send to web page with code modufy to github
 try
-    web('https://mstatmeander.wordpress.com/')
+    web('https://meanderstatistics.blogspot.com/p/tutorials.html')
 catch err %#ok<NASGU>
 	if isdeployed
         errLogFileName = fullfile(pwd,...
@@ -569,7 +571,7 @@ end
 function checkforupdates_Callback(hObject, eventdata, handles)
 %Send to web page for updates
 try
-    web('https://mstatmeander.wordpress.com/acerca-de/')
+    web('https://meanderstatistics.blogspot.com/p/download.html')
 catch err %#ok<NASGU>
 	if isdeployed
         errLogFileName = fullfile(pwd,...

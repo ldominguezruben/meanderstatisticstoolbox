@@ -4,6 +4,6 @@ function [angle]= mStat_angledes(equallySpacedX,equallySpacedY)
 
 
 for i=2:length(equallySpacedX)
-angle(i)=atand((equallySpacedX(i)-equallySpacedX(i-1))/(equallySpacedY(i-1)-equallySpacedY(i)));
+    angle(i)=atand((equallySpacedX(i)-equallySpacedX(i-1))/(equallySpacedY(i-1)-equallySpacedY(i)));
 end
 

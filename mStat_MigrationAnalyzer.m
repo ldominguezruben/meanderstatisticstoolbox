@@ -95,7 +95,7 @@ set_enable(handles,'init')
 
 % --------------------------------------------------------------------
 function closefunctions_Callback(hObject, eventdata, handles)
-% empty
+close
 
 
 % --------------------------------------------------------------------

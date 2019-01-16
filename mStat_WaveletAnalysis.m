@@ -27,10 +27,10 @@ end
 
 %--------------------------------------------------------------------------
 
-% --- Executes just before mstat_WaveletAnalysis is made visible.
+% --- Executes just before mStat_WaveletAnalysis is made visible.
 function mStat_WaveletAnalysis_OpeningFcn(hObject, eventdata, handles, varargin)
 
-% Choose default command line output for mstat_WaveletAnalysis
+% Choose default command line output for mStat_WaveletAnalysis
 handles.output = hObject;
 %       Update GUI data.
 guidata(hObject, handles);
@@ -388,8 +388,7 @@ handles.bendwavelength = num2str(bendwavelength);
 setappdata(0, 'bendwavelength', handles.bendwavelength);
 guidata(hObject,handles)
 
- handles.filter=1;
-
+handles.filter=1;
 
 %Apply Filter 
 % Call the "userSelectBend" function to get the index of intersection
@@ -417,8 +416,6 @@ setappdata(0, 'highlighty_arc', handles.highlighty_arc);
 handles.indi = num2str(indi);
 setappdata(0, 'indi', handles.indi);
 guidata(hObject,handles)
-
-
 
 elseif handles.minsin~=handles.maxsin & handles.minarc~=handles.maxarc
 %Find values between min and max
