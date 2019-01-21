@@ -297,8 +297,6 @@ for i=Migra.Indext1{1}.ind(1,1):Migra.Indext1{end}.ind(1,1)
 %      end
 end
 
-Migra.cutoff(Migra.cutoff==0)=nan;
-
 %Calculate area
 for t=1:length(ArMigra.xint_areat1)-1
 	Migra.areat0(t)=trapz(Migra.linet0X{t}.linea,Migra.linet0Y{t}.linea);

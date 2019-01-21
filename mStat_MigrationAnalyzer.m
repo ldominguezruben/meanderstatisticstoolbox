@@ -277,7 +277,7 @@ geovar=handles.geovar;
 cut=nan;
 %Indentify cutoff using wavelength
 e=1;
- for t=1:length(Migra.Indext1)
+ for t=1:length(Migra.Indext1)-1
     if nansum(isfinite(Migra.cutoff(Migra.Indext1{t}.ind(1,2:end-1))))>1
         [r,fin]=max(isfinite(Migra.cutoff(Migra.Indext1{t}.ind)));
         cut(e)=Migra.Indext1{t}.ind(fin(1,1));
