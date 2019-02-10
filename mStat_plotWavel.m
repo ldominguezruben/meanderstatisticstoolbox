@@ -36,9 +36,9 @@ FileBaseW = [riverName 'WaveLet'];
 if Tools==1 | Tools==3;
 FileBed_dataMX = geovar.sResample(:,1); % S-coordinate
 FileBed_dataMZ = geovar.cResample(:,1); % C-curvature
-elseif Tools==2
+elseif Tools==2% Moigration Toolbox
     FileBed_dataMX = vars.MigrationDistance;
-    vars.MigrationSignal(isnan(vars.MigrationSignal))=-999;
+    vars.MigrationSignal(isnan(vars.MigrationSignal))=-999;%Change by value default
     FileBed_dataMZ = vars.MigrationSignal/vars.deltat;
 % elseif Tools==3;
 %     FileBed_dataMX = geovar{1}.sResample(:,1); % S-coordinate

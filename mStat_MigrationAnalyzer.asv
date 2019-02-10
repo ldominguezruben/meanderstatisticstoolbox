@@ -209,7 +209,7 @@ mStat_SummaryMigration(handles.Migra);
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
 
-hwait = waitbar(0,'Migration Calculate','Name','MStaT V1.0',...
+hwait = waitbar(0,'Mi','Name','MStaT V1.0',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
@@ -233,11 +233,7 @@ level=5;%filter level default
 for i=1:2
     [geovar{i}]=mStat_planar(handles.xCoord{i},handles.yCoord{i},...
         handles.width(i),sel,handles.pictureReach,handles.bendSelect,Tools,level);
-    % Waitbar shows the the user the status
-    waitbar(40+(i*10)/100,hwait);
 end
-
-
 
 %save data
 setappdata(0, 'geovarf', geovar);
@@ -247,9 +243,6 @@ guidata(hObject,handles)
 
 %Calculate the migration using vectors
 [Migra,ArMigra]=mStat_Migration(geovar,handles);
-
-% Waitbar shows the the user the status
-waitbar(80/100,hwait);
 
 handles.Migra=Migra;
 handles.ArMigra=ArMigra;
@@ -276,23 +269,33 @@ log_text = {...
     'Chute Cut off Found';[cell2mat({Migra.NumberOfCut})]};
 statusLogging(handles.LogWindow, log_text)
 
-waitbar(1,hwait)
-delete(hwait)
-
 
 % --- Executes on button press in identifycutoff.
 function identifycutoff_Callback(hObject, eventdata, handles)
 %read variables
 Migra=handles.Migra;
+geovar=handles.geovar;
 
+
+cut=nan;
 %Indentify cutoff using wavelength
+% e=1;
 
 if Migra.NumberOfCut == 0
-   warndlg('Doesn´t found Cutoff')
+         warndlg('Doesn´t found Cutoff')
+% else
+%      for t=1:length(Migra.BendCutOff)
+%          cut(t)=Migra.Indext0{Migra.BendCutOff(t)}.ind(1);
+%      end
+% end
+ 
+%  if isnan(cut)
+%      warndlg('Doesn´t found Cutoff')
   else     
     axes(handles.pictureReach)
     hold on
     text(handles.ArMigra.xint_areat0(Migra.BendCutOff),handles.ArMigra.yint_areat0(Migra.BendCutOff),'Cutoff')
+  %  text(geovar{1}.equallySpacedX(cut),geovar{1}.equallySpacedY(cut),'Cutoff')
     hold off
  end
 

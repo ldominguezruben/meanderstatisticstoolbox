@@ -309,6 +309,5 @@ set (bendSelect, 'string', handles.bendListStr);
 
 mStat_transformatevar(geovar)
 
-waitbar(100/100,hwait);
 waitbar(1,hwait)
 delete(hwait)

@@ -286,19 +286,27 @@ else
     active = getappdata(0, 'active');
     if active.ac==1
         if length(x0)>1
-        [~,position]=min(abs(x1(1)-x0));
-        [~,position1]=min(abs(y1(1)-y0));
-        
-        x01=x0(position);
-        y01=y0(position1);
-        iout1=iout(position);
-        jout1=jout(position1);
+            
+            startpoint=[x1(1) y1(1)];
+            endpoint=[x1(2) y1(2)];
+            v=endpoint-startpoint;
 
-        clear x0 y0 iout jout position position1
-        x0=x01;
-        y0=y01;
-        iout=iout1;
-        jout=jout1;
+            xmid=x1(1)+0.5*v(:,1);%
+            ymid=y1(1)+0.5*v(:,2);%
+        
+            [~,position]=min(abs(xmid-x0));
+            [~,position1]=min(abs(ymid-y0));
+
+            x01=x0(position);
+            y01=y0(position1);
+            iout1=iout(position);
+            jout1=jout(position1);
+
+            clear x0 y0 iout jout position position1 v
+            x0=x01;
+            y0=y01;
+            iout=iout1;
+            jout=jout1;
         end
     end
 end
