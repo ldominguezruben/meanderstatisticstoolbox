@@ -1,21 +1,24 @@
 function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,Tools,level)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%MStaT
 %This function calculate diferents methods of determination of bends
-%by Dominguez Ruben 01/20/2017
+%by Dominguez Ruben, UNL, Argentina 01/20/2017
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%start code
 if Tools==2 | Tools==3 
 else
-if sel==1 %Mean Center Line method 
-hwait = waitbar(0,'Mean Center Method..','Name','MStaT V1.0',...
-         'CreateCancelBtn',...
-            'setappdata(gcbf,''canceling'',1)');
-setappdata(hwait,'canceling',0)
-elseif sel==2%Inflection method
-    hwait = waitbar(0,'Inflection Points Method...','Name','MStaT V1.0',...
-         'CreateCancelBtn',...
-            'setappdata(gcbf,''canceling'',1)');
-setappdata(hwait,'canceling',0)
-end
+    if sel==1 %Mean Center Line method 
+        hwait = waitbar(0,'Mean Center Method..','Name','MStaT V1.0',...
+                 'CreateCancelBtn',...
+                    'setappdata(gcbf,''canceling'',1)');
+        setappdata(hwait,'canceling',0)
+    elseif sel==2%Inflection method
+        hwait = waitbar(0,'Inflection Points Method...','Name','MStaT V1.0',...
+             'CreateCancelBtn',...
+                'setappdata(gcbf,''canceling'',1)');
+        setappdata(hwait,'canceling',0)
+    end
 end
 
 nFiles=1;
@@ -35,7 +38,7 @@ nFiles=1;
 % Waitbar shows the the user the status
 if Tools==2 | Tools==3 
 else
-waitbar(10/100,hwait);
+    waitbar(10/100,hwait);
 end
 % Now, utilize the PCA-Wavelet filter to obtain valley centerline.
 % The level below will have to be user input until a better approach
@@ -50,7 +53,7 @@ theXYCenterScatter = complex(equallySpacedX,equallySpacedY);
 % Waitbar shows the the user the status
 if Tools==2 | Tools==3 
 else
-waitbar(30/100,hwait);
+    waitbar(30/100,hwait);
 end
 
 meanCenter{nFiles}.XYOriginal = [real(x_sim(:,1)),imag(x_sim(:,1))]; 
@@ -63,7 +66,7 @@ yValleyCenter = imag(x_sim(:,1));
 % Waitbar shows the the user the status
 if Tools==2| Tools==3 
 else
-waitbar(50/100,hwait);
+    waitbar(50/100,hwait);
 end
 
 dimlessCurvature = cResample*width;%dimlees curvature with width C*=CBave
@@ -79,7 +82,7 @@ delta = 0.01;
 
 if Tools==2 | Tools==3 
 else
-waitbar(60/100,hwait);
+    waitbar(60/100,hwait);
 end
 
 %%
@@ -122,7 +125,7 @@ if sel==1 %valley line
         
         if Tools==2 | Tools==3
         else
-        waitbar(70/100,hwait);
+            waitbar(70/100,hwait);
         end
         
 elseif sel==2 %inflection points
@@ -143,7 +146,7 @@ elseif sel==2 %inflection points
         
         if Tools==2 | Tools==3 
         else
-        waitbar(70/100,hwait);
+            waitbar(70/100,hwait);
         end
 end
 
@@ -166,7 +169,7 @@ end
 % Waitbar shows the the user the status
 if Tools==2 | Tools==3 
 else
-waitbar(80/100,hwait);
+    waitbar(80/100,hwait);
 end
 
 % End bends section.  
@@ -233,20 +236,20 @@ s11='C';
 
 
 for i=2:nBends+1
-for j=1:na
-    if j==1
-       if newMaxCurvS(j)<intS(i) && newMaxCurvS(j+1)> intS(i) 
-       newMaxCurvS1(i-1)=newMaxCurvS(j);
-       else
-       end
+    for j=1:na
+        if j==1
+           if newMaxCurvS(j)<intS(i) && newMaxCurvS(j+1)> intS(i) 
+               newMaxCurvS1(i-1)=newMaxCurvS(j);
+           else
+           end
+        end
+        if j>1
+            if newMaxCurvS(j)>intS(i-1) && newMaxCurvS(j-1)< intS(i-1)
+                newMaxCurvS1(i-1)=newMaxCurvS(j);
+            else
+            end
+        end
     end
-    if j>1
-    if newMaxCurvS(j)>intS(i-1) && newMaxCurvS(j-1)< intS(i-1)
-    newMaxCurvS1(i-1)=newMaxCurvS(j);
-        else
-    end
-    end
-end
 end
 
 newMaxCurvS1=newMaxCurvS1';
@@ -254,7 +257,7 @@ newMaxCurvS1=newMaxCurvS1';
 j = 1;
 for i = 2:nBends+1
     if strcmp(s11,condition(j)) ~=1 && amplitudeOfBends(j)~=0
-            downstreamSlength(j) = intS(i)-newMaxCurvS1(j) ;
+        downstreamSlength(j) = intS(i)-newMaxCurvS1(j) ;
         else
         downstreamSlength(j)=nan;
     end
@@ -265,7 +268,7 @@ end
 j = 1;
 for i = 2:nBends+1
     if strcmp(s11,condition(j)) ~=1 && amplitudeOfBends(j)~=0
-    upstreamSlength(j) = (intS(i)-intS(i-1))-downstreamSlength(j);
+        upstreamSlength(j) = (intS(i)-intS(i-1))-downstreamSlength(j);
     else
         upstreamSlength(j)=nan;
     end
@@ -280,17 +283,13 @@ downstreamSlength(downstreamSlength<1)=nan;
 %end calculate
 if Tools==2 |  Tools==3
 else
-waitbar(90/100,hwait);
+    waitbar(90/100,hwait);
 end
 
 %Begin plot
 if Tools==1
-mStat_plotplanar(equallySpacedX, equallySpacedY,inflectionPts, x0, y0, x_sim,...
-newMaxCurvX, newMaxCurvY, pictureReach);
-elseif Tools==2
-elseif Tools==3
-%     mStat_plotplanar(equallySpacedX, equallySpacedY,inflectionPts, x0, y0, x_sim,...
-% newMaxCurvX, newMaxCurvY,pictureReach);
+    mStat_plotplanar(equallySpacedX, equallySpacedY,inflectionPts, x0, y0, x_sim,...
+    newMaxCurvX, newMaxCurvY, pictureReach);
 end
 
 %--------------------------------------------------------------------------
@@ -336,6 +335,6 @@ mStat_transformatevar(geovar)
 
 if Tools==2 | Tools==3 
 else
-waitbar(1,hwait)
-delete(hwait)
+    waitbar(1,hwait)
+    delete(hwait)
 end

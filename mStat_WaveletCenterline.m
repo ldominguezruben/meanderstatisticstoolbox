@@ -1,12 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%Wavelet analysis
-%last modified 04/17 by Dominguez Ruben L. UNL
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%MStaT
+%Wavelet analysis function
 % This function plot the wavelet analisys, need initial data
-
-
+%last modified 04/17 by Dominguez Ruben L. UNL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%start code
 function [period,power,sig95M,scale_avg,scaleavg_signif] = mStat_WaveletCenterline(JProfile,jnodes,DeltaCentS,sst,OptSaveFig,FileBaseW,...
     xmin,dt,dj,Lower_Scale,Upper_Scale,SIGLVL,equallySpacedX,equallySpacedY,angle,sel1,filter,axest,Tools,vars)
 
@@ -428,7 +426,5 @@ elseif Tools==3%CONFLUENCES-DIFLUENCER ANALYZER PLOT
     % cone-of-influence, anything "below" is dubious
     plot(Abscise*DeltaCentS,log2(coi*DeltaCentS),'k','linewidth',2);
     hold off
-    waitbar(100/100,hwait);
-    delete(hwait)
 end
 

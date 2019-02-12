@@ -1,10 +1,15 @@
-function [ReadVar]=mStat_ReadInputFiles
-
-%This function incorporate the initial data the Centrline
+function [ReadVar]=mStat_ReadInputFiles(multisel)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%MStaT
+%This function incorporate the initial data the Centerline in diferent
+%formats
+%by Dominguez Ruben, UNL, Argentina
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %Start code
+    
 [ReadVar.File,ReadVar.Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
-    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select .txt File');
+    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel);
 
 if ReadVar.File==0
     %warndlg('You need load two files')

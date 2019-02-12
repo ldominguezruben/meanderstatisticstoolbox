@@ -1,16 +1,16 @@
 function [Conf]=mStat_ConfluencesInfluences(geovar)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%Function to define influences of tributaries
+%%MStaT 
+%Function estimate the influence of the secondary channel on the main
+%channel
 %by Dominguez Ruben UNL, Argentina.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%start code
 
-%%
-%Determinate el punto mas cercano entre el tributario y el principal
-
-x=geovar{1}.equallySpacedX;%
-y=geovar{1}.equallySpacedY;%
+%Read data
+x=geovar{1}.equallySpacedX;%Main channel xCoordinate
+y=geovar{1}.equallySpacedY;%Main channel yCoordinate
 
 
 for t=2:length(geovar)
@@ -27,10 +27,6 @@ for t=2:length(geovar)
 
         B=[x y];
                 
-%         T=10;
-        
-%         k = dsearchn(B,T,A{t})
-        
         %compute Euclidean distances:
         distancesini{t} = sqrt(sum(bsxfun(@minus, B, Aini{t}).^2,2));
         %find the smallest distance and use that as an index into B:
@@ -149,7 +145,7 @@ end
 %difference and determinate the R (Parameter of time to adecuation of River)
 %Only with areas after the confluences
 
-coef=1.2;%20%
+coef=1.2;%20% diferences betwen areas
 
 %re-validate this code
 for t=3:length(T.pos)

@@ -105,16 +105,9 @@ set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
 set(dcm_obj,'Displaystyle','Window','Enable','on');
 pos = get(0,'userdata');
 
+%%%%%%%%%
 %scalebar
-
-%Position
-% currentPoint = get(gca, 'CurrentPoint');
-% %show equation    
-% eq1 = uicontrol('style','text',...
-% 'position',[600 20 100 20],...
-% 'fontsize',12);
-% set(eq1,'string',['x=',currentPoint(1),'y=',currentPoint(3)]);
-
+%%%%%%%%%
 
 % Push messages to Log Window:
     % ----------------------------
@@ -177,22 +170,31 @@ function file_Callback(hObject, eventdata, handles)
 
 % -------------------------------------------------------------------------
 function newproject_Callback(hObject, eventdata, handles)
-%New project
+%New project function
 axes(handles.pictureReach)
 cla(handles.pictureReach)
 clear handles.geovar
 clc
 
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'NEW PROJECT'};
+            statusLogging(handles.LogWindow, log_text)
+                
 set_enable(handles,'init')
 
 
 % -------------------------------------------------------------------------
 function openfunction_Callback(hObject, eventdata, handles)
-    
+%Open function
 set_enable(handles,'init')
 
-%This function incorporate the initial data
-[ReadVar]=mStat_ReadInputFiles;
+%This function incorporate the initial data input
+multisel='off';
+[ReadVar]=mStat_ReadInputFiles(multisel);
 if ReadVar.File==0
 else
 
@@ -301,24 +303,45 @@ function exportfunction_Callback(hObject, eventdata, handles)
 function exportmat_Callback(hObject, eventdata, handles)
 saveDataCallback(hObject, eventdata, handles)
 
-%Excel Export
-% --------------------------------------------------------------------
-function exportexcelfile_Callback(hObject, eventdata, handles)
-savexlsDataCallback(hObject, eventdata, handles)
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Export .mat Filesuccesfully!'};
+            statusLogging(handles.LogWindow, log_text)
+            
+
+           
 
 function saveDataCallback(hObject, eventdata, handles)
 hwait = waitbar(0,'Exporting .mat File...');
 
-[handles.FileName,handles.PathName] = uiputfile('*.mat','Save file');
+[handles.FileName,handles.PathName] = uiputfile('*.mat','Save .mat file');
 
 Parameters.PathFileName  = fullfile(handles.PathName,handles.FileName);                           
 Parameters.geovar = handles.geovar;
 waitbar(0.5,hwait)
 
 save([handles.PathName handles.FileName], 'Parameters');
+            
 waitbar(1,hwait)
 delete(hwait)
 
+
+%Excel Export
+% --------------------------------------------------------------------
+function exportexcelfile_Callback(hObject, eventdata, handles)
+savexlsDataCallback(hObject, eventdata, handles)
+
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Export .xlsx File succesfully!'};
+            statusLogging(handles.LogWindow, log_text)
+            
 function savexlsDataCallback(hObject, eventdata, handles)
 mStat_savexlsx(handles.geovar)
 
@@ -326,11 +349,9 @@ mStat_savexlsx(handles.geovar)
 %Google Export
 % --------------------------------------------------------------------
 function exportkmzfile_Callback(hObject, eventdata, handles)
+%This function esport the kmzfile for Google Earth
 
-% if handles.Filekml==0
-% else
-
-[file,path] = uiputfile('*','Save Google Earth File kml');
+[file,path] = uiputfile('*','Save .kml File');
 
 namekml=(fullfile(path,file));
 
@@ -338,8 +359,6 @@ namekml=(fullfile(path,file));
 %first
 [xcoord,ycoord]=utm2deg(handles.xCoord,handles.xCoord,char(handles.utmzone(:,1:4)));
 latlon1=[xcoord ycoord];
-
-%latlon1=[handles.kmlStruct.Lat handles.kmlStruct.Lon];
 
 %second
 for i=1:length(handles.geovar.xValleyCenter)
@@ -358,23 +377,36 @@ end
 [xinflectionY,yinflectionY]=utm2deg(handles.geovar.inflectionX,handles.geovar.inflectionY,char(utmzoneinf));
 latlon3=[xinflectionY yinflectionY];
 
-    % Write latitude and longitude into a KML file
-    %msgbox('Writing KML Files...','Conversion Status','helpfunction','replace');
-    mStat_kml(namekml,latlon1,latlon2,latlon3);
+% Write latitude and longitude into a KML file
+mStat_kml(namekml,latlon1,latlon2,latlon3);
 
-
-warndlg('Export succesfully!')
-% end
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Export .kml File succesfully!'};
+            statusLogging(handles.LogWindow, log_text)
+            
     
 
 %Export Figures    
 % --------------------------------------------------------------------
 function exportfiguregraphics_Callback(hObject, eventdata, handles)
-    [file,path] = uiputfile('*.tif','Save file');
-    
-    F = getframe(handles.pictureReach);
+%export figure function
+[file,path] = uiputfile('*.tif','Save .tif File');
+
+F = getframe(handles.pictureReach);
 Image = frame2im(F);
 imwrite(Image, fullfile(path,file),'Resolution',500)
+
+% Push messages to Log Window:
+% ----------------------------
+log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Export .tif File succesfully!'};
+            statusLogging(handles.LogWindow, log_text)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -389,7 +421,7 @@ function evaldecomp_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function waveletanalysis_Callback(hObject, eventdata, handles)
-%Wavelet analayzes
+%Wavelet analysis
 geovar=handles.geovar;
 handles.getWaveStats = mStat_WaveletAnalysis(geovar);
 
@@ -403,12 +435,14 @@ handles.getRiverStats = mStat_StatisticsVariables(handles);
 
 % --------------------------------------------------------------------
 function migrationanalyzer_Callback(hObject, eventdata, handles)
+%Migration Analyzer Tool
 mStat_MigrationAnalyzer;
 
 % --------------------------------------------------------------------
 function confluencesanalyzer_Callback(hObject, eventdata, handles)
-    mStat_ConfluencesAnalyzer;
-% Empty    
+%Confluences and Bifurcation Tools
+mStat_ConfluencesAnalyzer;
+
 
 % --------------------------------------------------------------------
 function backgroundimage_Callback(hObject, eventdata, handles)
@@ -418,17 +452,17 @@ guidata(hObject,handles)
 
 if handles.FileImage==0
 else
-axes(handles.pictureReach);
-hold on;
-mapshow(fullfile(handles.PathImage,handles.FileImage))
-hold on;
-        
-mStat_plotplanar(handles.geovar.equallySpacedX, handles.geovar.equallySpacedY, handles.geovar.inflectionPts, ...
-handles.geovar.x0, handles.geovar.y0, handles.geovar.x_sim, handles.geovar.newMaxCurvX, handles.geovar.newMaxCurvY, ...
-handles.pictureReach);
+    axes(handles.pictureReach);
+    hold on;
+    mapshow(fullfile(handles.PathImage,handles.FileImage))
+    hold on;
 
-msgbox(['Successfully update'],...
-    'Background Image');
+    mStat_plotplanar(handles.geovar.equallySpacedX, handles.geovar.equallySpacedY, handles.geovar.inflectionPts, ...
+    handles.geovar.x0, handles.geovar.y0, handles.geovar.x_sim, handles.geovar.newMaxCurvX, handles.geovar.newMaxCurvY, ...
+    handles.pictureReach);
+
+    msgbox(['Successfully update'],...
+        'Background Image');
         
 end
 
@@ -446,8 +480,8 @@ function unitsfunction_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function metricunits_Callback(hObject, eventdata, handles)
-% Metric factor
-    munits=1/0.3048;
+% Metric factor function
+munits=1/0.3048;
 
 handles.geovar.lengthCurved=handles.geovar.lengthCurved*munits;
 handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*munits;
@@ -645,7 +679,7 @@ level = str2double(get(handles.decompositionparameter,'String'));
 handles.geovar=geovar;
 guidata(hObject, handles);
 
-    % Push messages to Log Window:
+% Push messages to Log Window:
 % ----------------------------
 log_text = {...
             '';...
@@ -782,7 +816,7 @@ set(hObject,'enable','off')
 
 % --- Executes on selection change in selector.
 function selector_Callback(hObject, eventdata, handles)
-
+%This function select the bend and shows the parameters results
 axes(handles.pictureReach)
 cla(handles.pictureReach)
 guidata(hObject,handles)
@@ -820,9 +854,6 @@ log_text = {...
 
 % --- Executes during object creation, after setting all properties.
 function selector_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to selector (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -834,8 +865,8 @@ end
 %--------------------------------------------------------------------------
 % --- Executes on button press in gobend.
 function gobend_Callback(hObject, eventdata, handles)
-%go to bend selected
-%replot the picture
+%This function go to bend selected and replot the picture
+
 cla(handles.pictureReach)
 mStat_plotplanar(handles.geovar.equallySpacedX, handles.geovar.equallySpacedY, handles.geovar.inflectionPts, ...
     handles.geovar.x0, handles.geovar.y0, handles.geovar.x_sim, handles.geovar.newMaxCurvX, handles.geovar.newMaxCurvY, ...
@@ -870,7 +901,6 @@ handles.highlightPlot = line(handles.highlightX(1,:), handles.highlightY(1,:), '
 guidata(hObject,handles)
 %--------------------------------------------------------------------------
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Planar Parameters Display
 function sinuosity_Callback(hObject, eventdata, handles)
@@ -878,10 +908,6 @@ function sinuosity_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function sinuosity_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sinuosity (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -895,9 +921,6 @@ function curvaturel_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function curvaturel_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to curvaturel (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -912,9 +935,6 @@ function wavel_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function wavel_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to wavel (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -929,9 +949,6 @@ function amplitude_Callback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function amplitude_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to amplitude (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1059,19 +1076,11 @@ openfile_Callback(hObject, eventdata, handles)
 
 % --- Executes on selection change in LogWindow.
 function LogWindow_Callback(hObject, eventdata, handles)
-% hObject    handle to LogWindow (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns LogWindow contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from LogWindow
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
 function LogWindow_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to LogWindow (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: listbox controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
@@ -1081,19 +1090,11 @@ end
 
 
 function decompositionparameter_Callback(hObject, eventdata, handles)
-% hObject    handle to decompositionparameter (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of decompositionparameter as text
-%        str2double(get(hObject,'String')) returns contents of decompositionparameter as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
 function decompositionparameter_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to decompositionparameter (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
