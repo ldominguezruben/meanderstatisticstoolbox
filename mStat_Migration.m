@@ -17,6 +17,7 @@ function [Migra,ArMigra]=mStat_Migration(geovar,handles)
 robust=0;
 active.ac=0;%deactivate close point
 setappdata(0, 'active', active);
+Migra.deltat=handles.year(2)-handles.year(1);%Delta time
 
 % Verify the order of difitalization 
 [ArMigra.xint_areat0,ArMigra.yint_areat0,iout0,jout0]=intersections...
@@ -134,7 +135,9 @@ end
 %Average Migration (Julien 2002)
 for t=1:length(ArMigra.xint_areat1)-1
 	Migra.AreaTot(t)=Migra.areat0_t1(t)/(Migra.distancet0{t}+Migra.distancet1{t});
+    Migra.MigrationAveArea(t)=(Migra.areat0_t1(t)/(Migra.distancet0{t}+Migra.distancet1{t}))/Migra.deltat;
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Migration estimated
@@ -159,7 +162,7 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
 
         yy(o,:)=Migra.linet0Y{t}.line(1,o)+Migra.porcenVector*v(o,2);%
 
-        %Determinate the times 
+        %Determinate the times of extended 
         times=10;%(nanmin(geovar{2}.wavelengthOfBends)/geovar{1}.width)+5;%reduce the minimum wavelength and width ¿Como calculamos un valor correcto?
 
         mag=geovar{2}.width*times;%times of amplitude of migration 
@@ -175,33 +178,48 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
         Y22{t}(:,o)=[ystart_line1(o,1);yend_line1(o,1)];
 
         %Find the intersection
-        [xline1_int{t}(:,o),yline1_int{t}(:,o),~,~] = intersections(X11{t}(:,o),Y22{t}(:,o),Migra.linet1X{t}.line,Migra.linet1Y{t}.line,robust);
+        [xlinet1_int{t}(:,o),ylinet1_int{t}(:,o),~,~] = intersections(X11{t}(:,o),Y22{t}(:,o),Migra.linet1X{t}.line,Migra.linet1Y{t}.line,robust);
 
-        xline2_int{t}(:,o)=xx(o,:);%start point t0 Coordinate X
-        yline2_int{t}(:,o)=yy(o,:);%start point t0 Coordinate Y       
+        xlinet0_int{t}(:,o)=xx(o,:);%start point t0 Coordinate X
+        ylinet0_int{t}(:,o)=yy(o,:);%start point t0 Coordinate Y       
         
         
-        if isnan(xline1_int{t}(:,o)) | length(Migra.linet0X{t}.line)<3 | Migra.distancet1{t}<0.6*Migra.distancet0{t}
+        if isnan(xlinet1_int{t}(:,o)) |  Migra.distancet1{t}<0.9*Migra.distancet0{t} | length(Migra.linet0X{t}.line)<3  | length(Migra.linet1X{t}.line)<3
+            if  length(Migra.linet0X{t}.line)<3  | length(Migra.linet1X{t}.line)<3
+                 %Delete all data bend
+            xlinet1_int{t}(:,:)=nan;%delete area t1
+            ylinet1_int{t}(:,:)=nan;%delete area t1
+            xlinet0_int{t}(:,:)=nan;%delete area t0
+            ylinet0_int{t}(:,:)=nan;%delete area t0
+            MigrationSignal{t}(:,:)=nan;
+            Direction{t}(:,:)=nan;
+                
+            else
+            %%Define cut off
             Migra.BendCutOff(l) = t;
             Migra.NumberOfCut = l;
             l=l+1;
             
             %Delete all data bend
-            xline1_int{t}(:,:)=nan;%delete area t1
-            yline1_int{t}(:,:)=nan;%delete area t1
-            xline2_int{t}(:,:)=nan;%delete area t0
-            yline2_int{t}(:,:)=nan;%delete area t0
+            xlinet1_int{t}(:,:)=nan;%delete area t1
+            ylinet1_int{t}(:,:)=nan;%delete area t1
+            xlinet0_int{t}(:,:)=nan;%delete area t0
+            ylinet0_int{t}(:,:)=nan;%delete area t0
             MigrationSignal{t}(:,:)=nan;
             Direction{t}(:,:)=nan;
             
             %No calcula migration cuando hay un cutoff
             break
+            
+            end
         else
-            MigrationSignal{t}(o,1)=((xline1_int{t}(o)-xline2_int{t}(o))^2+...
-                (yline1_int{t}(o)-yline2_int{t}(o))^2)^0.5;
-
-            u = xline1_int{t}(o)-xline2_int{t}(o);
-            w = yline1_int{t}(o)-yline2_int{t}(o);
+            MigrationSignal{t}(o,1)=((xlinet1_int{t}(o)-xlinet0_int{t}(o))^2+...
+                (ylinet1_int{t}(o)-ylinet0_int{t}(o))^2)^0.5;
+            
+            
+    
+            u = xlinet1_int{t}(o)-xlinet0_int{t}(o);
+            w = ylinet1_int{t}(o)-ylinet0_int{t}(o);
             anglq = atan2d(u,w);                                    % Angle Corrected For Quadrant
             Angles360 = @(a) rem(360+a, 360);                       % For ‘atan2d’
             Direction{t}(o,1)= Angles360(anglq);
@@ -217,49 +235,62 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
         clear  xx yy u v w xstart_line1 xend_line1 ystart_line1 yend_line1 ...
             startpoint endpoint
     end
+    
+    if isempty(o)
+        Migra.MigrationAve(t)=nan;
+    else
+        % Mean migration
+        Migra.MigrationAve(t)=nanmean(MigrationSignal{t}(2:end,1))./Migra.deltat;
+    end
 end
     
 %%
+%Determinate distance
+
+Migra.MigrationDistance=cumsum(diff(geovar{1}.sResample(floor(iout0(1))+1:floor(iout0(end))+1)));
+
 % Resize the array to determinate a continuos signal
 e=1;
 for t=1:length(Migra.Distance)
+
+    
     for o=3:length(Migra.Distance{t}.DistanceSignal)
-        if t==1 & o==3%first point
-            Migra.MigrationDistance(e,1) = Migra.Distance{t}.DistanceSignal(1,o-1) + Migra.Distance{t}.DistanceSignal(1,o-1);
+        if t==1 & o==2%first point
+          %  Migra.MigrationDistance(e,1) = Migra.Distance{t}.DistanceSignal(1,o-1) + Migra.Distance{t}.DistanceSignal(1,o-1);
             if isnan(MigrationSignal{t})
                 Migra.MigrationSignal(e,1) = nan;
                 Migra.Direction(e,1) = nan;
-                Migra.xline1_int(e) = nan;
-                Migra.yline1_int(e) = nan;
-                Migra.xline2_int(e) = nan;
-                Migra.yline2_int(e) = nan; 
+                Migra.xlinet1_int(e) = nan;%t1
+                Migra.ylinet1_int(e) = nan;%t1
+                Migra.xlinet0_int(e) = nan;%t0
+                Migra.ylinet0_int(e) = nan; %t0
                 e=e+1;
             else
                 Migra.MigrationSignal(e,1) = MigrationSignal{t}(o-1,1);
                 Migra.Direction(e,1) = Direction{t}(o-1,1);
-                Migra.xline1_int(e) = xline1_int{t}(:,o-1);
-                Migra.yline1_int(e) = yline1_int{t}(:,o-1);
-                Migra.xline2_int(e) = xline2_int{t}(:,o-1);
-                Migra.yline2_int(e) = yline2_int{t}(:,o-1);   
+                Migra.xlinet1_int(e) = xlinet1_int{t}(:,o-1);
+                Migra.ylinet1_int(e) = ylinet1_int{t}(:,o-1);
+                Migra.xlinet0_int(e) = xlinet0_int{t}(:,o-1);
+                Migra.ylinet0_int(e) = ylinet0_int{t}(:,o-1);   
                 e=e+1;
             end
         else
-            Migra.MigrationDistance(e,1) = Migra.Distance{t}.DistanceSignal(1,o-1) + Migra.MigrationDistance(e-1,1);
+           % Migra.MigrationDistance(e,1) = Migra.Distance{t}.DistanceSignal(1,o-1) + Migra.MigrationDistance(e-1,1);
             if isnan(MigrationSignal{t})              
                 Migra.MigrationSignal(e,1) = nan;
                 Migra.Direction(e,1) = nan;
-                Migra.xline1_int(e) = nan;
-                Migra.yline1_int(e) = nan;
-                Migra.xline2_int(e) = nan;
-                Migra.yline2_int(e) = nan; 
+                Migra.xlinet1_int(e) = nan;
+                Migra.ylinet1_int(e) = nan;
+                Migra.xlinet0_int(e) = nan;
+                Migra.ylinet0_int(e) = nan; 
                 e=e+1;
             else
                  Migra.MigrationSignal(e,1) = MigrationSignal{t}(o-1,1);
                  Migra.Direction(e,1) = Direction{t}(o-1,1);
-                 Migra.xline1_int(e) = xline1_int{t}(:,o-1);
-                 Migra.yline1_int(e) = yline1_int{t}(:,o-1);
-                 Migra.xline2_int(e) = xline2_int{t}(:,o-1);
-                 Migra.yline2_int(e) = yline2_int{t}(:,o-1);
+                 Migra.xlinet1_int(e) = xlinet1_int{t}(:,o-1);
+                 Migra.ylinet1_int(e) = ylinet1_int{t}(:,o-1);
+                 Migra.xlinet0_int(e) = xlinet0_int{t}(:,o-1);
+                 Migra.ylinet0_int(e) = ylinet0_int{t}(:,o-1);
                  e=e+1;
             end
         end
@@ -274,47 +305,63 @@ filter=0;%No filter option
 axest=[handles.wavel_axes];%axes of determination
 Tools=2;%Migration tools
 
-Migra.deltat=handles.year(2)-handles.year(1);%Delta time
-
 mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,Migra)
 
 %%%Plot
-hwait = waitbar(0,'Plotting...','Name','MStaT ',...
-         'CreateCancelBtn',...
-            'setappdata(gcbf,''canceling'',1)');
-setappdata(hwait,'canceling',0)
-
 axes(handles.pictureReach)
 
 plot(xstart,ystart,'-b')%start
 hold on
 plot(xend,yend,'-k')
-%plot(Migra.xline2_int,Migra.yline2_int,'ob')
+%plot(Migra.xlinet0_int,Migra.ylinet0_int,'ob')
 plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
-legend('t0','t1','Intersection','Location','Best')
+legend('t0','t1','Intersection','Location','Best')   
 grid on
 axis equal
-for t=2:length(Migra.xline1_int)
-    %line([xstart(t,1) xline1_int(1,t)],[ystart(t,1) yline1_int(1,t)])
-    %line([xstart_line1(t) xend_line1(t)],[ystart_line1(t) yend_line1(t)])
-    %line([xline2_int(t) xline1_int(t)],[yline2_int(t) yline1_int(t)])
+% for t=2:length(Migra.xlinet1_int)
+%     %line([xstart(t,1) xline1_int(1,t)],[ystart(t,1) ylinet1_int(1,t)])
+%     %line([xstart_line1(t) xend_line1(t)],[ystart_line1(t) yend_line1(t)])
+%     %line([xlinet0_int(t) xline1_int(t)],[ylinet0_int(t) ylinet1_int(t)])
+% 
+%     % figure(3)
+%     D=[Migra.xlinet1_int(t) Migra.ylinet1_int(t)]-[Migra.xlinet0_int(t) Migra.ylinet0_int(t)];
+%     quiver(Migra.xlinet0_int(t),Migra.ylinet0_int(t),D(1),D(2),0,'filled','color','k','MarkerSize',10)
+%     % plot(xline1_int{u}(1,i),ylinet1_int{u}(1,i),'or')
+%     % hold on
+%     % plot(xstart,ystart,'-r')
+%     % plot(xend,yend,'-g')
+%     % axis equal
+% 
+%     % waitbar(((t/length(Migra.xline1_int))/50)/100,hwait); 
+% end
 
-    % figure(3)
-    D=[Migra.xline1_int(t) Migra.yline1_int(t)]-[Migra.xline2_int(t) Migra.yline2_int(t)];
-    quiver(Migra.xline2_int(t),Migra.yline2_int(t),D(1),D(2),0,'filled','color','k','MarkerSize',10)
-    % plot(xline1_int{u}(1,i),yline1_int{u}(1,i),'or')
-    % hold on
-    % plot(xstart,ystart,'-r')
-    % plot(xend,yend,'-g')
-    % axis equal
-
-    %waitbar(((t/length(xline1_int))/50)/100,hwait); 
-end
 % 
 xlabel('X [m]');ylabel('Y [m]')
 hold off
 
-waitbar(50/100,hwait);  
+
+%Plot maximum migration
+axes(handles.pictureReach)
+hold on
+
+%Found maximum migration
+Controlmax=Migra.MigrationSignal;
+[~,pos]=nanmax(Controlmax);
+
+%Control maximum migration
+r=1;
+while(Controlmax(pos)- Controlmax(pos-1))/Controlmax(pos)>0.5
+    Controlmax(pos)=[];
+    [~,pos]=nanmax(Controlmax);
+    r=r+1;
+end
+
+ee=text(Migra.xlinet1_int(pos),Migra.ylinet1_int(pos),'Maximum Migration');
+set(ee,'Clipping','on')
+    
+hold off
+
+% waitbar(50/100,hwait);  
     
 % figure(3)
 % hold on
@@ -323,22 +370,29 @@ waitbar(50/100,hwait);
 % ylabel('Migration/year [m/yr]','Fontsize',10) 
 
 %Plot migration
+% Define limits
+FileBed_dataMX=Migra.MigrationDistance;
+xmin=0;     
+DeltaCentS=FileBed_dataMX(1,1);  %units. 
+n=length((Migra.MigrationSignal/Migra.deltat)');
+xlim = [xmin,(n-1)*DeltaCentS+xmin];  % plotting range
+Abscise = [1:length(FileBed_dataMX)] + xmin;
+
 axes(handles.signalvariation);
-[hAx,hLine1,hLine2] = plotyy(Migra.MigrationDistance,Migra.MigrationSignal/Migra.deltat,Migra.MigrationDistance,Migra.Direction,'plot');
+dimlessx=Abscise*DeltaCentS;
+[hAx,hLine1,hLine2] = plotyy(dimlessx,Migra.MigrationSignal/Migra.deltat,dimlessx,Migra.Direction,'plot');
 hold on
+
+% waitbar(75/100,hwait); 
 
 xlabel('Intrinsic Channel Lengths [m]','Fontsize',10);
 ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
 
-% Define limits
- FileBed_dataMX=Migra.MigrationDistance;
-% xmin=min(FileBed_dataMX);     
-% DeltaCentS=FileBed_dataMX(2,1)-FileBed_dataMX(1,1);  %units. 
-% n=length((Migra.MigrationSignal/Migra.deltat)');
-% xlim = [xmin,(n-1)*DeltaCentS+xmin];  % plotting range
-xlim = [FileBed_dataMX(1,1),FileBed_dataMX(end,1)];
+
+%xlim = [0,FileBed_dataMX(end,1)];
 set(hAx(1),'XLim',xlim(:));
 set(hAx(2),'XLim',xlim(:));
+set(hAx(1),'XGrid','on');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %grid on
@@ -351,8 +405,8 @@ hold off
 hLine1.LineStyle = '-';
 hLine2.LineStyle = '-.';
 
-waitbar(100/100,hwait);
-delete(hwait)
+% waitbar(100/100,hwait);
+% delete(hwait)
 
 
 % 
@@ -402,22 +456,22 @@ delete(hwait)
 % %t1
 % for u=1:length(Migra.porcenVector)
 %     xline1_int{u}=zeros(2,length(xstart_line1)-1);
-%     yline1_int{u}=zeros(2,length(xstart_line1)-1);
+%     ylinet1_int{u}=zeros(2,length(xstart_line1)-1);
 % end
 % 
 % for i=1:length(xstart_line1)-1
 %     for u=1:length(Migra.porcenVector)
 %         if isnan(xstart_line1(i,u)) | isnan(xend_line1(i,u)) | isnan(ystart_line1(i,u)) | isnan(yend_line1(i,u)) 
 %             xline1_int{u}(:,i)=nan;
-%             yline1_int{u}(:,i)=nan;
+%             ylinet1_int{u}(:,i)=nan;
 %         else
 %             X11{u}(:,i)=[xstart_line1(i,u);xend_line1(i,u)];
 %             Y22{u}(:,i)=[ystart_line1(i,u);yend_line1(i,u)];
 %             %Find the intersection
-%             [xline1_int{u}(:,i),yline1_int{u}(:,i),~,~] = intersections(X11{u}(:,i),Y22{u}(:,i),xend,yend,robust);
+%             [xline1_int{u}(:,i),ylinet1_int{u}(:,i),~,~] = intersections(X11{u}(:,i),Y22{u}(:,i),xend,yend,robust);
 %         end
 % %     figure(3)
-% %     plot(xline1_int{u}(1,i),yline1_int{u}(1,i),'or')
+% %     plot(xline1_int{u}(1,i),ylinet1_int{u}(1,i),'or')
 % %     hold on
 % %     plot(xstart,ystart,'-r')
 % %     plot(xend,yend,'-g')
@@ -431,14 +485,14 @@ delete(hwait)
 %     for u=1:length(Migra.porcenVector)
 %     if isnan(xstart_line1(i,u)) | isnan(xend_line1(i,u)) | isnan(ystart_line1(i,u)) | isnan(yend_line1(i,u)) 
 %         xline1_int{u}(:,i)=nan;
-%         yline1_int{u}(:,i)=nan;
+%         ylinet1_int{u}(:,i)=nan;
 %     else
 %         X11{u}(:,i)=[xstart_line1(i,u);xend_line1(i,u)];
 %         Y22{u}(:,i)=[ystart_line1(i,u);yend_line1(i,u)];
-%     [xline2_int{u}(:,i),yline2_int{u}(:,i),~,~] = intersections(X11{u}(:,i),Y22{u}(:,i),xstart,ystart,robust);
+%     [xlinet0_int{u}(:,i),ylinet0_int{u}(:,i),~,~] = intersections(X11{u}(:,i),Y22{u}(:,i),xstart,ystart,robust);
 %     %Modify
-%     xline2_int{u}(:,i)=xx(i);
-%     yline2_int{u}(:,i)=yy(i);
+%     xlinet0_int{u}(:,i)=xx(i);
+%     ylinet0_int{u}(:,i)=yy(i);
 %     end
 %     end
 % end
@@ -451,10 +505,10 @@ delete(hwait)
 % for i=1:length(xline1_int{1})
 %     
 %     for n=1:length(Migra.porcenVector)
-%         MigrationSignal{n}(i,1)=((xline1_int{n}(i)-xline2_int{n}(i))^2+(yline1_int{n}(i)-yline2_int{n}(i))^2)^0.5;
+%         MigrationSignal{n}(i,1)=((xline1_int{n}(i)-xlinet0_int{n}(i))^2+(ylinet1_int{n}(i)-ylinet0_int{n}(i))^2)^0.5;
 % 
-%         u = xline1_int{n}(i)-xline2_int{n}(i);
-%         v = yline1_int{n}(i)-yline2_int{n}(i);
+%         u = xline1_int{n}(i)-xlinet0_int{n}(i);
+%         v = ylinet1_int{n}(i)-ylinet0_int{n}(i);
 %         anglq = atan2d(u,v);                                    % Angle Corrected For Quadrant
 %         Angles360 = @(a) rem(360+a, 360);                       % For ‘atan2d’
 %         Direction{n}(i,1)= Angles360(anglq);

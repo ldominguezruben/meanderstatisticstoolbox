@@ -209,7 +209,7 @@ mStat_SummaryMigration(handles.Migra);
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
 
-hwait = waitbar(0,'Migration Calculate','Name','MStaT V1.0',...
+hwait = waitbar(0,'Migration Calculate. Processing...','Name','MStaT V1.0',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
@@ -234,9 +234,8 @@ for i=1:2
     [geovar{i}]=mStat_planar(handles.xCoord{i},handles.yCoord{i},...
         handles.width(i),sel,handles.pictureReach,handles.bendSelect,Tools,level);
     % Waitbar shows the the user the status
-    waitbar(40+(i*10)/100,hwait);
+    waitbar((40+(i*10))/100,hwait);
 end
-
 
 
 %save data
@@ -273,7 +272,7 @@ log_text = {...
     'Mean Migration/year';[cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat})];...
     'Maximum Migration';[cell2mat({nanmax(Migra.MigrationSignal)})];...
     'Minimum Migration';[cell2mat({nanmin(Migra.MigrationSignal)})];...
-    'Chute Cut off Found';[cell2mat({Migra.NumberOfCut})]};
+    'Cutoff Found';[cell2mat({Migra.NumberOfCut})]};
 statusLogging(handles.LogWindow, log_text)
 
 waitbar(1,hwait)
@@ -292,7 +291,8 @@ if Migra.NumberOfCut == 0
   else     
     axes(handles.pictureReach)
     hold on
-    text(handles.ArMigra.xint_areat0(Migra.BendCutOff),handles.ArMigra.yint_areat0(Migra.BendCutOff),'Cutoff')
+    ee=text(handles.ArMigra.xint_areat0(Migra.BendCutOff),handles.ArMigra.yint_areat0(Migra.BendCutOff),'Cutoff');
+    set(ee,'Clipping','on')
     hold off
  end
 
@@ -328,6 +328,7 @@ switch enable_state
     set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'on')
     case 'results'
     set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'on')
+    set(handles.predictor,'Enable','off');
     set(handles.summary,'Enable','on');
     set(handles.export,'Enable','on');
     otherwise

@@ -10,11 +10,13 @@
 function [period,power,sig95M,scale_avg,scaleavg_signif] = mStat_WaveletCenterline(JProfile,jnodes,DeltaCentS,sst,OptSaveFig,FileBaseW,...
     xmin,dt,dj,Lower_Scale,Upper_Scale,SIGLVL,equallySpacedX,equallySpacedY,angle,sel1,filter,axest,Tools,vars)
 
-
-hwait = waitbar(0,'Creating Wavelet plot...','Name','MStaT V1.0',...
+if Tools==2 | Tools==3
+else
+hwait = waitbar(0,'Creating Wavelet Plot...','Name','MStaT V1.0',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
+end
 
 % ------------------------------START EVALUATION ---------------------------
 ssto = sst;
@@ -113,67 +115,67 @@ plot(dimlessx,dimlessy,'black -','linewidth',1.0);
 
 if filter==0
 else
-hold on
+    hold on
 
-    bendwavelength = getappdata(0, 'bendwavelength');
-    handles.bendwavelength = str2num(bendwavelength);
-    
-    indi = getappdata(0, 'indi');
-    handles.indi = str2num(indi);
+        bendwavelength = getappdata(0, 'bendwavelength');
+        handles.bendwavelength = str2num(bendwavelength);
 
-    for i=1:length(handles.indi)
-        line((Abscise(handles.indi(i,1):handles.indi(i,2))*DeltaCentS)./width,ssto(handles.indi(i,1):handles.indi(i,2)).*width, 'color', 'r', 'LineWidth',2);
-        plot((Abscise(handles.indi(i,1))*DeltaCentS)./width,ssto(handles.indi(i,1)).*width,'or','MarkerSize',6,'MarkerFaceColor','r')
-        plot((Abscise(handles.indi(i,2))*DeltaCentS)./width,ssto(handles.indi(i,2)).*width,'ob','MarkerSize',6,'MarkerFaceColor','b')
-        text([(Abscise(handles.indi(i,1))*DeltaCentS)./width],[ssto(handles.indi(i,1)).*width],num2str(handles.bendwavelength(i)),'FontSize',14)
+        indi = getappdata(0, 'indi');
+        handles.indi = str2num(indi);
+
+        for i=1:length(handles.indi)
+            line((Abscise(handles.indi(i,1):handles.indi(i,2))*DeltaCentS)./width,ssto(handles.indi(i,1):handles.indi(i,2)).*width, 'color', 'r', 'LineWidth',2);
+            plot((Abscise(handles.indi(i,1))*DeltaCentS)./width,ssto(handles.indi(i,1)).*width,'or','MarkerSize',6,'MarkerFaceColor','r')
+            plot((Abscise(handles.indi(i,2))*DeltaCentS)./width,ssto(handles.indi(i,2)).*width,'ob','MarkerSize',6,'MarkerFaceColor','b')
+            text([(Abscise(handles.indi(i,1))*DeltaCentS)./width],[ssto(handles.indi(i,1)).*width],num2str(handles.bendwavelength(i)),'FontSize',14)
+        end
     end
-end
-set(gca,'XLim',xlim(:));%./width);
-xlabel('S*','fontsize',10);
-ylabel('C*','fontsize',10);
-title('Signature of the channel curvature','fontsize',13);
-grid on;
-hold off;
+    set(gca,'XLim',xlim(:));%./width);
+    xlabel('S*','fontsize',10);
+    ylabel('C*','fontsize',10);
+    title('Signature of the channel curvature','fontsize',13);
+    grid on;
+    hold off;
 
-waitbar(25/100,hwait);
+    waitbar(25/100,hwait);
 
 
 elseif sel1==2%ANGLE VARIATION
-% [1] Plot angle variation
-axes(axest(1))
-plot(Abscise*DeltaCentS,angle,'black -','linewidth',1.0);
-hold on;  
+    % [1] Plot angle variation
+    axes(axest(1))
+    plot(Abscise*DeltaCentS,angle,'black -','linewidth',1.0);
+    hold on;  
 
-%apply filter
-if filter==0
-else
-    
-    bendwavelength = getappdata(0, 'bendwavelength');
-    handles.bendwavelength = str2num(bendwavelength);
-    
-    indi = getappdata(0, 'indi');
-    handles.indi = str2num(indi);
-    
-    hold on
-    for i=1:length(handles.indi)
-        line(Abscise(handles.indi(i,1):handles.indi(i,2))*DeltaCentS,angle(handles.indi(i,1):handles.indi(i,2)), 'color', 'r', 'LineWidth',2);
-        plot(Abscise(handles.indi(i,1))*DeltaCentS,angle(handles.indi(i,1)),'or','MarkerSize',6,'MarkerFaceColor','r')
-        plot(Abscise(handles.indi(i,2))*DeltaCentS,angle(handles.indi(i,2)),'ob','MarkerSize',6,'MarkerFaceColor','b')
-        text([Abscise(handles.indi(i,1))*DeltaCentS],[angle(handles.indi(i,1))],num2str(handles.bendwavelength(i)),'FontSize',14)
+    %apply filter
+    if filter==0
+    else
+
+        bendwavelength = getappdata(0, 'bendwavelength');
+        handles.bendwavelength = str2num(bendwavelength);
+
+        indi = getappdata(0, 'indi');
+        handles.indi = str2num(indi);
+
+        hold on
+        for i=1:length(handles.indi)
+            line(Abscise(handles.indi(i,1):handles.indi(i,2))*DeltaCentS,angle(handles.indi(i,1):handles.indi(i,2)), 'color', 'r', 'LineWidth',2);
+            plot(Abscise(handles.indi(i,1))*DeltaCentS,angle(handles.indi(i,1)),'or','MarkerSize',6,'MarkerFaceColor','r')
+            plot(Abscise(handles.indi(i,2))*DeltaCentS,angle(handles.indi(i,2)),'ob','MarkerSize',6,'MarkerFaceColor','b')
+            text([Abscise(handles.indi(i,1))*DeltaCentS],[angle(handles.indi(i,1))],num2str(handles.bendwavelength(i)),'FontSize',14)
+        end
+
     end
-    
-end
-    
-   
-set(gca,'XLim',xlim(:));
-set(gca,'YLim',[min(angle)-10 max(angle)+10]);
-xlabel('Intrinsic Channel Length [m]','fontsize',10);
-ylabel('Angle [degree]','fontsize',10);
-title('Signature of the channel angle','fontsize',13);
-grid on;
-hold off;
 
-waitbar(25/100,hwait);
+
+    set(gca,'XLim',xlim(:));
+    set(gca,'YLim',[min(angle)-10 max(angle)+10]);
+    xlabel('Intrinsic Channel Length [m]','fontsize',10);
+    ylabel('Angle [degree]','fontsize',10);
+    title('Signature of the channel angle','fontsize',13);
+    grid on;
+    hold off;
+
+    waitbar(25/100,hwait);
 
 end
 
@@ -193,9 +195,9 @@ grid on;
 axis equal
 
 
-   if filter==0
-   else
-       
+if filter==0
+else
+
     highlightx_arc = getappdata(0, 'highlightx_arc');
     handles.highlightx_arc = str2num(highlightx_arc);
     highlighty_arc = getappdata(0, 'highlighty_arc');
@@ -211,7 +213,7 @@ axis equal
     plot(handles.highlightx_arc(j,finitedhighlightx_arc(j,1)),handles.highlighty_arc(j,finitedhighlighty_arc(j,1)),'ob','MarkerSize',6,'MarkerFaceColor','b')
     text([handles.highlightx_arc(j,1)],[handles.highlighty_arc(j,1)],num2str(handles.bendwavelength(j)),'FontSize',14)
     end
-   end
+end
      
 hold off
 
@@ -289,28 +291,7 @@ yposFM=log2(period(in)*DeltaCentS./width);
 
 StrPeak = num2str((2^yposFM),'%6.2f');
 ee=text(xposFM,yposFM,StrPeak,'fontsize',13);
-set(ee,'Clipping','on')
-             
-% %Getting the Fourier peaks
-% lenWS = length(global_ws);
-% xposFM = 0.0; xposFM=0.0; PrintFPeak=0;
-% for rr=1:lenWS
-%     if (global_ws(rr)<global_signif(rr))
-%        % if (global_ws(rr)>xposFM) 
-%             PrintFPeak=1;
-%             xposFM=global_ws(rr)*DeltaCentS*DeltaCentS;
-%             yposFM=log2(period(rr)*DeltaCentS);
-%         %end
-%     else
-%         if (PrintFPeak==1)
-%             StrPeak = num2str(2^yposFM,'%6.2f');
-%             ee=text(xposFM,yposFM,StrPeak,'fontsize',13);
-%              set(ee,'Clipping','on')
-%             PrintFPeak=0;
-%         end        
-%     end
-% end
-
+set(ee,'Clipping','on')    
 
 %close graph
 hold off;
@@ -335,120 +316,121 @@ uicontrol('Style', 'push','enable','off', 'fontsize',12, 'units', 'norm', 'posit
 waitbar(100/100,hwait);
 delete(hwait)
 %legend('Global Wavelet Spectrum','Significance','Fontsize',14,'Position','Best')
-elseif Tools==2% MIGRATION ANALYZER 
-cla(axest(1))    
-axes(axest(1))
-Yticks = 2.^(fix(log2(min(period*DeltaCentS))):fix(log2(max(period*DeltaCentS))));
-Yticksav = num2str(Yticks);
-setappdata(0, 'Yticksav', Yticksav);
-%Modifiying the sig95 to be only those that are in cone of influence
+%%
 
-if (sig95Mod == 1)
-    [msig95,nsig95]=size(sig95);
-    sig95M=zeros(msig95,nsig95);
-    for nn=1: nsig95               % along x-distance nodes
-        for mm=1: msig95           % along period nodes
-            if (period(mm)<=coi(nn))
-                sig95M(mm,nn)=sig95(mm,nn);
+elseif Tools==2% MIGRATION ANALYZER 
+  
+    cla(axest(1))    
+    axes(axest(1))
+    Yticks = 2.^(fix(log2(min(period*DeltaCentS))):fix(log2(max(period*DeltaCentS))));
+    Yticksav = num2str(Yticks);
+    setappdata(0, 'Yticksav', Yticksav);
+    %Modifiying the sig95 to be only those that are in cone of influence
+
+    if (sig95Mod == 1)
+        [msig95,nsig95]=size(sig95);
+        sig95M=zeros(msig95,nsig95);
+        for nn=1: nsig95               % along x-distance nodes
+            for mm=1: msig95           % along period nodes
+                if (period(mm)<=coi(nn))
+                    sig95M(mm,nn)=sig95(mm,nn);
+                end
             end
         end
+    else
+        sig95M=sig95;
     end
-else
-    sig95M=sig95;
-end
 
-contourf(Abscise*DeltaCentS,log2(period*DeltaCentS),sig95M,[1:max(max(sig95M))],'LineColor','none');
-colormap('jet');
-cc=colorbar;
-cc.Label.String = 'WPS';
-cc.FontSize=8;
-cc.Location='EastOutside';
+    contourf(Abscise*DeltaCentS,log2(period*DeltaCentS),sig95M,[1:max(max(sig95M))],'LineColor','none');
+    colormap('jet');
+    cc=colorbar;
+    cc.Label.String = 'WPS';
+    cc.FontSize=8;
+    cc.Location='EastOutside';
 
-xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
-ylabel('Arc-Wavelength [m]','fontsize',6);
-title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
-set(gca,'XLim',xlim(:));
-set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
-grid on;
-hold on;
-% cone-of-influence, anything "below" is dubious
-plot(Abscise*DeltaCentS,log2(coi*DeltaCentS),'k','linewidth',2);
+    xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
+    ylabel('Arc-Wavelength [m]','fontsize',6);
+    title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
+    set(gca,'XLim',xlim(:));
+    set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
+    grid on;
+    hold on;
+    % cone-of-influence, anything "below" is dubious
+    plot(Abscise*DeltaCentS,log2(coi*DeltaCentS),'k','linewidth',2);
 
-waitbar(100/100,hwait);
-delete(hwait)
 
+%%
 elseif Tools==3%CONFLUENCES-DIFLUENCER ANALYZER PLOT
 
-axes(axest(1))
-Yticks = 2.^(fix(log2(min(period*DeltaCentS))):fix(log2(max(period*DeltaCentS))));
-Yticksav = num2str(Yticks);
-setappdata(0, 'Yticksav', Yticksav);
-%Modifiying the sig95 to be only those that are in cone of influence
+    axes(axest(1))
+    Yticks = 2.^(fix(log2(min(period*DeltaCentS))):fix(log2(max(period*DeltaCentS))));
+    Yticksav = num2str(Yticks);
+    setappdata(0, 'Yticksav', Yticksav);
+    %Modifiying the sig95 to be only those that are in cone of influence
 
-if (sig95Mod == 1)
-    [msig95,nsig95]=size(sig95);
-    sig95M=zeros(msig95,nsig95);
-    for nn=1: nsig95               % along x-distance nodes
-        for mm=1: msig95           % along period nodes
-            if (period(mm)<=coi(nn))
-                sig95M(mm,nn)=sig95(mm,nn);
+    if (sig95Mod == 1)
+        [msig95,nsig95]=size(sig95);
+        sig95M=zeros(msig95,nsig95);
+        for nn=1: nsig95               % along x-distance nodes
+            for mm=1: msig95           % along period nodes
+                if (period(mm)<=coi(nn))
+                    sig95M(mm,nn)=sig95(mm,nn);
+                end
+            end
+        end
+    else
+        sig95M=sig95;
+    end
+
+    [T3.f,~,~]=contourf(Abscise*DeltaCentS,log2(period*DeltaCentS),sig95M,[1:max(max(sig95M))],'LineColor','black');
+
+    n=1;
+
+    for w=1:length(T3.f)
+        if T3.f(1,w)==1  
+        T3.X_Y{n}(1:2,1:T3.f(2,w))=[T3.f(1,w+1:w+T3.f(2,w));T3.f(2,w+1:w+T3.f(2,w))]; %
+        T3.Ar(n)=polyarea(T3.X_Y{n}(1,:),T3.X_Y{n}(2,:));
+        n=n+1;
+        else 
+        end
+    end
+
+    %store data
+    setappdata(0, 'T3', T3);
+
+    colormap('white');
+
+    xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
+    ylabel('Arc-Wavelength [m]','fontsize',10);
+    title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
+    set(gca,'XLim',xlim(:));
+    set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
+    grid on;
+    hold on;
+
+    if isempty(vars)
+    else 
+        Conf=vars;
+        for q=1:length(Conf.Rintrinsec)
+            if q==1
+                line([Conf.Xgraph(2)  Conf.Xgraph(2)],...
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
+                line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'b', 'LineWidth',2);
+            else
+                line([Conf.Rintrinsec(q-1)  Conf.Rintrinsec(q-1)],...
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
+                            line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
             end
         end
     end
-else
-    sig95M=sig95;
-end
-
-[T3.f,~,~]=contourf(Abscise*DeltaCentS,log2(period*DeltaCentS),sig95M,[1:max(max(sig95M))],'LineColor','black');
 
 
-n=1;
-
-for w=1:length(T3.f)
-    if T3.f(1,w)==1  
-    T3.X_Y{n}(1:2,1:T3.f(2,w))=[T3.f(1,w+1:w+T3.f(2,w));T3.f(2,w+1:w+T3.f(2,w))]; %
-    T3.Ar(n)=polyarea(T3.X_Y{n}(1,:),T3.X_Y{n}(2,:));
-    n=n+1;
-    else 
-    end
-end
-
-%store data
-setappdata(0, 'T3', T3);
-
-colormap('white');
-   
-xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
-ylabel('Arc-Wavelength [m]','fontsize',10);
-title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
-set(gca,'XLim',xlim(:));
-set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
-grid on;
-hold on;
-
-if isempty(vars)
-else 
-    Conf=vars;
-    for q=1:length(Conf.Rintrinsec)
-        if q==1
-            line([Conf.Xgraph(2)  Conf.Xgraph(2)],...
-                log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
-            line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
-                log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'b', 'LineWidth',2);
-        else
-            line([Conf.Rintrinsec(q-1)  Conf.Rintrinsec(q-1)],...
-                log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
-                        line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
-                log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
-        end
-    end
-end
-
-
-% cone-of-influence, anything "below" is dubious
-plot(Abscise*DeltaCentS,log2(coi*DeltaCentS),'k','linewidth',2);
-hold off
-waitbar(100/100,hwait);
-delete(hwait)
+    % cone-of-influence, anything "below" is dubious
+    plot(Abscise*DeltaCentS,log2(coi*DeltaCentS),'k','linewidth',2);
+    hold off
+    waitbar(100/100,hwait);
+    delete(hwait)
 end
 

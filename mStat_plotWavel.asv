@@ -42,19 +42,15 @@ elseif Tools==2% Moigration Toolbox
     FileBed_dataMZ = vars.MigrationSignal/vars.deltat;
 end
 
+
 lenRanges = length(Input_Band_Scale);
 for m=1:(lenRanges);
     Lower_Scale = Input_Band_Scale(m)-Epsilon;   
     Upper_Scale = Input_Band_Scale(m)+Epsilon; 
     jj=Jplot;
-    
-    if Tools==2;
-        DeltaCentS=FileBed_dataMX(1,1);
-        xmin=0;
-    else
-        DeltaCentS=FileBed_dataMX(2,1)-FileBed_dataMX(1,1);  %units.
-        xmin=min(FileBed_dataMX(:,jj));
-    end
+    xmin=min(FileBed_dataMX(:,jj));     
+    if Tool
+    DeltaCentS=FileBed_dataMX(2,1)-FileBed_dataMX(1,1);  %units.
     sst=transpose(FileBed_dataMZ(:,jj));
     JProfile = jj;
    [period,power,sig95M,scale_avg,scaleavg_signif] = mStat_WaveletCenterline(...

@@ -3,7 +3,7 @@ function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,T
 %This function calculate diferents methods of determination of bends
 %by Dominguez Ruben 01/20/2017
 
-if Tools==2 | Tools==3 
+if Tools==2
 else
 if sel==1 %Mean Center Line method 
 hwait = waitbar(0,'Mean Center Method..','Name','MStaT V1.0',...
@@ -33,7 +33,7 @@ nFiles=1;
 [angle]= mStat_angledes(equallySpacedX,equallySpacedY);
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
+if Tools==2
 else
 waitbar(10/100,hwait);
 end
@@ -48,7 +48,7 @@ theXYCenterScatter = complex(equallySpacedX,equallySpacedY);
 [x_sim, qual, npc] = wmspca(theXYCenterScatter, level, wname, npc);
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
+if Tools==2
 else
 waitbar(30/100,hwait);
 end
@@ -61,7 +61,7 @@ xValleyCenter = real(x_sim(:,1));
 yValleyCenter = imag(x_sim(:,1));
 
 % Waitbar shows the the user the status
-if Tools==2| Tools==3 
+if Tools==2
 else
 waitbar(50/100,hwait);
 end
@@ -77,7 +77,7 @@ delta = 0.01;
 [maxCurvS, maxCurvXY] = ...
     mStat_assignMaxCurv(dimlessCurvature, delta, sResample, equallySpaced);
 
-if Tools==2 | Tools==3 
+if Tools==2
 else
 waitbar(60/100,hwait);
 end
@@ -119,8 +119,7 @@ if sel==1 %valley line
         setappdata(0, 'active', active);
         [x0, y0, iout, jout] = intersections(equallySpacedX,...
             equallySpacedY, xValleyCenter, yValleyCenter,robust);
-        
-        if Tools==2 | Tools==3
+        if Tools==2
         else
         waitbar(70/100,hwait);
         end
@@ -140,8 +139,7 @@ elseif sel==2 %inflection points
         y0=inflectionY;
         iout=ind;
         jout=(1:1:length(ind))';
-        
-        if Tools==2 | Tools==3 
+        if Tools==2
         else
         waitbar(70/100,hwait);
         end
@@ -164,7 +162,7 @@ end
 %     
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
+if Tools==2
 else
 waitbar(80/100,hwait);
 end
@@ -278,7 +276,7 @@ upstreamSlength(downstreamSlength<1)=nan;
 downstreamSlength(downstreamSlength<1)=nan;
 
 %end calculate
-if Tools==2 |  Tools==3
+if Tools==2
 else
 waitbar(90/100,hwait);
 end
@@ -334,7 +332,7 @@ set (bendSelect, 'string', handles.bendListStr);
 
 mStat_transformatevar(geovar)
 
-if Tools==2 | Tools==3 
+if Tools==2
 else
 waitbar(1,hwait)
 delete(hwait)
