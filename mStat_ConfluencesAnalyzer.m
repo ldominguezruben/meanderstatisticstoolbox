@@ -53,9 +53,6 @@ set(handles.figure1,'Name',['MStaT: Confluences and Bifurcation Analyzer '], ...
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes mStat_ConfluencesAnalyzer wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = mStat_ConfluencesAnalyzer_OutputFcn(hObject, eventdata, handles) 
@@ -234,6 +231,9 @@ else
          widthTri{i}=str2double(cell2mat(tableData(1+i,2)));
          [Tri{i}]=mStat_planar(handles.xCoordTri{i},handles.yCoordTri{i},widthTri{i},...
              sel,handles.pictureReach,handles.bendSelect,Tools,level);
+         
+         LongTri(i)=Tri{i}.intS(end,1);
+         
          waitbar((30+(i*10))/100,hwait);
     end
 
@@ -263,19 +263,16 @@ else
     %relation BT/BM
     for t=1:handles.numfile
         BTdivBM(t)=widthTri{t}./widthMain;
-%         handles.celltable1(t,1)={BTdivBM(t)};
     end
     
     %Lambdas relations
     for t=1:handles.numfile
         lambdaTdivlambdaM(t)=nanmean(Tri{t}.wavelengthOfBends)./nanmean(Main.wavelengthOfBends);
-%         handles.celltable1(t,2)={lambdaTdivlambdaM(t)};
     end
     
     %Amplitude relations
     for t=1:handles.numfile
         AmplitudeTdivAmplitudeM(t)=nanmean(Tri{t}.amplitudeOfBends)./nanmean(Main.amplitudeOfBends);
-%         handles.celltable1(t,3)={AmplitudeTdivAmplitudeM(t)};
     end
 
     waitbar(75/100,hwait);
@@ -355,13 +352,15 @@ log_text = {...
             '';...
             ['%--- ' datestr(now) ' ---%'];...
             'Summary of CBA';...
-            'Total Length Analyzed [km]:';[cell2mat({(geovar{1}.intS(end,1)+geovar{2}.intS(end,1))/1000})];...
+            'Total Length Analyzed [km]:';[cell2mat({(geovar{1}.intS(end,1)+nansum(LongTri))/1000})];...
             'B_T/B_M:';[cell2mat({BTdivBM})];...
             '\lambda_T/\lambda_M:';[cell2mat({lambdaTdivlambdaM})];...
             '\Amp_T/Amp_M:';[cell2mat({AmplitudeTdivAmplitudeM})];...
             'R [m]:';[cell2mat({Conf.R})];};
 
         statusLogging(handles.LogWindow, log_text)
+
+%Close waitbar        
 waitbar(1,hwait)
 delete(hwait)
 
@@ -393,12 +392,11 @@ switch enable_state
         set(handles.calculate,'Enable','off');
         set(handles.tributarychannel,'Enable','off');
         set(handles.inputtable, 'Data', cell(2,2));
-    
+        set(handles.export,'Enable','off');
     case 'loadfiles'
         set(handles.calculate,'Enable','on');
-    
     case 'results'
-
+        set(handles.export,'Enable','on');
     otherwise
 end
 
