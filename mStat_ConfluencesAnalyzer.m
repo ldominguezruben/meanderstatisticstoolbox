@@ -107,12 +107,27 @@ function excelfile_Callback(hObject, eventdata, handles)
 function mainchannel_Callback(hObject, eventdata, handles)
 %This function incorporate the main channel data
 multisel='off';
-[ReadVar]=mStat_ReadInputFiles(multisel);
+
+persistent lastPath 
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
+end
+
+[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if ReadVar.Path ~= 0
+    lastPath = ReadVar.Path;
+end
+
 
 %Create celltable
-handles.celltable=cell(1,2);
+handles.celltable=cell(1,3);
 
-handles.celltable(1,2)={''};
+handles.celltable(1,3)={''};
 
 if ReadVar.File==0
 else
@@ -141,7 +156,19 @@ else
     set_enable(handles,'loadfiles')
     set(handles.tributarychannel,'Enable','on');    
     
+    %Plot
+    axes(handles.pictureReach)
+    plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
+    hold on 
+    plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob')   
+    grid on
+    legend('Main Channel','Initial point','Location','Best')
+    xlabel('X');ylabel('Y')
+    axis equal
+    hold off
+    
 end
+
 
 
 % --- Executes on button press in tributarychannel.
@@ -153,49 +180,82 @@ warndlg(msg)
 
 %This function read the tributaries data
 multisel='on';
-[ReadVar]=mStat_ReadInputFiles(multisel);
-
-if iscell(ReadVar.File)
-    handles.numfile=size(ReadVar.File,2);
-else
-    handles.numfile=1;
+persistent lastPath 
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
 end
-    
-for i=1:handles.numfile
-    if iscell(ReadVar.File)%Multi selection
-        handles.celltable(i+1,1)={ReadVar.File{i}};
-        Filename={ReadVar.File{i}};
-        guidata(hObject,handles)
-    else %Single selection
-        handles.celltable(i+1,1)={ReadVar.File};
-        Filename={ReadVar.File};
-        guidata(hObject,handles)
+
+[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if ReadVar.Path ~= 0
+    lastPath = ReadVar.Path;
+end
+
+if ReadVar.File==0
+else
+    if iscell(ReadVar.File)%determinate the number of secondary channels
+        handles.numfile=size(ReadVar.File,2);
+    else
+        handles.numfile=1;
     end
     
-    %Convert information
-    handles.NameTributary = {ReadVar.File};
-    handles.xCoordTri{i}=[];
-    handles.yCoordTri{i}=[];
-    handles.xCoordTri{i}(:,1)=ReadVar.xCoord{:,1};
-    handles.yCoordTri{i}(:,1)=ReadVar.yCoord{:,1};
-    handles.formatfileread=ReadVar.comp;
-    guidata(hObject, handles);    
-    
-     
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-                '';...
-                ['%--- ' datestr(now) ' ---%'];...
-                'Tributary Channel Centerline Loaded:';[cell2mat(Filename)]};
-                statusLogging(handles.LogWindow, log_text)
-                
-    clear Filename
-end
-    
-guidata(hObject,handles)
+    for i=1:handles.numfile
+        if iscell(ReadVar.File)%Multi selection
+            handles.celltable(i+1,1)={ReadVar.File{i}};
+            Filename={ReadVar.File{i}};
+            guidata(hObject,handles)
+        else %Single selection
+            handles.celltable(i+1,1)={ReadVar.File};
+            Filename={ReadVar.File};
+            guidata(hObject,handles)
+        end
 
-set(handles.inputtable,'Data',handles.celltable)
+        %Convert information
+        handles.NameTributary = {ReadVar.File};
+        handles.xCoordTri{i}=[];
+        handles.yCoordTri{i}=[];
+        handles.xCoordTri{i}(:,1)=ReadVar.xCoord{:,1};
+        handles.yCoordTri{i}(:,1)=ReadVar.yCoord{:,1};
+        handles.formatfileread=ReadVar.comp;
+        guidata(hObject, handles);    
+
+
+        % Push messages to Log Window:
+        % ----------------------------
+        log_text = {...
+                    '';...
+                    ['%--- ' datestr(now) ' ---%'];...
+                    'Tributary Channel Centerline Loaded:';[cell2mat(Filename)]};
+                    statusLogging(handles.LogWindow, log_text)
+
+        clear Filename
+    end
+    
+        %Plot
+    axes(handles.pictureReach)
+    plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
+    hold on 
+    plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob') 
+    for i=1:handles.numfile
+        plot(handles.xCoordTri{i},handles.yCoordTri{i},'-r')%Main
+   %     plot(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),'oy') 
+    end
+    grid on
+    legend('Main Channel','Initial point','Secondary Channels','Location','Best')
+    xlabel('X');ylabel('Y')
+    axis equal
+    hold off
+    
+    
+    guidata(hObject,handles)
+
+    set(handles.inputtable,'Data',handles.celltable)
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Push button Calculate
@@ -302,6 +362,7 @@ else
     axes(handles.pictureReach)
     plot(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,'-k')%Main
     hold on 
+    plot(geovar{1}.equallySpacedX(1,1),geovar{1}.equallySpacedY(1,1),'ob')
     
     if handles.numfile>1 %read multy files
         for t=1:handles.numfile
@@ -323,7 +384,7 @@ else
         plot(xunit, yunit,'-b','Linewidth',2);%Circle
     end
     grid on
-    legend('Main Channel','Secondary Channels','Intersection point',...
+    legend('Main Channel','Initial point','Secondary Channels','Intersection point',...
         'Influences Region','Location','Best')
     xlabel('X');ylabel('Y')
     axis equal
@@ -343,6 +404,7 @@ else
     mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,vars)
     
 end
+
 
 set_enable(handles,'results')
 
@@ -387,6 +449,7 @@ function set_enable(handles,enable_state)
 %Set initial an load files
 switch enable_state
     case 'init'
+        legend(handles.pictureReach,'hide')
         cla(handles.pictureReach)
         cla(handles.wavel_axes)
         set(handles.calculate,'Enable','off');

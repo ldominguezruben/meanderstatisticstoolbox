@@ -116,7 +116,7 @@ pos = get(0,'userdata');
         ['%----------- ' datestr(now) ' ------------%'];...
         'LETs START!!!'};
     statusLogging(handles.LogWindow, log_text)
-
+handles.start=1;
 guidata(hObject, handles);%      Updates handles structure.
 
 %--------------------------------------------------------------------------
@@ -181,7 +181,7 @@ clc
 log_text = {...
             '';...
             ['%--- ' datestr(now) ' ---%'];...
-            'NEW PROJECT'};
+            'NEW PROJECT!'};
             statusLogging(handles.LogWindow, log_text)
                 
 set_enable(handles,'init')
@@ -194,8 +194,23 @@ set_enable(handles,'init')
 
 %This function incorporate the initial data input
 multisel='off';
-[ReadVar]=mStat_ReadInputFiles(multisel);
-if ReadVar.File==0
+
+persistent lastPath 
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
+end
+
+[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if ReadVar.Path ~= 0
+    lastPath = ReadVar.Path;
+end
+
+if ReadVar.File==0%empty file
 else
 
     % Push messages to Log Window:
@@ -481,8 +496,11 @@ function unitsfunction_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function metricunits_Callback(hObject, eventdata, handles)
 % Metric factor function
-munits=1/0.3048;
-
+if handles.start==0
+    munits=1/0.3048;
+else
+    munits=1;
+end
 handles.geovar.lengthCurved=handles.geovar.lengthCurved*munits;
 handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*munits;
 handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*munits;
@@ -513,12 +531,13 @@ guidata(hObject, handles);
 
 % Set the statistics to the "IndividualStats" table in 
 % the main GUI.  
-set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend)),2);
+set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
 set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
 set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
 set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
 set(handles.dstreamL, 'String', round(handles.geovar.downstreamSlength(selectedBend),2));
 set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
+handles.munits=1;
 guidata(hObject, handles);
 
 
@@ -564,6 +583,7 @@ set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend
 set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
 set(handles.dstreamL, 'String',round(handles.geovar.downstreamSlength(selectedBend),2));
 set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
+handles.eunits=0.3048;
 guidata(hObject, handles);
     
 
@@ -1046,6 +1066,7 @@ case 'init'
     if  handles.formatfileread(2)=='l'
     set(handles.exportkmzfile,'Enable','on')
     end
+    handles.start=0;
     set(handles.backgroundimage,'Enable','on')
     otherwise                
 end

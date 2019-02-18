@@ -41,7 +41,7 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-set_enable(handles,'init')
+%set_enable(handles,'init')
 
 % Set the name and version
 set(handles.figure1,'Name',['MStaT: Migration Analyzer '], ...
@@ -49,7 +49,9 @@ set(handles.figure1,'Name',['MStaT: Migration Analyzer '], ...
 
 axes(handles.pictureReach);
 axes(handles.signalvariation);
-
+set(handles.sedtable, 'RowName', {'t0','t1'});
+set(handles.sedtable, 'Data', cell(2,3));
+    
 %data cursor type
 dcm_objt0 = datacursormode(gcf);
 
@@ -113,7 +115,23 @@ guidata(hObject,handles)
 
 %This function incorporate the initial data
 multisel='off';
-[ReadVar]=mStat_ReadInputFiles(multisel);
+
+persistent lastPath 
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
+end
+
+%read file funtion
+[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if ReadVar.Path ~= 0
+    lastPath = ReadVar.Path;
+end
+
 
 if ReadVar.File==0
 else
@@ -151,7 +169,21 @@ celltable=get(handles.sedtable,'Data');
 
 % This function incorporate the initial data
 multisel='off';%Multiselect off
-[ReadVar]=mStat_ReadInputFiles(multisel);
+persistent lastPath 
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
+end
+
+%read file funtion
+[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if ReadVar.Path ~= 0
+    lastPath = ReadVar.Path;
+end
 
 if ReadVar.File==0
 else

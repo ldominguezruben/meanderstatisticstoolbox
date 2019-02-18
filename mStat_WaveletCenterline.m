@@ -411,14 +411,14 @@ elseif Tools==3%CONFLUENCES-DIFLUENCER ANALYZER PLOT
         for q=1:length(Conf.Rintrinsec)
             if q==1
                 line([Conf.Xgraph(2)  Conf.Xgraph(2)],...
-                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);%Intersection
                 line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
-                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'b', 'LineWidth',2);
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'b', 'LineWidth',2);%Influences region
             else
                 line([Conf.Rintrinsec(q-1)  Conf.Rintrinsec(q-1)],...
-                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);%Intersection
                             line([Conf.Rintrinsec(q)  Conf.Rintrinsec(q)],...
-                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);
+                    log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'color', 'r', 'LineWidth',2);%Influences region
             end
         end
     end

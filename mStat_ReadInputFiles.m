@@ -1,4 +1,4 @@
-function [ReadVar]=mStat_ReadInputFiles(multisel)
+function [ReadVar]=mStat_ReadInputFiles(multisel,lastpath)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%MStaT
 %This function incorporate the initial data the Centerline in diferent
@@ -7,12 +7,17 @@ function [ReadVar]=mStat_ReadInputFiles(multisel)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %Start code
-    
+if lastpath == 0
 [ReadVar.File,ReadVar.Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
     'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel);
+else
+    [ReadVar.File,ReadVar.Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
+    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel,lastpath);
+end
 
 if ReadVar.File==0
-    %warndlg('You need load two files')
+
+    %empty file
 else
     ReadVar.numfile=size(ReadVar.File,1);
     ReadVar.comp=mat2str(ReadVar.File(end));
@@ -72,4 +77,26 @@ else
         end 
         
     end
+end
+
+
+function rememberUigetfile
+persistent lastPath pathName
+% If this is the first time running the function this session,
+% Initialize lastPath to 0
+if isempty(lastPath) 
+    lastPath = 0;
+end
+% First time calling 'uigetfile', use the pwd
+if lastPath == 0
+    [fileName, pathName] = uigetfile;
+    
+% All subsequent calls, use the path to the last selected file
+else
+    [fileName, pathName] = uigetfile(lastPath);
+end
+% Use the path to the last selected file
+% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+if pathName ~= 0
+    lastPath = pathName;
 end

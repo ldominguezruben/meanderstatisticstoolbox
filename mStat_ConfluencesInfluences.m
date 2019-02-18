@@ -15,12 +15,12 @@ y=geovar{1}.equallySpacedY;%Main channel yCoordinate
 
 for t=2:length(geovar)
 
-    %%Find interesection
+    %If exist intersection betwen secondary and main channel, this function find the intersection
     robust=0;
     [Conf.XINT{t},Conf.YINT{t},Conf.IOUT{t},Conf.JOUT{t}] =...
         intersections(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,geovar{t}.equallySpacedX,geovar{t}.equallySpacedY,robust);
     
-    if isnan(Conf.XINT{t})%Find the point closest
+    if isnan(Conf.XINT{t})%or find the point closest to main channel
         
         Aini{t}=[geovar{t}.equallySpacedX(1) geovar{t}.equallySpacedY(1)];
         Aend{t}=[geovar{t}.equallySpacedX(end) geovar{t}.equallySpacedY(end)];
