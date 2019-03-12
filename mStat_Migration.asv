@@ -370,9 +370,8 @@ hold off
 % xlabel('Intrinsic Channel Lengths [m]','Fontsize',10);
 % ylabel('Migration/year [m/yr]','Fontsize',10) 
 
-%%
-% Plot migration signal
-% Define limits
+%Plot migration
+%Define limits
 FileBed_dataMX=Migra.MigrationDistance;
 xmin=0;     
 DeltaCentS=FileBed_dataMX(1,1);  %units. 
@@ -381,11 +380,18 @@ xlim = [xmin,(n-1)*DeltaCentS+xmin];  % plotting range
 Abscise = [1:length(FileBed_dataMX)] + xmin;
 
 axes(handles.signalvariation);
+figure(3)
 dimlessx=Abscise*DeltaCentS;
 [hAx,hLine1,hLine2] = plotyy(dimlessx,Migra.MigrationSignal/Migra.deltat,dimlessx,Migra.Direction,'plot');
 hold on
+
+% waitbar(75/100,hwait); 
+
 xlabel('Intrinsic Channel Lengths [m]','Fontsize',18);
 ylabel('Migration/year [m/yr]','Fontsize',18) % left y-axis
+
+
+%xlim = [0,FileBed_dataMX(end,1)];
 set(hAx(1),'XLim',xlim(:));
 set(hAx(2),'XLim',xlim(:));
 set(hAx(1),'XGrid','on');

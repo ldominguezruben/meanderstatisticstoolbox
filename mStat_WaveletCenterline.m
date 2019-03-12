@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%MStaT
-%Wavelet analysis function
-% This function plot the wavelet analisys, need initial data
+%MStaT
+%Wavelet Analysis Function
+%This function plot the wavelet analisys, need initial data
 %last modified 04/17 by Dominguez Ruben L. UNL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %start code

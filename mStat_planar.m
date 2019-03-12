@@ -211,7 +211,7 @@ bends1(dStreamIndex1)=12;
 bends1(uStreamIndex1)=13;
 bends1(cmpdIndex1)=14;
 if symmetricIndex(1) ~= 0
-bends1(symmetricIndex1)=15;
+    bends1(symmetricIndex1)=15;
 end
 
 % Array conditions

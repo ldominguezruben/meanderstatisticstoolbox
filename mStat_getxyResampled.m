@@ -25,7 +25,7 @@ inLineCoords1 = [centerlineOut(:,1) centerlineOut(:,2)];
  nReachPoints = floor(reachLength/B);
  %Checks if error is within desired limit and resamples points until the
  %error is reduced to the desired amount
- while abs(error) > 0.30
+ while abs(error) > 0.50
       if aveDs-B < 0 
           signD = -1;
       else

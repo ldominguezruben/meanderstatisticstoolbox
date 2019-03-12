@@ -15,8 +15,8 @@
 % tributary o distributary channel on the main channel. 
 % For more information you can reviewed the Gutierrez and Abad 2014a and 
 % Gutierrez and Abad 2014b.
-%
-% Collaborations
+
+%% Collaborations
 % Lucas Dominguez. UNL, Argentina
 % Jorge Abad. UTEC, Peru
 % Ronald Gutierrez. UN, Colombia
