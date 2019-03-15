@@ -1,10 +1,10 @@
 function varargout = mStat_ConfluencesAnalyzer(varargin)
 %-----------------MEANDER STATISTICS TOOLBOX. MStaT------------------------
-%MSTAT CONFLUENCESANALYZER  
+% MSTAT CONFLUENCE AND DIFLUENCE ANALYZER  
 %
 % This function evaluate the influences of the secondaries channels on 
-%confluence or bifurcation in the main channel and control in how long 
-%downstream modify the main channel.
+% confluence or bifurcation in the main channel and control in how long 
+% downstream modify the main channel.
 
 % Collaborations
 % Lucas Dominguez. UNL, Argentina
@@ -37,17 +37,16 @@ function mStat_ConfluencesAnalyzer_OpeningFcn(hObject, eventdata, handles, varar
 handles.output = hObject;
 set_enable(handles,'init')
 
-set(handles.figure1,'Name',['MStaT: Confluences and Bifurcation Analyzer '], ...
+set(handles.figure1,'Name',['MStaT: Confluence and Difluence Analyzer '], ...
     'DockControls','off')
 
-
 % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-        '';...
-        ['%----------- ' datestr(now) ' ------------%'];...
-        'LETs START!!!'};
-    statusLogging(handles.LogWindow, log_text)
+% ----------------------------
+log_text = {...
+    '';...
+    ['%----------- ' datestr(now) ' ------------%'];...
+    'LETs START!!!'};
+statusLogging(handles.LogWindow, log_text)
     
 
 % Update handles structure
@@ -125,9 +124,9 @@ end
 
 
 %Create celltable
-handles.celltable=cell(1,3);
+handles.celltable=cell(1,2);
 
-handles.celltable(1,3)={''};
+handles.celltable(1,2)={''};
 
 if ReadVar.File==0
 else
@@ -174,7 +173,7 @@ end
 % --- Executes on button press in tributarychannel.
 function tributarychannel_Callback(hObject, eventdata, handles)
 %Advantages
-msg='Please select all the tributaries channels to analyze';
+msg='Please select all the secondary channels to analyze';
 
 warndlg(msg)
 
@@ -195,7 +194,8 @@ if ReadVar.Path ~= 0
     lastPath = ReadVar.Path;
 end
 
-if ReadVar.File==0
+if isempty(ReadVar.File)
+    
 else
     if iscell(ReadVar.File)%determinate the number of secondary channels
         handles.numfile=size(ReadVar.File,2);
@@ -216,13 +216,12 @@ else
 
         %Convert information
         handles.NameTributary = {ReadVar.File};
-        handles.xCoordTri{i}=[];
-        handles.yCoordTri{i}=[];
-        handles.xCoordTri{i}(:,1)=ReadVar.xCoord{:,1};
-        handles.yCoordTri{i}(:,1)=ReadVar.yCoord{:,1};
+        handles.xCoordTri=[];
+        handles.yCoordTri=[];
+        handles.xCoordTri=ReadVar.xCoord;
+        handles.yCoordTri=ReadVar.yCoord;
         handles.formatfileread=ReadVar.comp;
         guidata(hObject, handles);    
-
 
         % Push messages to Log Window:
         % ----------------------------
@@ -235,14 +234,17 @@ else
         clear Filename
     end
     
-        %Plot
+    %Plot
     axes(handles.pictureReach)
     plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
     hold on 
     plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob') 
     for i=1:handles.numfile
         plot(handles.xCoordTri{i},handles.yCoordTri{i},'-r')%Main
-   %     plot(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),'oy') 
+        sec = sprintf('Secondary%d',i);
+        ee=text(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),sec);
+        set(ee,'Clipping','on')
+        clear sec
     end
     grid on
     legend('Main Channel','Initial point','Secondary Channels','Location','Best')
@@ -250,10 +252,24 @@ else
     axis equal
     hold off
     
-    
     guidata(hObject,handles)
-
-    set(handles.inputtable,'Data',handles.celltable)
+    
+    %write filename data
+    set(handles.inputtable, 'Data', cell(handles.numfile+1,2));
+    if handles.numfile==1
+        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1'});
+    elseif handles.numfile==2
+        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2'});
+    elseif handles.numfile==3
+        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3'});
+    elseif handles.numfile==4
+        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4'});
+    elseif handles.numfile==3
+        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4','Secondary5'});
+    end
+    
+    set(handles.inputtable, 'Data', handles.celltable)
+    
 end
 
 
@@ -262,9 +278,10 @@ end
 
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
+
 % Run the calculate function
 
-hwait = waitbar(0,'Confluences and Bifurcation Analysis. Processing...','Name','MStaT ',...
+hwait = waitbar(0,'Confluence and Difluence Analyzer. Processing...','Name','MStaT ',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
 setappdata(hwait,'canceling',0)
@@ -272,12 +289,12 @@ setappdata(hwait,'canceling',0)
 tableData = get(handles.inputtable, 'data');
 
 if size(tableData,1)==1
-    warndlg('You need incorporate Tributaries Channels')
+    warndlg('You need incorporate the secondary channels')
 else
     %Calculate
     sel=2;%Toolbox inflection points method by defect
     handles.bendSelect=[];
-    Tools=3;%CBT Confluencer Bifurcation Tools
+    Tools=3;%CDM Confluence and Difluence Module
     level=5;%default level
     % Read Main
     widthMain=str2double(cell2mat(tableData(1,2)));
@@ -342,10 +359,10 @@ else
     %go to wavelet analyzer
     %%Plotting
     SIGLVL=0.95;
-    sel=2;
+    sel=2;%Toolbox inflection points method by defect
     filter=0;
     axest=[handles.wavel_axes];
-    Tools=3;%Confluences Tools
+    Tools=3;%Confluence and Difluence Analyzer
     vars=[];
 
     mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,vars)
@@ -394,17 +411,16 @@ else
     %go to wavelet analyzer
     %%Plotting
     SIGLVL=0.95;
-    sel=2;
+    sel=2;%Toolbox inflection points method by defect
     filter=0;
     axest=[handles.wavel_axes];
-    Tools=3;%Confluences And Bifurcation Tools
+    Tools=3;%Confluence and Difluence Module
 
     vars=Conf;
 
     mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,vars)
     
 end
-
 
 set_enable(handles,'results')
 
@@ -463,12 +479,10 @@ switch enable_state
     otherwise
 end
 
-
 %%Log Window
 % --- Executes on selection change in LogWindow.
 function LogWindow_Callback(hObject, eventdata, handles)
 % empty
-
 
 % --- Executes during object creation, after setting all properties.
 function LogWindow_CreateFcn(hObject, eventdata, handles)

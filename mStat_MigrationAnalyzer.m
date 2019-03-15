@@ -360,10 +360,8 @@ if Migra.NumberOfCut == 0
     hold on
     ee=text(handles.ArMigra.xint_areat0(Migra.BendCutOff),handles.ArMigra.yint_areat0(Migra.BendCutOff),'Cutoff');
     set(ee,'Clipping','on')
-    
     handles.highlightPlot = line(Migra.linet1X{Migra.BendCutOff}.line, Migra.linet1Y{Migra.BendCutOff}.line,...
             'color', 'y', 'LineWidth',3); 
-        
     hold off
  end
 
@@ -378,35 +376,35 @@ function set_enable(handles,enable_state)
 %Set initial an load files
 switch enable_state
     case 'init'
-    axes(handles.signalvariation)
-    cla reset
-    grid on
-    axes(handles.wavel_axes)
-    cla reset
-    grid on
-    axes(handles.pictureReach)
-    cla reset
-    grid on
-    set(handles.calculate,'Enable','off');
-    set(handles.sedtable, 'RowName', {'t0','t1'});
-    set(handles.sedtable, 'Data', cell(2,3));
-    set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'off')
-    set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')
-    set(handles.vectorsgraph,'Enable','off');
-    set(handles.export,'Enable','off');
-    set(handles.summary,'Enable','off');
+        axes(handles.signalvariation)
+        cla reset
+        grid on
+        axes(handles.wavel_axes)
+        cla reset
+        grid on
+        axes(handles.pictureReach)
+        cla reset
+        grid on
+        set(handles.calculate,'Enable','off');
+        set(handles.sedtable, 'RowName', {'t0','t1'});
+        set(handles.sedtable, 'Data', cell(2,3));
+        set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'off')
+        set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')
+        set(handles.vectorsgraph,'Enable','off');
+        set(handles.export,'Enable','off');
+        set(handles.summary,'Enable','off');
     case 'loadfiles'
-    cla(handles.signalvariation)
-    %set(handles.sedtable, 'Data', cell(2,3));
-    cla(handles.wavel_axes)
-    set(handles.calculate,'Enable','on');
-    set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'on')
-    set(handles.vectorsgraph,'Enable','off');
+        cla(handles.signalvariation)
+        %set(handles.sedtable, 'Data', cell(2,3));
+        cla(handles.wavel_axes)
+        set(handles.calculate,'Enable','on');
+        set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'on')
+        set(handles.vectorsgraph,'Enable','off');
     case 'results'
-    set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'on')
-    set(handles.summary,'Enable','on');
-    set(handles.export,'Enable','on');
-    set(handles.vectorsgraph,'Enable','on');
+        set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'on')
+        set(handles.summary,'Enable','on');
+        set(handles.export,'Enable','on');
+        set(handles.vectorsgraph,'Enable','on');
     otherwise
 end
 

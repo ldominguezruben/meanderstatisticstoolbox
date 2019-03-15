@@ -71,7 +71,7 @@ Abscise = [1:length(sst)]*dt + xmin ;  % construct Abscise array
 
 %Intersection
 for t=2:length(geovar)
-Conf.Xgraph(t)=Abscise(1,Conf.indexinter{t})*DeltaCentS;
+    Conf.Xgraph(t)=Abscise(1,Conf.indexinter{t})*DeltaCentS;
 end
     
 %%
@@ -101,11 +101,11 @@ end
 
 %Find close number
 for t=2:length(geovar)
-for u=1:length(T3.Ar)
-    [~,T.pos(t)]=min(abs(Conf.Xgraph(t)-T3.X_Yorder{u}(1,:)));
-    T.u(t)=u;
-    break
-end
+    for u=1:length(T3.Ar)
+        [~,T.pos(t)]=min(abs(Conf.Xgraph(t)-T3.X_Yorder{u}(1,:)));
+        T.u(t)=u;
+        break
+    end
 end
 
 T.pos(t+1)=length(T3.Ar);
@@ -116,17 +116,26 @@ e=1;
 l=1;
 for t=2:length(geovar)+1
     if t==2
-    for u=1:2: T.pos(t)-1
-        Conf.BeforeAveArea{t}(e)=nanmean(T3.Arorder(u:u+1));
-        e=e+1;
-    end
-    clear u
+        for u=1:2: T.pos(t)-1
+            Conf.BeforeAveArea{t}(e)=nanmean(T3.Arorder(u:u+1));
+            e=e+1;
+        end
+        clear u
     else
-    for u= T.pos(t-1):2: T.pos(t)
-        Conf.AfterAveArea{t}(l)=nanmean(T3.Arorder(u:u+1));
-        l=l+1;
-    end
-    clear u
+        if  rem(T.pos(end),2)==0
+            for u= T.pos(t-1):2: T.pos(t)
+                Conf.AfterAveArea{t}(l)=nanmean(T3.Arorder(u:u+1));
+                l=l+1;
+            end
+        else
+            T.pos(end)=T.pos(end)-1;
+            
+            for u= T.pos(t-1):2: T.pos(t)-1
+                Conf.AfterAveArea{t}(l)=nanmean(T3.Arorder(u:u+1));
+                l=l+1;
+            end
+        end 
+        clear u
     end
 end
 
