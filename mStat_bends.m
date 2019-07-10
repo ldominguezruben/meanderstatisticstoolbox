@@ -1,11 +1,12 @@
-function [intS, nBends, bendID, bend, newInflectionPts, dStreamIndex, uStreamIndex, symmetricIndex, cmpdIndex, nMaxCurvX, nMaxCurvY, nMaxCurvS, numMaxPts, simpleIndex] = mStat_bends(maxCurvS, maxCurvXY, x0, y0, ...
+function [intS, nBends, bendID, bend, newInflectionPts, dStreamIndex, ...
+    uStreamIndex, symmetricIndex, cmpdIndex, nMaxCurvX, nMaxCurvY, nMaxCurvS,...
+    numMaxPts, simpleIndex] = mStat_bends(maxCurvS, maxCurvXY, x0, y0, ...
     sResample, I, J, xCenter, yCenter, inflectionPts, equallySpacedX, equallySpacedY)
 
 %      This function finds and classifies bends for the given river planimetry.    
 %      Last Modified: 5/10/2017 by Dominguez Ruben L
 
 %--------------------------------------------------------------------------
-
 %      Obtain a a vector with the s-coordinate (along the river centerline) of intersection points.
 %      (This centerline pertains only to the equally spaced (sResample) data.)  
 

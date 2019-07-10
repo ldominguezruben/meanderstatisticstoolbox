@@ -40,7 +40,8 @@ set(handles.figure1,'Name',['MStaT: Wavelet Analysis '], ...
 
 %data cursor
 dcm_obj = datacursormode(gcf);
-set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
+
+set(dcm_obj,'UpdateFcn',@mStat_myupdatefcnWaveletAnalysis);
 
 set(dcm_obj,'Displaystyle','Window','Enable','on');
 

@@ -213,14 +213,14 @@ end
 
    
 %% Get the (x,y) coordinates of the data points and splined centerline nodes
-xCoord   =  xyDataPt(:,1);
-yCoord   =  xyDataPt(:,2);
-% Get vector of centerline coordiantes
-xCenter  =  centerlineOut(1,:);
-yCenter  =  centerlineOut(2,:);
-% % Plot the tangent and normal vectors on the plot with the centerline; note that
-% % this might be necessary to verify that the normal vector points to the left of
-% % the centerline, facing downstream
+    xCoord   =  xyDataPt(:,1);
+    yCoord   =  xyDataPt(:,2);
+    % Get vector of centerline coordiantes
+    xCenter  =  centerlineOut(1,:);
+    yCenter  =  centerlineOut(2,:);
+    % % Plot the tangent and normal vectors on the plot with the centerline; note that
+    % % this might be necessary to verify that the normal vector points to the left of
+    % % the centerline, facing downstream
     % hold on;
     % plot([xCenter+xTangent],[yCenter+yTangent],'bo')
     % plot([xCenter+xNormal],[yCenter+yNormal],'gd')

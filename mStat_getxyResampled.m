@@ -2,10 +2,10 @@ function [nReachPoints, xResample, yResample, sResample, cResample] = mStat_getx
 %Dominguez Ruben 8/1/2017
 
 %      General parameters to get equally spaced data.
-nTimesToSmooth = 3;  %  equivalent to "nFilt" in "curvature" function. 
-polyOrder =2;        %  equivalent to "order" in "curvature" function.
-nPointsInWindow = 7; %  equivalent to "window" in "curvature" function.
-nReachPoints = 1500; %  equivalent to "nDiscr" in "curvature" function 
+nTimesToSmooth =1000; %10000  %  equivalent to "nFilt" in "curvature" function. 
+polyOrder = 4;%5;  3      %  equivalent to "order" in "curvature" function.
+nPointsInWindow = 7; %7  equivalent to "window" in "curvature" function.
+nReachPoints = 100; % 1500 150 equivalent to "nDiscr" in "curvature" function 
                      %  in the banks: 1500 works well in most of the cases.
 fakeRMax = 10;       %  will work well with this number.
 inLineCoords = [x y];
@@ -27,7 +27,7 @@ inLineCoords1 = [centerlineOut(:,1) centerlineOut(:,2)];
  %error is reduced to the desired amount
  while abs(error) > 0.50
       if aveDs-B < 0 
-          signD = -1;
+         signD = -1;
       else
          signD = 1;
       end 

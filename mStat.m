@@ -259,7 +259,10 @@ else
     %Calculate and plot planar variables
     [geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
         handles.pictureReach,handles.bendSelect,Tools,level);
-
+    
+    %store data
+    setappdata(0, 'geovar', geovar);
+    
     %save handles
     handles.geovar=geovar;
     guidata(hObject, handles);
@@ -694,6 +697,11 @@ level = str2double(get(handles.decompositionparameter,'String'));
 %Calculate and plot planar variables
 [geovar]=mStat_planar(handles.xCoord,handles.yCoord,handles.width,sel,...
     handles.pictureReach,handles.bendSelect,Tools,level);
+
+%store data
+setappdata(0, 'geovar', geovar);
+setappdata(0, 'handles', handles);
+
 
 %save handles
 handles.geovar=geovar;

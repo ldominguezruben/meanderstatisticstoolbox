@@ -117,7 +117,6 @@ else
 
         bendwavelength = getappdata(0, 'bendwavelength');
         handles.bendwavelength = str2num(bendwavelength);
-
         indi = getappdata(0, 'indi');
         handles.indi = str2num(indi);
 
