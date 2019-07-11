@@ -15,7 +15,7 @@ else %remember the lastpath
     'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel,lastpath);
 end
 
-if isempty(ReadVar.File)
+if ReadVar.File==0
     %empty 
 else
     
