@@ -189,6 +189,11 @@ set_enable(handles,'init')
 
 % -------------------------------------------------------------------------
 function openfunction_Callback(hObject, eventdata, handles)
+
+    
+
+% --------------------------------------------------------------------
+function singlefile_Callback(hObject, eventdata, handles)
 %Open function
 set_enable(handles,'init')
 
@@ -303,7 +308,11 @@ else
                 statusLogging(handles.LogWindow, log_text)
                     
 end  
-    
+
+% --------------------------------------------------------------------
+function multifiles_Callback(hObject, eventdata, handles)
+mStat_MultiFiles
+
 
 % --------------------------------------------------------------------
 function close_Callback(hObject, eventdata, handles)
@@ -1126,6 +1135,29 @@ function decompositionparameter_Callback(hObject, eventdata, handles)
 function decompositionparameter_CreateFcn(hObject, eventdata, handles)
 
 % Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupChannel.
+function popupChannel_Callback(hObject, eventdata, handles)
+% hObject    handle to popupChannel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupChannel contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupChannel
+
+
+% --- Executes during object creation, after setting all properties.
+function popupChannel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupChannel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
