@@ -340,7 +340,6 @@ axis equal
 xlabel('X [m]');ylabel('Y [m]')
 hold off
 
-
 %Plot maximum migration
 axes(handles.pictureReach)
 hold on

@@ -15,16 +15,18 @@ function [equalPlot, inflectionCplot, intPoints1, maxCurv, wavelet]...
 
 %      Change the current axes to "pictureReach".
 axes(pictureReach);
-% axis xy; 
-% axis on;
-%axis equal
-grid on
-%set(gca, 'Color', 'none')
-  daspect([1 1 1])
- pbaspect([1 1 1])
-xlim([min(equallySpacedX)-100000 max(equallySpacedX)+100000])
-ylim([min(equallySpacedY)-100000 max(equallySpacedY)+100000])
-% axis tight;
+axis equal
+ extended=0;
+ dtx=abs(max(equallySpacedX)-min(equallySpacedX))+extended;
+ dty=abs(max(equallySpacedY)-min(equallySpacedY))+extended;
+ if dtx>dty
+     xlim([min(equallySpacedX)-extended max(equallySpacedX)+extended])
+     ylim([min(equallySpacedY)-(dtx/2) max(equallySpacedY)+(dtx/2)])
+ elseif dtx<dty
+     xlim([min(equallySpacedX)-(dty/2) max(equallySpacedX)+(dty/2)])
+     ylim([min(equallySpacedY)-extended max(equallySpacedY)+extended])
+ end
+ axis fill
 
 %   Plot of equally spaced data (blue line).  
 equalPlot = line(equallySpacedX, equallySpacedY, 'color', 'k','LineWidth',2.5);%, 'marker','+');

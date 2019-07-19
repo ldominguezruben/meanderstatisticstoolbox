@@ -57,7 +57,7 @@ function h = scalebar(varargin)
     boldflag = false;
     linewidth = 0.5;
     fontweight = 'normal';
-    unitstring = '';
+    unitstring = ' m';
     
 
     % PROCESS ARGUMENTS

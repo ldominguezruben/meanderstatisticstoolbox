@@ -1,15 +1,12 @@
-function [nReachPoints, xResample, yResample, sResample, cResample] = mStat_getxyResampled(x,y,B)
+function [nReachPoints, xResample, yResample, sResample, cResample] =...
+    mStat_getxyResampled(x,y,B,AdvancedSet)
 %Dominguez Ruben 8/1/2017
 
-%      General parameters to get equally spaced data.
-nTimesToSmooth =1000; %10000  %  equivalent to "nFilt" in "curvature" function. 
-polyOrder = 4;%5;  3      %  equivalent to "order" in "curvature" function.
-nPointsInWindow = 7; %7  equivalent to "window" in "curvature" function.
-nReachPoints = 100; % 1500 150 equivalent to "nDiscr" in "curvature" function 
-                     %  in the banks: 1500 works well in most of the cases.
 fakeRMax = 10;       %  will work well with this number.
+
 inLineCoords = [x y];
-transParam = [nTimesToSmooth polyOrder nPointsInWindow nReachPoints fakeRMax];
+transParam = [AdvancedSet.nTimesToSmooth AdvancedSet.polyOrder...
+    AdvancedSet.nPointsInWindow AdvancedSet.nReachPoints fakeRMax];
 
 %      Calling Leigleiter Function.
 [snOut,ClSpline,centerlineOut,xyOut,iMiss,iTrans] = ...
@@ -32,14 +29,9 @@ inLineCoords1 = [centerlineOut(:,1) centerlineOut(:,2)];
          signD = 1;
       end 
    nReachPoints =  nReachPoints+dN*signD;
-%    if nReachPoints<0
-%        dN = 1;
-%        nReachPoints =  floor(reachLength/B)+dN*signD;
-%        transParam = [nTimesToSmooth polyOrder nPointsInWindow nReachPoints fakeRMax];
-%    else
-   transParam = [nTimesToSmooth polyOrder nPointsInWindow nReachPoints fakeRMax];
-%    end
-   
+  transParam = [AdvancedSet.nTimesToSmooth AdvancedSet.polyOrder...
+    AdvancedSet.nPointsInWindow nReachPoints fakeRMax];
+
    [snOut,ClSpline,centerlineOut,xyOut,iMiss,iTrans] = ...
        xy2sn(inLineCoords,inLineCoords,transParam);
    equallySpacedX = centerlineOut(:,1);
@@ -57,7 +49,9 @@ inLineCoords1 = [centerlineOut(:,1) centerlineOut(:,2)];
      nReachPoints = nReachPoints+50-mod(nReachPoints,50);
  end
  %Call Leigleiter final time. Transfora a coordenadas locales
- transParam = [nTimesToSmooth polyOrder nPointsInWindow nReachPoints fakeRMax];
+ transParam = [AdvancedSet.nTimesToSmooth AdvancedSet.polyOrder...
+    AdvancedSet.nPointsInWindow nReachPoints fakeRMax];
+
  [snOut,ClSpline,centerlineOut,xyOut,iMiss,iTrans] = ...
      xy2sn(inLineCoords,inLineCoords,transParam);
  equallySpacedX = centerlineOut(:,1);

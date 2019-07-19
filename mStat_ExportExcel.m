@@ -1,11 +1,12 @@
-function mStat_savexlsx(geovar)
+function mStat_ExportExcel(geovar)
 
 %This function save all the data in excel file to posprocessing
 
-hwait = waitbar(0,'Exporting Excel File...');
-    [file,path] = uiputfile('*.xlsx','Save *.xlsx file');
-    outfile = fullfile(path,file);  
 
+[file,path] = uiputfile('*.xlsx','Save *.xlsx file');
+outfile = fullfile(path,file);  
+str=['Exporting' file];
+hwait = waitbar(0,str,'Name','MStaT');
 
 [m,n]=size(geovar.equallySpacedX);
 
@@ -19,7 +20,6 @@ C=sum(strcmp(C,geovar.condition));
 
    sout = {...
             'MStaT: Summary of Data Analysis' '' '' '' '' '';...
- %           'MSTaT ' geovar.mStat_version '' '' '' '';...
             'Date Processed: ' datestr(now) '' '' '' '';...
             'Path and File' '' '' '' '' outfile;
             '' '' '' '' '' '';...

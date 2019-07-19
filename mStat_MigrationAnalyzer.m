@@ -9,7 +9,7 @@ function varargout = mStat_MigrationAnalyzer(varargin)
 % determinate the migration directions of the natural channels.
 
 % Collaborations
-% Lucas Dominguez. UNL, Argentina
+% Lucas Dominguez Ruben. UNL, Argentina
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -34,7 +34,6 @@ end
 % --- Executes just before mStat_MigrationAnalyzer is made visible.
 function mStat_MigrationAnalyzer_OpeningFcn(hObject, eventdata, handles, varargin)
 
-
 % Choose default command line output for mStat_MigrationAnalyzer
 handles.output = hObject;
 
@@ -50,10 +49,6 @@ set(handles.figure1,'Name',['MStaT: Migration Analyzer '], ...
 axes(handles.pictureReach);
 axes(handles.signalvariation);
 set_enable(handles,'init')
-% set(handles.sedtable, 'RowName', {'t0','t1'});
-% set(handles.sedtable, 'Data', cell(2,3));
-% set(handles.export,'Enable','off');
-% set(handles.summary,'Enable','off');
         
 %data cursor type
 dcm_objt0 = datacursormode(gcf);
@@ -135,7 +130,6 @@ if ReadVar.Path ~= 0
     lastPath = ReadVar.Path;
 end
 
-
 if ReadVar.File==0
 else
     
@@ -162,7 +156,6 @@ else
     
     %plot
     axes(handles.pictureReach)
-
     plot(handles.xCoord{1}(:,1),handles.yCoord{1}(:,1),'-b')%start
     hold on
     legend('t0','Location','Best') 
@@ -171,8 +164,6 @@ else
 
     xlabel('X [m]');ylabel('Y [m]')
     hold off
-
-    %set_enable(handles,'loadfiles')
     
 end
 

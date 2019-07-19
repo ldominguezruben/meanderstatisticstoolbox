@@ -2,7 +2,7 @@ function varargout = mStat_WaveletAnalysis(varargin)
 %MStaT mStat_WaveletAnalysis function determinate and graphs the wavelet
 %analyzes
 
-% Last Modified by GUIDE v2.5 19-Jul-2019 15:34:37
+% Last Modified by GUIDE v2.5 19-Jul-2019 14:57:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -437,9 +437,62 @@ mStat_plotWavel(handles.geovar,sel,SIGLVL,handles.filter,handles.axest,Tools,var
 % --------------------------------------------------------------------
 function datacursor_ClickedCallback(hObject, eventdata, handles)
 
+%data cursor
+dcm_obj = datacursormode(gcf);
+
+guidata(hObject,handles)
+
+set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
+set(dcm_obj,'Displaystyle','Window','Enable','on');
+c_info = getCursorInfo(dcm_obj);
+
+DeltaCentS=handles.geovar.sResample(2,1)-handles.geovar.sResample(1,1);
+xmin=min(handles.geovar.sResample(:,1));
+n = length(handles.geovar.sResample);
+xlim = [xmin,(n-1)*DeltaCentS+xmin];
+dt=1;
+Abscise = [1:length(handles.geovar.cResample)]*dt + xmin ;
+
+%[1] Plot curvature variation
+axes(handles.curveandangle_axes)
+dimlessx=Abscise*DeltaCentS./handles.width;
+dimlessy=ssto.*handles.width;
+plot(dimlessx,dimlessy,'black -','linewidth',1.0);
+
+
+set(gca,'XLim',xlim(:)./handles.width);
+xlabel('S*','fontsize',10);
+ylabel('C*','fontsize',10);
+title('Signature of the channel curvature','fontsize',13);
+grid on;
+hold off;
+
+
+    
+
+%find equal
+[row1,]= find(c_info(1,1)==round(geovar.equallySpacedX*10000)/10000);
+
+
+dimlessx=Abscise*DeltaCentS./geovar.width;
+dimlessy=geovar.cResample.*geovar.width;
+plot(dimlessx,dimlessy,'black -','linewidth',1.0);
+hold on
+plot(dimlessx(row1),dimlessy(row1),'or');
+set(gca,'XLim',xlim(:)./geovar.width);
+xlabel('S*','fontsize',10);
+ylabel('C*','fontsize',10);
+title('Signature of the channel curvature','fontsize',13);
+grid on;
+hold off;
+
+ %mStat_plotWavel(handles.geovar,sel,SIGLVL,handles.filter,handles.axest,Tools,vars)
+
 
 function mStat_PlotCurvature(handles)
-% empty
+
+
+mStat_plotWavel(handles.geovar,sel,SIGLVL,handles.filter,handles.axest,Tools,vars)
  
 
 
@@ -453,53 +506,9 @@ function uitoggletool1_OnCallback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function datacursor_OnCallback(hObject, eventdata, handles)
 
-%data cursor
-dcm_obj = datacursormode(gcf);
-
-guidata(hObject,handles)
-
-set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
-set(dcm_obj,'Displaystyle','Window','Enable','on');
-c_info = getCursorInfo(dcm_obj);
-
-if isempty(c_info)
-else
-    % Graph
-    DeltaCentS=handles.geovar.sResample(2,1)-handles.geovar.sResample(1,1);
-    xmin=min(handles.geovar.sResample(:,1));
-    n = length(handles.geovar.sResample);
-    xlim = [xmin,(n-1)*DeltaCentS+xmin];
-    dt=1;
-    Abscise = [1:length(handles.geovar.cResample)]*dt + xmin ;
-
-    %[1] Plot curvature variation
-    axes(handles.curveandangle_axes)
-
-    %find equal
-    [row1,]= find(c_info.Position(1,1)==handles.geovar.equallySpacedX);
-
-    dimlessx=Abscise*DeltaCentS./handles.geovar.width;
-    dimlessy=handles.geovar.cResample.*handles.geovar.width;
-    plot(dimlessx,dimlessy,'black -','linewidth',1.0);
-    hold on
-    plot(dimlessx(row1),dimlessy(row1),'or');
-    set(gca,'XLim',xlim(:)./handles.geovar.width);
-    xlabel('S*','fontsize',10);
-    ylabel('C*','fontsize',10);
-    title('Signature of the channel curvature','fontsize',13);
-    grid on;
-    hold off;
-end
-
 
 % --- Executes during object creation, after setting all properties.
 function datacursor_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to datacursor (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
-
-% --------------------------------------------------------------------
-function datacursor_OffCallback(hObject, eventdata, handles)
-datacursormode off
-

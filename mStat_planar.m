@@ -1,4 +1,5 @@
-function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,Tools,level)
+function [geovar]=mStat_planar(xCoord,yCoord,width,FileName,sel,...
+    Tools,level,AdvancedSet)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%MStaT
 %This function calculate diferents methods of determination of bends
@@ -6,19 +7,12 @@ function [geovar]=mStat_planar(xCoord,yCoord,width,sel,pictureReach,bendSelect,T
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %start code
-if Tools==2 | Tools==3 
-else
-    if sel==1 %Mean Center Line method 
-        hwait = waitbar(0,'Mean Center Method..','Name','MStaT V1.0',...
+if Tools==1
+        str=['Analyzing ' FileName];
+        hwait = waitbar(0,str,'Name','MStaT',...
                  'CreateCancelBtn',...
                     'setappdata(gcbf,''canceling'',1)');
         setappdata(hwait,'canceling',0)
-    elseif sel==2%Inflection method
-        hwait = waitbar(0,'Inflection Points Method...','Name','MStaT V1.0',...
-             'CreateCancelBtn',...
-                'setappdata(gcbf,''canceling'',1)');
-        setappdata(hwait,'canceling',0)
-    end
 end
 
 nFiles=1;
@@ -27,17 +21,17 @@ nFiles=1;
 
 % First, resample data to get equally spaced points (call the
 % getxyResampled function).  These resampled points represent the 
-% given (blue) centerline of the river reach.  
+% given (blue) centerline of the river reach. 
+
 [nReachPoints, equallySpacedX, equallySpacedY, ...
     sResample, cResample] =...
-    mStat_getxyResampled(xCoord,yCoord,width);
+    mStat_getxyResampled(xCoord,yCoord,width,AdvancedSet);
 
 % Second, found the angle variations of the resampled line 
 [angle]= mStat_angledes(equallySpacedX,equallySpacedY);
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
-else
+if Tools==1
     waitbar(10/100,hwait);
 end
 % Now, utilize the PCA-Wavelet filter to obtain valley centerline.
@@ -51,8 +45,7 @@ theXYCenterScatter = complex(equallySpacedX,equallySpacedY);
 [x_sim, qual, npc] = wmspca(theXYCenterScatter, level, wname, npc);
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
-else
+if Tools==1
     waitbar(30/100,hwait);
 end
 
@@ -64,8 +57,7 @@ xValleyCenter = real(x_sim(:,1));
 yValleyCenter = imag(x_sim(:,1));
 
 % Waitbar shows the the user the status
-if Tools==2| Tools==3 
-else
+if Tools==1
     waitbar(50/100,hwait);
 end
 
@@ -80,8 +72,7 @@ delta = 0.01;
 [maxCurvS, maxCurvXY] = ...
     mStat_assignMaxCurv(dimlessCurvature, delta, sResample, equallySpaced);
 
-if Tools==2 | Tools==3 
-else
+if Tools==1
     waitbar(60/100,hwait);
 end
 
@@ -118,13 +109,12 @@ if sel==1 %valley line
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
         robust = 1;
-        active.ac=0;
+        active.ac = 0;
         setappdata(0, 'active', active);
         [x0, y0, iout, jout] = intersections(equallySpacedX,...
             equallySpacedY, xValleyCenter, yValleyCenter,robust);
         
-        if Tools==2 | Tools==3
-        else
+        if Tools==1
             waitbar(70/100,hwait);
         end
         
@@ -136,7 +126,7 @@ elseif sel==2 %inflection points
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
 
-        active.ac=0;       
+        active.ac = 0;       
         setappdata(0, 'active', active);
 
         x0=inflectionX;
@@ -144,8 +134,7 @@ elseif sel==2 %inflection points
         iout=ind;
         jout=(1:1:length(ind))';
         
-        if Tools==2 | Tools==3 
-        else
+        if Tools==1
             waitbar(70/100,hwait);
         end
 end
@@ -167,8 +156,7 @@ end
 %     
 
 % Waitbar shows the the user the status
-if Tools==2 | Tools==3 
-else
+if Tools==1
     waitbar(80/100,hwait);
 end
 
@@ -281,15 +269,8 @@ upstreamSlength(downstreamSlength<1)=nan;
 downstreamSlength(downstreamSlength<1)=nan;
 
 %end calculate
-if Tools==2 |  Tools==3
-else
-    waitbar(90/100,hwait);
-end
-
-%Begin plot
 if Tools==1
-    mStat_plotplanar(equallySpacedX, equallySpacedY,inflectionPts, x0, y0, x_sim,...
-    newMaxCurvX, newMaxCurvY, pictureReach);
+    waitbar(90/100,hwait);
 end
 
 %--------------------------------------------------------------------------
@@ -327,14 +308,9 @@ geovar.upstreamSlength = upstreamSlength;
 geovar.condition = condition;
 geovar.width = width;
 
-%put the bend on the table
-handles.bendListStr = bendID;
-set (bendSelect, 'string', handles.bendListStr);
-
 mStat_transformatevar(geovar)
 
-if Tools==2 | Tools==3 
-else
+if Tools==1
     waitbar(1,hwait)
     delete(hwait)
 end

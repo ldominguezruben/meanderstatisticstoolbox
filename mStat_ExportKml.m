@@ -1,4 +1,4 @@
-function mStat_kml(name,latlon1,latlon2,latlon3)
+function mStat_ExportKml(name,latlon1,latlon2,latlon3)
 %makes a kml file for use in google earth
 %input:  name of track, one matrix containing latitude and longitude
 %usage:  pwr_kml('track5',latlon)

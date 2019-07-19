@@ -6,10 +6,10 @@ newMaxCurvX, newMaxCurvY,pictureReach)
 %--------------------------------------------------------------------------
 % This creates the 'background' axes.
  axes(pictureReach);
- scalebar off
+ scalebar 
 ha = axes('units','normalized', ...
-'position',[0 0 1 1],'DataAspectRatio',[1 1 1],...
-        'PlotBoxAspectRatio',[1 1 1]);
+'position',[0 0 1 1]);%,'DataAspectRatio',[1 1 1],...
+        %'PlotBoxAspectRatio',[1 1 1]);
    
 % Move the background axes to the bottom
 %uistack(ha,'bottom');
@@ -17,7 +17,7 @@ ha = axes('units','normalized', ...
 % into the axes again.  Also, make the background axes invisible.
 set(ha,'handlevisibility','off','visible','off')
 set(gca, 'Color', 'w')
-% axis equal;
+%axis equal;
 
 % Call plotting function and selectData necessary data in the pictureReach.  
 [equalPlot, inflectionCplot, intPoints1, maxCurv, wavelet] = ...
