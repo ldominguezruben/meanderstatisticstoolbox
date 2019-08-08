@@ -48,6 +48,8 @@ log_text = {...
     'LETs START!!!'};
 statusLogging(handles.LogWindow, log_text)
     
+axes(handles.wavel_axes)
+grid on
 
 % Update handles structure
 guidata(hObject, handles);
@@ -102,175 +104,238 @@ function excelfile_Callback(hObject, eventdata, handles)
 %Initial Panel
 
 %Read data
-% --- Executes on button press in mainchannel.
-function mainchannel_Callback(hObject, eventdata, handles)
-%This function incorporate the main channel data
-multisel='off';
+% --------------------------------------------------------------------
+function openfile_Callback(hObject, eventdata, handles)
 
-persistent lastPath 
-% If this is the first time running the function this session,
-% Initialize lastPath to 0
-if isempty(lastPath) 
-    lastPath = 0;
-end
+handles.Module = 3;
 
-[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+%This function incorporate the initial data input
+handles.multisel='on';
+guidata(hObject,handles)
 
-% Use the path to the last selected file
-% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-if ReadVar.Path ~= 0
-    lastPath = ReadVar.Path;
-end
+mStat_ReadInputFiles(handles);
+% 
+% persistent lastPath 
+% % If this is the first time running the function this session,
+% % Initialize lastPath to 0
+% if isempty(lastPath) 
+%     lastPath = 0;
+% end
+% 
+% 
+% if lastPath == 0
+%     [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
+%     'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel);
+% else %remember the lastpath
+%     [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
+%     'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel,lastPath);
+% end
+% 
+% 
+% % Use the path to the last selected file
+% % If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+% if Path ~= 0
+%     lastPath = Path;
+% end
+% 
+% 
+% if handles.numfile==1%onefile
+%     [ReadVar{i}]=mStat_ReadInputFiles(handles.File,handles.Path);
+%     ReadVar{i}.File=handles.File{1};
+%     str=['Analyzing ' handles.File];
+%     hwait = waitbar(0,str,'Name','MStaT',...
+%          'CreateCancelBtn',...
+%             'setappdata(gcbf,''canceling'',1)');
+%     setappdata(hwait,'canceling',0)
+%     waitbar(1,hwait)
+%     delete(hwait)
+% else%multifiles
+%     [ReadVar{i}]=mStat_ReadInputFiles(handles.File{1}(i),handles.Path);
+%     ReadVar{i}.File=handles.File{1}(i);
+%         str=['Analyzing ' handles.File{1}(i) 'Progress' char(i) '/' char(handles.numfile)];
+%     hwait = waitbar(0,str,'Name','MStaT',...
+%          'CreateCancelBtn',...
+%             'setappdata(gcbf,''canceling'',1)');
+%     setappdata(hwait,'canceling',0)
+%     waitbar(1,hwait)
+%     delete(hwait)
+% end
+%         
+% 
+% if Path==0
+%     %empty file
+% else
+%     if iscell(File)%multifile
+%         handles.numfile=size(File,2); 
+%     else
+%         handles.numfile=1;
+%     end
+%     
+%     %Write file readed in multiselect tool
+%     mStat_AddXYData(File,Path,Module);
+%      
+%     handles.celltable=cell(handles.numfile,3); 
+%     handles.celltable(handles.numfile,3)={''};
+%     handles.celltable(:,1)={'None'};
+%     
+%     %Write File name
+%     for i=1:handles.numfile
+%         handles.celltable(i,2) = {File(i)};
+%         set_enable(handles,'loadfiles')
+%     end
+% 
+%     set(handles.inputtable,'Data',handles.celltable)
+%     guidata(hObject,handles)
+% end  
+% 
+
+% %Create celltable
+
+% 
+% if ReadVar.File==0
+%     
+% else
+%     
+%     % Push messages to Log Window:
+%     % ----------------------------
+%     log_text = {...
+%                 '';...
+%                 ['%--- ' datestr(now) ' ---%'];...
+%                 'Main Channel Centerline Loaded:';[cell2mat({ReadVar.File})]};
+%                 statusLogging(handles.LogWindow, log_text)
+%                 
+%     %Convert information
+%     handles.NameMain = {ReadVar.File};
+%     handles.xCoordMain = [];
+%     handles.yCoordMain = [];
+%     handles.xCoordMain(:,1) = ReadVar.xCoord{:,1};
+%     handles.yCoordMain(:,1) = ReadVar.yCoord{:,1};
+%     handles.formatfileread = ReadVar.comp;
+%     guidata(hObject, handles);    
+% 
+%     %Write File name
+%     handles.celltable(1,1) = {ReadVar.File};
+%     set(handles.inputtable,'Data',handles.celltable)
+%     guidata(hObject,handles)
+%     set_enable(handles,'loadfiles')
+%     set(handles.tributarychannel,'Enable','on');    
+%     
+%     %Plot
+%     axes(handles.pictureReach)
+%     plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
+%     hold on 
+%     plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob')   
+%     grid on
+%     legend('Main Channel','Initial point','Location','Best')
+%     xlabel('X');ylabel('Y')
+%     axis equal
+%     hold off
+%     
+% end
 
 
-%Create celltable
-handles.celltable=cell(1,2);
 
-handles.celltable(1,2)={''};
-
-if ReadVar.File==0
-else
-    
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-                '';...
-                ['%--- ' datestr(now) ' ---%'];...
-                'Main Channel Centerline Loaded:';[cell2mat({ReadVar.File})]};
-                statusLogging(handles.LogWindow, log_text)
-                
-    %Convert information
-    handles.NameMain = {ReadVar.File};
-    handles.xCoordMain = [];
-    handles.yCoordMain = [];
-    handles.xCoordMain(:,1) = ReadVar.xCoord{:,1};
-    handles.yCoordMain(:,1) = ReadVar.yCoord{:,1};
-    handles.formatfileread = ReadVar.comp;
-    guidata(hObject, handles);    
-
-    %Write File name
-    handles.celltable(1,1) = {ReadVar.File};
-    set(handles.inputtable,'Data',handles.celltable)
-    guidata(hObject,handles)
-    set_enable(handles,'loadfiles')
-    set(handles.tributarychannel,'Enable','on');    
-    
-    %Plot
-    axes(handles.pictureReach)
-    plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
-    hold on 
-    plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob')   
-    grid on
-    legend('Main Channel','Initial point','Location','Best')
-    xlabel('X');ylabel('Y')
-    axis equal
-    hold off
-    
-end
-
-
-
-% --- Executes on button press in tributarychannel.
-function tributarychannel_Callback(hObject, eventdata, handles)
-%Advantages
-msg='Please select all the secondary channels to analyze';
-
-warndlg(msg)
-
-%This function read the tributaries data
-multisel='on';
-persistent lastPath 
-% If this is the first time running the function this session,
-% Initialize lastPath to 0
-if isempty(lastPath) 
-    lastPath = 0;
-end
-
-[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
-
-% Use the path to the last selected file
-% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-if ReadVar.Path ~= 0
-    lastPath = ReadVar.Path;
-end
-
-if isempty(ReadVar.File)
-    
-else
-    if iscell(ReadVar.File)%determinate the number of secondary channels
-        handles.numfile=size(ReadVar.File,2);
-    else
-        handles.numfile=1;
-    end
-    
-    for i=1:handles.numfile
-        if iscell(ReadVar.File)%Multi selection
-            handles.celltable(i+1,1)={ReadVar.File{i}};
-            Filename={ReadVar.File{i}};
-            guidata(hObject,handles)
-        else %Single selection
-            handles.celltable(i+1,1)={ReadVar.File};
-            Filename={ReadVar.File};
-            guidata(hObject,handles)
-        end
-
-        %Convert information
-        handles.NameTributary = {ReadVar.File};
-        handles.xCoordTri=[];
-        handles.yCoordTri=[];
-        handles.xCoordTri=ReadVar.xCoord;
-        handles.yCoordTri=ReadVar.yCoord;
-        handles.formatfileread=ReadVar.comp;
-        guidata(hObject, handles);    
-
-        % Push messages to Log Window:
-        % ----------------------------
-        log_text = {...
-                    '';...
-                    ['%--- ' datestr(now) ' ---%'];...
-                    'Tributary Channel Centerline Loaded:';[cell2mat(Filename)]};
-                    statusLogging(handles.LogWindow, log_text)
-
-        clear Filename
-    end
-    
-    %Plot
-    axes(handles.pictureReach)
-    plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
-    hold on 
-    plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob') 
-    for i=1:handles.numfile
-        plot(handles.xCoordTri{i},handles.yCoordTri{i},'-r')%Main
-        sec = sprintf('Secondary%d',i);
-        ee=text(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),sec);
-        set(ee,'Clipping','on')
-        clear sec
-    end
-    grid on
-    legend('Main Channel','Initial point','Secondary Channels','Location','Best')
-    xlabel('X');ylabel('Y')
-    axis equal
-    hold off
-    
-    guidata(hObject,handles)
-    
-    %write filename data
-    set(handles.inputtable, 'Data', cell(handles.numfile+1,2));
-    if handles.numfile==1
-        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1'});
-    elseif handles.numfile==2
-        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2'});
-    elseif handles.numfile==3
-        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3'});
-    elseif handles.numfile==4
-        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4'});
-    elseif handles.numfile==3
-        set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4','Secondary5'});
-    end
-    
-    set(handles.inputtable, 'Data', handles.celltable)
-    
-end
+% % --- Executes on button press in tributarychannel.
+% function tributarychannel_Callback(hObject, eventdata, handles)
+% %Advantages
+% msg='Please select all the secondary channels to analyze';
+% 
+% warndlg(msg)
+% 
+% %This function read the tributaries data
+% multisel='on';
+% persistent lastPath 
+% % If this is the first time running the function this session,
+% % Initialize lastPath to 0
+% if isempty(lastPath) 
+%     lastPath = 0;
+% end
+% 
+% [ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
+% 
+% % Use the path to the last selected file
+% % If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
+% if ReadVar.Path ~= 0
+%     lastPath = ReadVar.Path;
+% end
+% 
+% if isempty(ReadVar.File)
+%     
+% else
+%     if iscell(ReadVar.File)%determinate the number of secondary channels
+%         handles.numfile=size(ReadVar.File,2);
+%     else
+%         handles.numfile=1;
+%     end
+%     
+%     for i=1:handles.numfile
+%         if iscell(ReadVar.File)%Multi selection
+%             handles.celltable(i+1,1)={ReadVar.File{i}};
+%             Filename={ReadVar.File{i}};
+%             guidata(hObject,handles)
+%         else %Single selection
+%             handles.celltable(i+1,1)={ReadVar.File};
+%             Filename={ReadVar.File};
+%             guidata(hObject,handles)
+%         end
+% 
+%         %Convert information
+%         handles.NameTributary = {ReadVar.File};
+%         handles.xCoordTri=[];
+%         handles.yCoordTri=[];
+%         handles.xCoordTri=ReadVar.xCoord;
+%         handles.yCoordTri=ReadVar.yCoord;
+%         handles.formatfileread=ReadVar.comp;
+%         guidata(hObject, handles);    
+% 
+%         % Push messages to Log Window:
+%         % ----------------------------
+%         log_text = {...
+%                     '';...
+%                     ['%--- ' datestr(now) ' ---%'];...
+%                     'Tributary Channel Centerline Loaded:';[cell2mat(Filename)]};
+%                     statusLogging(handles.LogWindow, log_text)
+% 
+%         clear Filename
+%     end
+%     
+%     %Plot
+%     axes(handles.pictureReach)
+%     plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
+%     hold on 
+%     plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob') 
+%     for i=1:handles.numfile
+%         plot(handles.xCoordTri{i},handles.yCoordTri{i},'-r')%Main
+%         sec = sprintf('Secondary%d',i);
+%         ee=text(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),sec);
+%         set(ee,'Clipping','on')
+%         clear sec
+%     end
+%     grid on
+%     legend('Main Channel','Initial point','Secondary Channels','Location','Best')
+%     xlabel('X');ylabel('Y')
+%     axis equal
+%     hold off
+%     
+%     guidata(hObject,handles)
+%     
+%     %write filename data
+%     set(handles.inputtable, 'Data', cell(handles.numfile+1,2));
+%     if handles.numfile==1
+%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1'});
+%     elseif handles.numfile==2
+%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2'});
+%     elseif handles.numfile==3
+%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3'});
+%     elseif handles.numfile==4
+%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4'});
+%     elseif handles.numfile==3
+%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4','Secondary5'});
+%     end
+%     
+%     set(handles.inputtable, 'Data', handles.celltable)
+%     
+% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -278,6 +343,8 @@ end
 
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
+ReadVar  = getappdata(0, 'ReadVar');
+geovar = getappdata(0, 'geovar');
 
 % Run the calculate function
 
@@ -289,29 +356,21 @@ setappdata(hwait,'canceling',0)
 tableData = get(handles.inputtable, 'data');
 
 if size(tableData,1)==1
-    warndlg('You need incorporate the secondary channels')
+    warndlg('You need incorporate almost one secondary channels')
 else
-    %Calculate
-    sel=2;%Toolbox inflection points method by defect
-    handles.bendSelect=[];
-    Tools=3;%CDM Confluence and Difluence Module
-    level=5;%default level
-    % Read Main
-    widthMain=str2double(cell2mat(tableData(1,2)));
-    [Main]=mStat_planar(handles.xCoordMain,handles.yCoordMain,widthMain,sel,...
-        handles.pictureReach,handles.bendSelect,Tools,level);
+    %Check what is main and secondary channels
+    p=1;
     
-    waitbar(30/100,hwait);
-
-    %Read Tributary data
-    for i=1:handles.numfile
-         widthTri{i}=str2double(cell2mat(tableData(1+i,2)));
-         [Tri{i}]=mStat_planar(handles.xCoordTri{i},handles.yCoordTri{i},widthTri{i},...
-             sel,handles.pictureReach,handles.bendSelect,Tools,level);
-         
-         LongTri(i)=Tri{i}.intS(end,1);
-         
-         waitbar((30+(i*10))/100,hwait);
+    for i=1:size(tableData,1)
+        if strcmp(tableData(i,2),'Main Channel')
+            widthMain=ReadVar{i}.width;
+            Main=geovar{i};
+        elseif strcmp(tableData(i,2),'Secondary Channel')            
+            Tri{p}=geovar{i};
+            LongTri(p)=Tri{p}.intS(end,1);
+            widthTri{p}=ReadVar{i}.width;
+            p=p+1;
+        end
     end
 
     %save data
@@ -319,13 +378,13 @@ else
     handles.Tri=Tri;
     guidata(hObject,handles)
 
-    if handles.numfile==1 %single file
+    if size(tableData,1)==2%single file
         geovar{1}=Main;
         geovar{2}=Tri{1};
-    else
-        for t=1:handles.numfile+1
+    elseif size(tableData,1)>2
+        for t=1:size(tableData,1)
             if t==1
-                geovar{1}=Main;
+                geovar{t}=Main;
             else
                 geovar{t}=Tri{t-1};
             end
@@ -338,17 +397,17 @@ else
     %Obtain data to incorporate the 
     
     %relation BT/BM
-    for t=1:handles.numfile
+    for t=1:size(tableData,1)-1
         BTdivBM(t)=widthTri{t}./widthMain;
     end
     
     %Lambdas relations
-    for t=1:handles.numfile
+    for t=1:size(tableData,1)-1
         lambdaTdivlambdaM(t)=nanmean(Tri{t}.wavelengthOfBends)./nanmean(Main.wavelengthOfBends);
     end
     
     %Amplitude relations
-    for t=1:handles.numfile
+    for t=1:size(tableData,1)-1
         AmplitudeTdivAmplitudeM(t)=nanmean(Tri{t}.amplitudeOfBends)./nanmean(Main.amplitudeOfBends);
     end
 
@@ -469,7 +528,6 @@ switch enable_state
         cla(handles.pictureReach)
         cla(handles.wavel_axes)
         set(handles.calculate,'Enable','off');
-        set(handles.tributarychannel,'Enable','off');
         set(handles.inputtable, 'Data', cell(2,2));
         set(handles.export,'Enable','off');
     case 'loadfiles'

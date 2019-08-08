@@ -60,16 +60,17 @@ set(handles.figure1,'Name',['MStaT: Advanced Setting'], ...
     'DockControls','off')
 
 handles.ChannelSel=varargin{1};
+width=varargin{2};
 
 % Update handles structure
 guidata(hObject, handles);
 
-ReadVar=getappdata(0, 'ReadVar');
-AdvancedSet=getappdata(0, 'AdvancedSet');
+ReadVar = getappdata(0, 'ReadVar');
+AdvancedSet = getappdata(0, 'AdvancedSet');
 
 %General Paranameters
 %Write
-set(handles.width,'String',ReadVar{handles.ChannelSel}.width)
+set(handles.width,'String',width)
 set(handles.level,'String',ReadVar{handles.ChannelSel}.Level)
 
 %Curvature Parameters
@@ -83,7 +84,7 @@ set(handles.reachpoints,'String',AdvancedSet{handles.ChannelSel}.nReachPoints)
 [~, equallySpacedX, equallySpacedY, ...
    ~, ~] =...
     mStat_getxyResampled(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,...
-    ReadVar{handles.ChannelSel}.width,AdvancedSet{handles.ChannelSel});
+    width,AdvancedSet{handles.ChannelSel});
 
 %Plot initial configuration
 axes(handles.previewpicture)

@@ -314,9 +314,11 @@ axes(handles.pictureReach)
 
 plot(xstart,ystart,'-b')%start
 hold on
-plot(xend,yend,'-k')%ended
-plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
-legend('t0','t1','Intersection','Location','Best')   
+plot(xend,yend,'-r')%ended
+plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'ok')
+plot(xstart(1),ystart(1),'or',    'MarkerSize',4,...
+    'MarkerEdgeColor','r','MarkerFaceColor','y');%start
+legend('t0','t1','Intersection','Init Data','Location','Best')   
 grid on
 axis equal
 % for t=2:length(Migra.xlinet1_int)
@@ -383,16 +385,16 @@ axes(handles.signalvariation);
 dimlessx=Abscise*DeltaCentS;
 [hAx,hLine1,hLine2] = plotyy(dimlessx,Migra.MigrationSignal/Migra.deltat,dimlessx,Migra.Direction,'plot');
 hold on
-xlabel('Intrinsic Channel Lengths [m]','Fontsize',18);
-ylabel('Migration/year [m/yr]','Fontsize',18) % left y-axis
+xlabel('Intrinsic Channel Lengths [m]','Fontsize',10);
+ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
 set(hAx(1),'XLim',xlim(:));
 set(hAx(2),'XLim',xlim(:));
 set(hAx(1),'XGrid','on');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %grid on
-ylabel(hAx(1),'Migration/year [m/yr]','Fontsize',18) % left y-axis ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
-ylabel(hAx(2),'Direction [º]','Fontsize',18) % right y-axis
+ylabel(hAx(1),'Migration/year [m/yr]','Fontsize',10) % left y-axis ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
+ylabel(hAx(2),'Direction [º]','Fontsize',10) % right y-axis
 %set(hAx(1),'YLim',[0 nanmax(Migra.MigrationSignal/Migra.deltat)],'YTick',[0 nanmax(Migra.MigrationSignal/Migra.deltat)/2  nanmax(Migra.MigrationSignal/Migra.deltat)])
 set(hAx(2),'YLim',[0 360],'YTick',[0 90 180 270 360])
 hold off

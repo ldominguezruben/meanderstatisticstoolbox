@@ -1,19 +1,18 @@
 function [geovar]=mStat_planar(xCoord,yCoord,width,FileName,sel,...
-    Tools,level,AdvancedSet)
+   Module,level,AdvancedSet)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%MStaT
 %This function calculate diferents methods of determination of bends
 %by Dominguez Ruben, UNL, Argentina 01/20/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 %start code
-if Tools==1
-        str=['Analyzing ' FileName];
-        hwait = waitbar(0,str,'Name','MStaT',...
-                 'CreateCancelBtn',...
-                    'setappdata(gcbf,''canceling'',1)');
-        setappdata(hwait,'canceling',0)
-end
+str=['Analyzing ' FileName];
+hwait = waitbar(0,str,'Name','MStaT',...
+         'CreateCancelBtn',...
+            'setappdata(gcbf,''canceling'',1)');
+setappdata(hwait,'canceling',0)
 
 nFiles=1;
 %--------------------------------------------------------------------------
@@ -26,28 +25,24 @@ nFiles=1;
 [nReachPoints, equallySpacedX, equallySpacedY, ...
     sResample, cResample] =...
     mStat_getxyResampled(xCoord,yCoord,width,AdvancedSet);
-
+    
 % Second, found the angle variations of the resampled line 
 [angle]= mStat_angledes(equallySpacedX,equallySpacedY);
 
 % Waitbar shows the the user the status
-if Tools==1
     waitbar(10/100,hwait);
-end
+
 % Now, utilize the PCA-Wavelet filter to obtain valley centerline.
 % The level below will have to be user input until a better approach
 % has been found (4 works well for Ucayali).
 
-%level = 4; 
 wname = 'db10';  
 npc = 'nodet'; 
 theXYCenterScatter = complex(equallySpacedX,equallySpacedY);
 [x_sim, qual, npc] = wmspca(theXYCenterScatter, level, wname, npc);
 
 % Waitbar shows the the user the status
-if Tools==1
-    waitbar(30/100,hwait);
-end
+waitbar(30/100,hwait);
 
 meanCenter{nFiles}.XYOriginal = [real(x_sim(:,1)),imag(x_sim(:,1))]; 
 %(These are the meanCenter XY original coordinates).
@@ -57,9 +52,7 @@ xValleyCenter = real(x_sim(:,1));
 yValleyCenter = imag(x_sim(:,1));
 
 % Waitbar shows the the user the status
-if Tools==1
-    waitbar(50/100,hwait);
-end
+waitbar(50/100,hwait);
 
 dimlessCurvature = cResample*width;%dimlees curvature with width C*=CBave
 equallySpaced = [equallySpacedX, equallySpacedY];
@@ -72,9 +65,9 @@ delta = 0.01;
 [maxCurvS, maxCurvXY] = ...
     mStat_assignMaxCurv(dimlessCurvature, delta, sResample, equallySpaced);
 
-if Tools==1
-    waitbar(60/100,hwait);
-end
+
+waitbar(60/100,hwait);
+
 
 %%
 % Now, find the Geometric Inflection Points.
@@ -101,7 +94,7 @@ inflectionX = inflectionX';
 inflectionY = inflectionY';
 inflectionPts = [inflectionX, inflectionY];
 
-if sel==1 %valley line
+if sel==2 %valley line
         geovar.methodIntersection='Intersection Mean Center';
 
         % Now, get the intersection points of the equally spaced data and
@@ -114,11 +107,10 @@ if sel==1 %valley line
         [x0, y0, iout, jout] = intersections(equallySpacedX,...
             equallySpacedY, xValleyCenter, yValleyCenter,robust);
         
-        if Tools==1
-            waitbar(70/100,hwait);
-        end
+        waitbar(70/100,hwait);
         
-elseif sel==2 %inflection points
+        
+elseif sel==1 %inflection points
         
         geovar.methodIntersection='Intersection Inflection Points';
         % Now, get the intersection points of the equally spaced data and
@@ -133,10 +125,8 @@ elseif sel==2 %inflection points
         y0=inflectionY;
         iout=ind;
         jout=(1:1:length(ind))';
-        
-        if Tools==1
-            waitbar(70/100,hwait);
-        end
+
+        waitbar(70/100,hwait);
 end
 
 %      End geometric section.  
@@ -156,9 +146,7 @@ end
 %     
 
 % Waitbar shows the the user the status
-if Tools==1
     waitbar(80/100,hwait);
-end
 
 % End bends section.  
 
@@ -269,9 +257,7 @@ upstreamSlength(downstreamSlength<1)=nan;
 downstreamSlength(downstreamSlength<1)=nan;
 
 %end calculate
-if Tools==1
-    waitbar(90/100,hwait);
-end
+waitbar(90/100,hwait);
 
 %--------------------------------------------------------------------------
 
@@ -310,7 +296,5 @@ geovar.width = width;
 
 mStat_transformatevar(geovar)
 
-if Tools==1
-    waitbar(1,hwait)
-    delete(hwait)
-end
+waitbar(1,hwait)
+delete(hwait)

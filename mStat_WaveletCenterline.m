@@ -182,7 +182,7 @@ axes(axest(3))
 plot(equallySpacedX, equallySpacedY, 'color', 'k', 'linewidth',2);
 hold on;
 plot(equallySpacedX(1), equallySpacedY(1), 'or' );
-legend('Centerline','Init Data','Location','Best')
+legend('Centerline','Init Data','Location','Best','Fontsize',10)
 xlim1 = [min(equallySpacedX),max(equallySpacedX)];  % plotting range
 set(gca,'XLim',xlim1(:));
 xlabel('X [m]');
@@ -279,7 +279,7 @@ semilogx((global_ws*DeltaCentS*DeltaCentS),log2(period*DeltaCentS./width),'linew
 
 hold on;
 semilogx((global_signif*DeltaCentS*DeltaCentS),log2(period*DeltaCentS./width),'red--');
-legend('Global Wavelet Spectrum','Significance','Fontsize',12,'Location','Best')
+legend('Global Wavelet Spectrum','Significance','Fontsize',10,'Location','Best')
 
 [~,in]=max(log2((global_ws*DeltaCentS*DeltaCentS./width)));
 
@@ -347,7 +347,7 @@ elseif Tools==2% MIGRATION ANALYZER
 
     xlabel('Intrinsic Channel Lengths [m]','fontsize',10);
     ylabel('Arc-Wavelength [m]','fontsize',10);
-    title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',13);
+    title(['Wavelet Spectrum at ',num2str(SIGLVL*100),'% of confidence'],'fontsize',11);
     set(gca,'XLim',xlim(:));
     set(gca,'YLim',log2([min(period*DeltaCentS),max(period*DeltaCentS)]), 'YDir','reverse', 'YTick',log2(Yticks(:)), 'YTickLabel',Yticks);
     grid on;

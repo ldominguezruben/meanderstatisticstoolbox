@@ -37,6 +37,8 @@ function mStat_MigrationAnalyzer_OpeningFcn(hObject, eventdata, handles, varargi
 % Choose default command line output for mStat_MigrationAnalyzer
 handles.output = hObject;
 
+warning off
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -50,14 +52,6 @@ axes(handles.pictureReach);
 axes(handles.signalvariation);
 set_enable(handles,'init')
         
-%data cursor type
-dcm_objt0 = datacursormode(gcf);
-
-set(dcm_objt0,'UpdateFcn',@mStat_myupdatefcnMigration);
-
-set(dcm_objt0,'Displaystyle','Window','Enable','on');
-
-pos = get(0,'userdata');
 % Push messages to Log Window:
     % ----------------------------
     log_text = {...
@@ -84,7 +78,12 @@ function filefunctions_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function openfunctions_Callback(hObject, eventdata, handles)
-% empty
+handles.Module = 2;
+handles.multisel = 'on';
+guidata(hObject,handles)
+
+%read file funtion
+mStat_ReadInputFiles(handles);
 
 function newproject_Callback(hObject, eventdata, handles)
 set_enable(handles,'init')
@@ -101,133 +100,6 @@ set_enable(handles,'init')
 % --------------------------------------------------------------------
 function closefunctions_Callback(hObject, eventdata, handles)
 close
-
-
-% --------------------------------------------------------------------
-function initialtime_Callback(hObject, eventdata, handles)
-set_enable(handles,'init')
-handles.celltable=cell(2,3);
-
-celltable(1:2,2:3)={''};
-guidata(hObject,handles)
-
-%This function incorporate the initial data
-multisel='off';
-
-persistent lastPath 
-% If this is the first time running the function this session,
-% Initialize lastPath to 0
-if isempty(lastPath) 
-    lastPath = 0;
-end
-
-%read file funtion
-[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
-
-% Use the path to the last selected file
-% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-if ReadVar.Path ~= 0
-    lastPath = ReadVar.Path;
-end
-
-if ReadVar.File==0
-else
-    
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-                '';...
-                ['%--- ' datestr(now) ' ---%'];...
-                'Final Time Centerline Loaded:';[cell2mat({ReadVar.File})]};
-                statusLogging(handles.LogWindow, log_text)
-                
-    %Convert information
-    handles.xCoord=[];
-    handles.yCoord=[];
-    handles.xCoord{1}(:,1)=ReadVar.xCoord{:,1};
-    handles.yCoord{1}(:,1)=ReadVar.yCoord{:,1};
-    handles.formatfileread=ReadVar.comp;
-    guidata(hObject, handles);
-    
-    
-    %Write File name
-    celltable(1,1)={ReadVar.File};
-    set(handles.sedtable,'Data',celltable)      
-    
-    %plot
-    axes(handles.pictureReach)
-    plot(handles.xCoord{1}(:,1),handles.yCoord{1}(:,1),'-b')%start
-    hold on
-    legend('t0','Location','Best') 
-    grid on
-    axis equal
-
-    xlabel('X [m]');ylabel('Y [m]')
-    hold off
-    
-end
-
-
-% --------------------------------------------------------------------
-function finaltime_Callback(hObject, eventdata, handles)
-%This function read Centerline final time
-celltable=get(handles.sedtable,'Data');
-
-% This function incorporate the initial data
-multisel='off';%Multiselect off
-persistent lastPath 
-% If this is the first time running the function this session,
-% Initialize lastPath to 0
-if isempty(lastPath) 
-    lastPath = 0;
-end
-
-%read file funtion
-[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
-
-% Use the path to the last selected file
-% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-if ReadVar.Path ~= 0
-    lastPath = ReadVar.Path;
-end
-
-if ReadVar.File==0
-else
-    
-    % Push messages to Log Window:
-    % ----------------------------
-    log_text = {...
-                '';...
-                ['%--- ' datestr(now) ' ---%'];...
-                'Final Time Centerline Loaded:';[cell2mat({ReadVar.File})]};
-                statusLogging(handles.LogWindow, log_text)
-                
-    % Convert information            
-    handles.xCoord{2}(:,1)=ReadVar.xCoord{:,1};
-    handles.yCoord{2}(:,1)=ReadVar.yCoord{:,1};
-    handles.formatfileread=ReadVar.comp;
-    guidata(hObject, handles);
-    set_enable(handles,'loadfiles')
-    
-    %Write File name
-    celltable(2,1)={ReadVar.File};
-    set(handles.sedtable,'Data',celltable) 
-    
-    %plot
-    axes(handles.pictureReach)
-
-    plot(handles.xCoord{1}(:,1),handles.yCoord{1}(:,1),'-b')%start
-    hold on
-    plot(handles.xCoord{2}(:,1),handles.yCoord{2}(:,1),'-k')%start
-    legend('t0','t1','Location','Best') 
-    grid on
-    axis equal
-
-    xlabel('X [m]');ylabel('Y [m]')
-    hold off
-    
-end
-
 
 % --------------------------------------------------------------------
 function export_Callback(hObject, eventdata, handles)
@@ -267,6 +139,9 @@ mStat_SummaryMigration(handles.Migra);
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
 %Run the calculate function
+geovar = getappdata(0, 'geovar');
+ReadVar = getappdata(0, 'ReadVar');
+
 hwait = waitbar(0,'Migration Calculate. Processing...','Name','MStaT',...
          'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
@@ -275,27 +150,25 @@ setappdata(hwait,'canceling',0)
 tableData = get(handles.sedtable, 'data');
 % Clean the GUI
 cla(handles.wavel_axes)
-%cla(handles.pictureReach)
 cla(handles.signalvariation)
 linkaxes(handles.signalvariation)
 delete(allchild(handles.signalvariation))
 
 %Read GUI data
-handles.width=str2double(cellstr(tableData(:,3)));
-handles.year=str2double(cellstr(tableData(:,2)));
 
-%Init Calculate
-sel=2;%Inflection points default method
-handles.bendSelect=[];%none data
-Tools=2;%Migration Module
-level=5;%filter level default
-for i=1:2
-    [geovar{i}]=mStat_planar(handles.xCoord{i},handles.yCoord{i},...
-        handles.width(i),sel,handles.pictureReach,handles.bendSelect,Tools,level);
-    % Waitbar shows the the user the status
-    waitbar((40+(i*10))/100,hwait);
+for i=1:length(ReadVar)
+    width(i)=ReadVar{i}.width;
 end
 
+handles.year=str2double(cellstr(tableData(:,2)));
+
+if width(1)>width(2)
+    ReadVar{2}=ReadVar{1};
+    ReadVar{1}=ReadVar{2};
+    geovar{2}=geovar{1};
+    geovar{1}=geovar{2};
+end
+    
 %save data
 setappdata(0, 'geovarf', geovar);
 handles.geovar=geovar;
@@ -377,8 +250,7 @@ switch enable_state
         cla reset
         grid on
         set(handles.calculate,'Enable','off');
-        set(handles.sedtable, 'RowName', {'t0','t1'});
-        set(handles.sedtable, 'Data', cell(2,3));
+        set(handles.sedtable, 'Data', cell(2,2));
         set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'off')
         set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')
         set(handles.vectorsgraph,'Enable','off');
@@ -449,8 +321,6 @@ if f==1
 else
     warndlg('Doesn´t found bends')
 end
-
-
 
 
 
@@ -542,3 +412,70 @@ switch get(handles.vectorsgraph,'value')   % Get Tag of selected object
        % Code for when there is no match.
 
 end
+
+
+% --------------------------------------------------------------------
+function datacursor_OnCallback(hObject, eventdata, handles)
+axes(handles.pictureReach); 
+
+%data cursor type
+dcm_obj = datacursormode(gcf);
+
+set(dcm_obj,'UpdateFcn',@mStat_myupdatefcn);
+
+set(dcm_obj,'Displaystyle','Window','Enable','on');
+pos = get(0,'userdata');
+
+
+% --- Executes when entered data in editable cell(s) in sedtable.
+function sedtable_CellEditCallback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function sedtable_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to sedtable (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on key press with focus on sedtable and none of its controls.
+function sedtable_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to sedtable (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes when selected cell(s) is changed in sedtable.
+function sedtable_CellSelectionCallback(hObject, eventdata, handles)
+% hObject    handle to sedtable (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
+%	Indices: row and column indices of the cell(s) currently selecteds
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function ruler_OnCallback(hObject, eventdata, handles)
+axes(handles.pictureReach)
+%imdistline(hparent)
+
+ axis manual
+ handles.Figruler = imline(gca);
+ % Get original position
+ pos = getPosition(handles.Figruler);
+ % Get updated position as the ruler is moved around
+ id = addNewPositionCallback(handles.Figruler,@(pos) title(mat2str(pos,3)));
+ 
+ x=pos(:,1);
+ y=pos(:,2);
+ 
+ handles.ruler=imdistline(handles.pictureReach,x,y);
+ guidata(hObject,handles)
+
+
+% --------------------------------------------------------------------
+function ruler_OffCallback(hObject, eventdata, handles)
+delete(handles.ruler)
+delete(handles.Figruler)

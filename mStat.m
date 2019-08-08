@@ -183,60 +183,16 @@ set_enable(handles,'init')
 
 % -------------------------------------------------------------------------
 function openfunction_Callback(hObject, eventdata, handles)
-%opent function
+%open function
 set_enable(handles,'init')
 
+handles.Module = 1;
+
 %This function incorporate the initial data input
-multisel='on';
+handles.multisel='on';
+guidata(hObject,handles)
 
-persistent lastPath 
-% If this is the first time running the function this session,
-% Initialize lastPath to 0
-if isempty(lastPath) 
-    lastPath = 0;
-end
-
-if lastPath == 0
-    [File,Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
-    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel);
-else %remember the lastpath
-    [File,Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
-    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel,lastPath);
-end
-
-%[ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
-
-% Use the path to the last selected file
-% If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-if Path ~= 0
-    lastPath = Path;
-end
-
-if Path==0
-    %empty file
-else
-    if iscell(File)%multifile
-        handles.numfile=size(File,2); 
-    else
-        handles.numfile=1;
-    end
-    
-    %Write file readed in multiselect tool
-    mStat_AddXYData(File,Path,handles.pictureReach,handles.bendSelect);
-
-    %Write in popupChannel
-     str{1,1}=['Select Channel'];
-     if handles.numfile==1
-         str{2,1}=File;
-     else
-        for i=1:handles.numfile
-            str{i+1,1}=File{i};
-        end
-     end
-     
-     set(handles.popupChannel, 'String', str,'Enable','on');
-                                     
-end  
+mStat_ReadInputFiles(handles);
 
 
 % --------------------------------------------------------------------
@@ -377,9 +333,7 @@ end
     
 % --------------------------------------------------------------------
 function htmlfile_Callback(hObject, eventdata, handles)
-% hObject    handle to htmlfile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% empty
 
 
 %Export Figures    
@@ -803,6 +757,7 @@ guidata(hObject,handles)
 mStat_Calculate(handles)
 set_enable(handles,'results')
 
+
 % --- Executes on selection change in popupChannel.
 function popupChannel_Callback(hObject, eventdata, handles)
 
@@ -927,7 +882,7 @@ guidata(hObject,handles)
 % Retrieve the selected bend ID number from the "bendSelect" listbox.
 selectedBend = get(handles.bendSelect,'Value');
 
-% setappdata is a function which allows the selected bend
+% setappdata is a function which allows the handles.Channeled bend
 % to be accessed by multiple GUI windows.  
 setappdata(0, 'selectedBend', handles.selectedBend);
 guidata(hObject, handles);
@@ -1151,7 +1106,6 @@ pan(handles.pictureReach)
 function set_enable(handles,enable_state)
 switch enable_state
 case 'init'
-    %set(handles.widthinput,'String','','Enable','off')
     set(handles.sinuosity,'String','','Enable','off')
     set(handles.curvaturel,'String','','Enable','off')
     set(handles.wavel,'String','','Enable','off')
@@ -1162,13 +1116,11 @@ case 'init'
     set(handles.bendSelect,'Visible','off','String','','Enable','off')
     set(handles.exportfunction,'Enable','off')
     set(handles.exportkmlfile,'Enable','off')
-    set(handles.setti,'Enable','off') 
-    set(handles.recalculate,'Enable','off')    
+    set(handles.setti,'Enable','off')  
     set(handles.gobend,'Enable','off')   
-    set(handles.selector,'Enable','off')  
+    set(handles.selector,'Enable','off','Value',1)  
     set(handles.bendSelect,'Enable','off') 
     set(handles.waveletanalysis,'Enable','off')
-    set(handles.advancedsetting,'Enable','off')
     set(handles.riverstatistics,'Enable','off')
     set(handles.backgroundimage,'Enable','off')
     set(handles.savematfileT,'Enable','off')
@@ -1176,6 +1128,7 @@ case 'init'
     set(handles.zoomextendedT,'Enable','off')
     set(handles.zoominT,'Enable','off')
     set(handles.zoomoutT,'Enable','off')
+    set(handles.channelname,'Enable','off')
     set(handles.panT,'Enable','off')
     set(handles.datacursorT,'Enable','off')
     set(handles.popupChannel,'String','Select Channel','Enable','off','Value',1)
@@ -1184,18 +1137,16 @@ case 'init'
     clear selectBend
     clc
     case 'loadfiles'
-    %set(handles.widthinput,'Enable','on')
     set(handles.sinuosity,'Enable','on')
     set(handles.curvaturel,'Enable','on')
     set(handles.wavel,'Enable','on')
     set(handles.amplitude,'Enable','on')
     set(handles.ustreamL,'Enable','on')
     set(handles.dstreamL,'Enable','on')
+    set(handles.channelname,'Enable','on')
     set(handles.bendSelect,'Visible','on','String','','Enable','on')
     set(handles.condition,'String','','Enable','on')
-    set(handles.advancedsetting,'Enable','on')
     set(handles.setti,'Enable','on')
-    set(handles.recalculate,'Enable','on') 
     set(handles.gobend,'Enable','on')
     set(handles.selector,'Enable','on')  
     set(handles.bendSelect,'Enable','on')  
@@ -1211,9 +1162,6 @@ case 'init'
     set(handles.waveletanalysis,'Enable','on')  
     set(handles.riverstatistics,'Enable','on')  
     set(handles.exportfunction,'Enable','on')
-%     if  handles.formatfileread(2)=='l'
-%         set(handles.exportkmlfile,'Enable','on')
-%     end
     handles.start=0;
     set(handles.backgroundimage,'Enable','on')
     otherwise                
@@ -1257,16 +1205,14 @@ geovar=getappdata(0, 'geovar');
 AdvancedSet=getappdata(0, 'AdvancedSet');
 
 %Read selector
-sel=get(handles.selector,'Value');%1 Inflection method or MCM
-
-Tools=1;%Geometry parameter
+sel=get(handles.selector,'Value')-1;%Decomposition method
 
 %Function of calculate
 %Calculate and plot planar variables
 
 [geovar{handles.ChannelSel}]=mStat_planar(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,...
     ReadVar{handles.ChannelSel}.width,ReadVar{handles.ChannelSel}.File,...
-    sel,Tools,ReadVar{handles.ChannelSel}.Level,AdvancedSet{handles.ChannelSel});
+    sel,handles.Module,ReadVar{handles.ChannelSel}.Level,AdvancedSet{handles.ChannelSel});
     
 %Begin plot
      mStat_plotplanar(geovar{handles.ChannelSel}.equallySpacedX, geovar{handles.ChannelSel}.equallySpacedY,...
@@ -1294,3 +1240,26 @@ log_text = {...
             'Mean Wavelength [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.wavelengthOfBends)}),2)]};
             statusLogging(handles.LogWindow, log_text)
                     
+
+
+
+function channelname_Callback(hObject, eventdata, handles)
+% hObject    handle to channelname (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of channelname as text
+%        str2double(get(hObject,'String')) returns contents of channelname as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function channelname_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to channelname (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
