@@ -185,7 +185,7 @@ set_enable(handles,'init')
 function openfunction_Callback(hObject, eventdata, handles)
 %open function
 set_enable(handles,'init')
-
+handles.first = 1;
 handles.Module = 1;
 
 %This function incorporate the initial data input
