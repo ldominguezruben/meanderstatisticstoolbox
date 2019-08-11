@@ -80,6 +80,7 @@ function filefunctions_Callback(hObject, eventdata, handles)
 function openfunctions_Callback(hObject, eventdata, handles)
 handles.Module = 2;
 handles.multisel = 'on';
+handles.first = 1;
 guidata(hObject,handles)
 
 %read file funtion
@@ -218,7 +219,7 @@ Migra=handles.Migra;
 %Indentify cutoff using wavelength
 
 if Migra.NumberOfCut == 0
-   warndlg('Doesn´t found Cutoff')
+   warndlg('DoesnÂ´t found Cutoff')
   else     
     axes(handles.pictureReach)
     hold on
@@ -319,7 +320,7 @@ end
 
 if f==1
 else
-    warndlg('Doesn´t found bends')
+    warndlg('DoesnÂ´t found bends')
 end
 
 
