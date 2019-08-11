@@ -108,7 +108,7 @@ function excelfile_Callback(hObject, eventdata, handles)
 function openfile_Callback(hObject, eventdata, handles)
 
 handles.Module = 3;
-
+handles.first = 1;
 %This function incorporate the initial data input
 handles.multisel='on';
 guidata(hObject,handles)
