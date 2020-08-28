@@ -1,28 +1,10 @@
 function varargout = mStat_AdvancedSetting(varargin)
-% MSTAT_ADVANCEDSETTING MATLAB code for mStat_AdvancedSetting.fig
-%      MSTAT_ADVANCEDSETTING, by itself, creates a new MSTAT_ADVANCEDSETTING or raises the existing
-%      singleton*.
-%
-%      H = MSTAT_ADVANCEDSETTING returns the handle to a new MSTAT_ADVANCEDSETTING or the handle to
-%      the existing singleton*.
-%
-%      MSTAT_ADVANCEDSETTING('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MSTAT_ADVANCEDSETTING.M with the given input arguments.
-%
-%      MSTAT_ADVANCEDSETTING('Property','Value',...) creates a new MSTAT_ADVANCEDSETTING or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mStat_AdvancedSetting_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mStat_AdvancedSetting_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%MStaT
+%This GUI correspond to advanced settings for the input data. 
 
-% Edit the above text to modify the response to help mStat_AdvancedSetting
-
-% Last Modified by GUIDE v2.5 18-Jul-2019 20:10:40
+% by Lucas Dominguez Ruben
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -94,10 +76,13 @@ grid on
 plot(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,'-k')
 hold on
 plot(equallySpacedX,equallySpacedY,'-r')
+plot(equallySpacedX(1,1), equallySpacedY(1,1),'*',    'MarkerSize',12,...
+    'MarkerEdgeColor','b','MarkerFaceColor','b');
+axis equal
+grid on
 xlabel('X [m]');
 ylabel('Y [m]');
-axis equal
-legend('Original Data','MStaT Smoothing Data')
+legend('Original Data','MStaT Smoothing Data','Upstream','Location','best')
 hold off
 
 
@@ -115,12 +100,7 @@ varargout{1} = handles.output;
 
 
 function polyorder_Callback(hObject, eventdata, handles)
-% hObject    handle to polyorder (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of polyorder as text
-%        str2double(get(hObject,'String')) returns contents of polyorder as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -138,12 +118,7 @@ end
 
 
 function smooth_Callback(hObject, eventdata, handles)
-% hObject    handle to smooth (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of smooth as text
-%        str2double(get(hObject,'String')) returns contents of smooth as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -161,12 +136,7 @@ end
 
 
 function window_Callback(hObject, eventdata, handles)
-% hObject    handle to window (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of window as text
-%        str2double(get(hObject,'String')) returns contents of window as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -184,12 +154,7 @@ end
 
 
 function reachpoints_Callback(hObject, eventdata, handles)
-% hObject    handle to reachpoints (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of reachpoints as text
-%        str2double(get(hObject,'String')) returns contents of reachpoints as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -237,20 +202,18 @@ grid on
 plot(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,'-k')
 hold on
 plot(equallySpacedX,equallySpacedY,'-r')
+plot(equallySpacedX(1,1), equallySpacedY(1,1),'*',    'MarkerSize',12,...
+    'MarkerEdgeColor','b','MarkerFaceColor','b');
 axis equal
+grid on
 xlabel('X [m]');
 ylabel('Y [m]');
-legend('Original Data','MStaT Smoothing Data')
+legend('Original Data','MStaT Smoothing Data','Upstream','Location','best')
 hold off
 
 
 function width_Callback(hObject, eventdata, handles)
-% hObject    handle to width (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of width as text
-%        str2double(get(hObject,'String')) returns contents of width as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -267,12 +230,7 @@ end
 
 
 function level_Callback(hObject, eventdata, handles)
-% hObject    handle to level (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of level as text
-%        str2double(get(hObject,'String')) returns contents of level as a double
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -309,15 +267,81 @@ AdvancedSet{handles.ChannelSel}.nReachPoints=str2num(get(handles.reachpoints,'St
 %Store Data
 setappdata(0, 'ReadVar',ReadVar);
 setappdata(0, 'AdvancedSet',AdvancedSet);
+close(handles.figure1)
 
 
 % --------------------------------------------------------------------
 function file_Callback(hObject, eventdata, handles)
-% hObject    handle to file (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% empty
 
 
 % --------------------------------------------------------------------
 function close_Callback(hObject, eventdata, handles)
 close
+
+
+% --- Executes on selection change in orientation.
+function orientation_Callback(hObject, eventdata, handles)
+%Change the orientation
+sel=get(handles.orientation,'Value');
+
+if sel==2
+    handles.upstream=1;
+    guidata(hObject,handles)
+end
+
+if handles.upstream==1
+    %Read all Data
+    ReadVar=getappdata(0, 'ReadVar');
+
+    ReadVar{handles.ChannelSel}.xCoord=flipud(ReadVar{handles.ChannelSel}.xCoord);
+    ReadVar{handles.ChannelSel}.yCoord=flipud(ReadVar{handles.ChannelSel}.yCoord);
+    
+    %Read
+    ReadVar{handles.ChannelSel}.width=str2num(get(handles.width,'String'));
+    ReadVar{handles.ChannelSel}.Level=str2num(get(handles.level,'String'));
+
+    %Curvature Parameters
+    %Read
+    AdvancedSet{handles.ChannelSel}.polyOrder=str2num(get(handles.polyorder,'String'));
+    AdvancedSet{handles.ChannelSel}.nTimesToSmooth=str2num(get(handles.smooth,'String'));
+    AdvancedSet{handles.ChannelSel}.nPointsInWindow=str2num(get(handles.window,'String'));
+    AdvancedSet{handles.ChannelSel}.nReachPoints=str2num(get(handles.reachpoints,'String'));
+
+    %Get equally data
+[~, equallySpacedX, equallySpacedY, ...
+   ~, ~] =...
+    mStat_getxyResampled(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,...
+    ReadVar{handles.ChannelSel}.width,AdvancedSet{handles.ChannelSel});
+
+    %Plot initial configuration
+    axes(handles.previewpicture)
+
+    %plot original data
+    grid on
+    plot(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,'-k')
+    hold on
+    plot(equallySpacedX,equallySpacedY,'-r')
+    plot(equallySpacedX(1,1), equallySpacedY(1,1),'*',    'MarkerSize',12,...
+        'MarkerEdgeColor','b','MarkerFaceColor','b');
+    axis equal
+    grid on
+    xlabel('X [m]');
+    ylabel('Y [m]');
+    legend('Original Data','MStaT Smoothing Data','Upstream','Location','best')
+    hold off
+
+    %Store Data
+    setappdata(0, 'ReadVar',ReadVar);
+end
+% --- Executes during object creation, after setting all properties.
+function orientation_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to orientation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -77,8 +77,13 @@ for ii = 1:Nos
     coordMat = str2double(regexp(coordStr,'[,\s]+','split'));
     % Rearrange coordinates to form an x-by-3 matrix
     [m,n] = size(coordMat);
-    coordMat = reshape(coordMat,3,m*n/3)';
     
+    %% ADD to resolve high extensions
+    if mod(n,3)==0
+        coordMat = reshape(coordMat,3,m*n/3)';
+    elseif mod(n,2)==0
+        coordMat = reshape(coordMat,2,m*n/2)';
+    end
     % define polygon in clockwise direction, and terminate
     [Lat, Lon] = poly2ccw(coordMat(:,2),coordMat(:,1));
     if geom==3

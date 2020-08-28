@@ -6,7 +6,6 @@ function [geovar]=mStat_planar(xCoord,yCoord,width,FileName,sel,...
 %by Dominguez Ruben, UNL, Argentina 01/20/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 %start code
 str=['Analyzing ' FileName];
 hwait = waitbar(0,str,'Name','MStaT',...
@@ -65,7 +64,6 @@ delta = 0.01;
 [maxCurvS, maxCurvXY] = ...
     mStat_assignMaxCurv(dimlessCurvature, delta, sResample, equallySpaced);
 
-
 waitbar(60/100,hwait);
 
 
@@ -94,14 +92,14 @@ inflectionX = inflectionX';
 inflectionY = inflectionY';
 inflectionPts = [inflectionX, inflectionY];
 
-if sel==2 %valley line
+if sel==2 %Mean center method
         geovar.methodIntersection='Intersection Mean Center';
 
         % Now, get the intersection points of the equally spaced data and
         % valley centerline by calling the "intersections" function and initializing
         % a handles structure for dimlessCurvature.
         % Note: may make more sense to initialize robust as zero.
-        robust = 1;
+        robust = 0;
         active.ac = 0;
         setappdata(0, 'active', active);
         [x0, y0, iout, jout] = intersections(equallySpacedX,...
@@ -109,8 +107,7 @@ if sel==2 %valley line
         
         waitbar(70/100,hwait);
         
-        
-elseif sel==1 %inflection points
+elseif sel==1 %inflection points method
         
         geovar.methodIntersection='Intersection Inflection Points';
         % Now, get the intersection points of the equally spaced data and
@@ -120,7 +117,10 @@ elseif sel==1 %inflection points
 
         active.ac = 0;       
         setappdata(0, 'active', active);
-
+        
+%         robust = 0;
+%         [x0, y0, iout, jout] = intersections(equallySpacedX,...
+%             equallySpacedY, inflectionX, inflectionY,robust);
         x0=inflectionX;
         y0=inflectionY;
         iout=ind;
@@ -194,22 +194,18 @@ end
 for ii=1:ms-1
     if bends1(ii,1)==12
         condition(ii,1)={'DS'};
-    else if bends1(ii,1)==13
-            condition(ii,1)={'US'};
-        else if bends1(ii,1)==14
-                condition(ii,1)={'C'};
-                else if bends1(ii,1)==15
-                        condition(ii,1)={'S'};
-                    end
-            end 
-        end
+    elseif bends1(ii,1)==13
+        condition(ii,1)={'US'};
+    elseif bends1(ii,1)==14
+        condition(ii,1)={'C'};
+    elseif bends1(ii,1)==15
+        condition(ii,1)={'S'};
     end
 end
 
 [na,ma]=size(newMaxCurvS);
 
 s11='C';
-
 
 for i=2:nBends+1
     for j=1:na
@@ -234,10 +230,10 @@ j = 1;
 for i = 2:nBends+1
     if strcmp(s11,condition(j)) ~=1 && amplitudeOfBends(j)~=0
         downstreamSlength(j) = intS(i)-newMaxCurvS1(j) ;
-        else
+    else
         downstreamSlength(j)=nan;
     end
-        j=j+1;
+    j=j+1;
 end
 
 % 
@@ -262,7 +258,6 @@ waitbar(90/100,hwait);
 %--------------------------------------------------------------------------
 
 %Store all the planar data calculated
-
 geovar.angle = angle;
 geovar.xValleyCenter = xValleyCenter;
 geovar.yValleyCenter = yValleyCenter;
@@ -283,6 +278,7 @@ geovar.equallySpacedX = equallySpacedX;
 geovar.equallySpacedY = equallySpacedY;
 geovar.sResample = sResample;
 geovar.cResample = cResample;
+
 geovar.bendID1 = bendID';
 geovar.sinuosityOfBends = sinuosityOfBends;
 geovar.lengthStraight = lengthStraight;

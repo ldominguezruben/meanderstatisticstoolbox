@@ -16,11 +16,11 @@ end
 
 
 if lastPath == 0
-    [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
-    'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',handles.multisel);
+    [File,Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
+    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',handles.multisel);
 else %remember the lastpath
-    [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
-    'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',handles.multisel,lastPath);
+    [File,Path] = uigetfile({'*.kml;*.txt;*.xls;*.xlsx',...
+    'MStaT Files (*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',handles.multisel,lastPath);
 end
 
 
@@ -73,6 +73,9 @@ else
 
             ReadVar{i}.CS=3;
             
+            if handles.Module == 1 
+                set(handles.exportkmlfile,'Enable','on')
+            end
             clear kmlFile kmlStruct
 
         elseif  ReadVar{i}.comp=='t'%Read ASCII File
@@ -104,7 +107,7 @@ else
                 ReadVar{i}.xCoord = Ex(:,1);
                 ReadVar{i}.yCoord = Ex(:,2);
 
-            if isnumeric(ReadVar{i}.xCoord(1,1)) | isnumeric(ReadVar{i}.yCoord(1,1))
+            if isnumeric(ReadVar{i}.xCoord(1,1)) | isnumeric(ReadVar{i}.yCoord(1,1));
             else
                 ReadVar{i}.xCoord(1,1) =[];
                 ReadVar{i}.yCoord(1,1) =[]; 
@@ -119,16 +122,16 @@ else
         elseif  ReadVar{i}.comp=='x'%read office 2013 File
                 %read xlsx
                 xlsxFile=fullfile(ReadVar{i}.Path,ReadVar{i}.File);
-                ReadVar{i}.utmzone=[];%without data
-                Ex=xlsread(char(xlsxFile));
+                ReadVar{i}.utmzone = [];%without data
+                Ex = xlsread(char(xlsxFile));
 
                 ReadVar{i}.xCoord = Ex(:,1);
                 ReadVar{i}.yCoord = Ex(:,2);
 
             if isnumeric(ReadVar{i}.xCoord(1,1)) | isnumeric(ReadVar{i}.yCoord(1,1))
             else
-                ReadVar{i}.xCoord(1,1) =[];
-                ReadVar{i}.yCoord(1,1) =[]; 
+                ReadVar{i}.xCoord(1,1) = [];
+                ReadVar{i}.yCoord(1,1) = []; 
             end 
 
              if ReadVar{i}.xCoord(1,1)>180
@@ -149,9 +152,9 @@ else
                  Lat = double(k(:,3));
                  Lon = double(k(:,2));
                  ReadVar{i}.Ids = double(k(:,4));
-             %found Id
-             n=1;%number of sample
-             m=1;%number od Ids
+                %found Id
+                n=1;%number of sample
+                m=1;%number od Ids
                 while size(k,1)>=n
                     if n==1
                         Id(m) = double(k(n,4));
@@ -171,13 +174,17 @@ else
             elseif strcmp(Class,'Line')
                  Lat = ReadVar{i}.ShapeData.Y;
                  Lon = ReadVar{i}.ShapeData.Y;
-                 ReadVar{i}.Ids = ReadVar{i}.ShapeData.id;
+                 ReadVar{i}.Ids = ReadVar{i}.ShapeData.Id;
             end
 
             %Define what class of element
-
-            [ReadVar{i}.xCoord, ReadVar{i}.yCoord,ReadVar{i}.utmzone] =...
-            deg2utm(Lat,Lon);
+            if Lat(1)<180 
+                [ReadVar{i}.xCoord, ReadVar{i}.yCoord,ReadVar{i}.utmzone] =...
+                deg2utm(Lat,Lon);
+            else 
+                ReadVar{i}.xCoord=Lat;
+                ReadVar{i}.yCoord=Lon;
+            end
             
             ReadVar{i}.CS=3;
             
@@ -185,12 +192,11 @@ else
                 ReadVar{i}.stringsId{t} = Id(t);
             end
 
-        end
-        
+        end      
             ReadVar{i}.Module = handles.Module;
             ReadVar{i}.Level = 5;%Decomposition level default
             %      General parameters to get equally spaced data.
-            AdvancedSet{i}.nTimesToSmooth = 2; %2 
+            AdvancedSet{i}.nTimesToSmooth = 10; %Add point equivalent
             AdvancedSet{i}.polyOrder = 3;% equivalent to "order" in "curvature" function.
             AdvancedSet{i}.nPointsInWindow = 7;%  equivalent to "window" in "curvature" function.
             AdvancedSet{i}.nReachPoints = 1500; % 1500 150 equivalent to "nDiscr" in "curvature" function 
@@ -216,12 +222,9 @@ else
         setappdata(0, 'AdvancedSet', AdvancedSet1); 
     end
     
-    
     mStat_AddXYData(handles);
 
 end
-
-
 
 
 function rememberUigetfile

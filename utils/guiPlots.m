@@ -9,9 +9,9 @@
 
 %--------------------------------------------------------------------------
 
-function [equalPlot, inflectionCplot, intPoints1, maxCurv, wavelet]...
+function [equalPlot, inflectionCplot, intPoints1, maxCurv, wavelet,upstream]...
     = guiPlots(equallySpacedX, equallySpacedY, newInflectionPts, x0,... 
-    y0, x_sim, maxCurvX, maxCurvY, pictureReach)
+    y0, x_sim, maxCurvX, maxCurvY, pictureReach,sel)
 
 %      Change the current axes to "pictureReach".
 axes(pictureReach);
@@ -32,12 +32,6 @@ axis equal
 equalPlot = line(equallySpacedX, equallySpacedY, 'color', 'k','LineWidth',2.5);%, 'marker','+');
 hold on;
 
-% %   Plot of all inflection points (green stars).
-inflectionCplot = line(newInflectionPts(:,1), newInflectionPts(:,2), ...
-    'color', 'b', 'linewidth',1.5,'marker','d','MarkerSize',8,    'MarkerEdgeColor','b',...
-    'MarkerFaceColor','c');
-hold on;
-
 %   Plot of intersection points of the wavelet filter centerline
 %   and the equally spaced data (along the given, blue centerline).  These
 %   intersection points are shown as a circle colored "cyan".  
@@ -49,9 +43,53 @@ hold on;
 maxCurv = plot(maxCurvX, maxCurvY, 'sk','MarkerSize',9);
 hold on;
 
-%   Plot of valley filter centerline (red-dashed line).  
-wavelet = plot(x_sim(:,1),'--r','LineWidth',1.5); 
+
+%plot upstream point
+upstream = plot(equallySpacedX(1,1), equallySpacedY(1,1),'*',    'MarkerSize',14,...
+    'MarkerEdgeColor','b','MarkerFaceColor','b');
 hold on;
+
+
+if sel==1
+    % %   Plot of all inflection points (green stars).
+    inflectionCplot = line(newInflectionPts(:,1), newInflectionPts(:,2), ...
+        'color', 'b', 'linewidth',1.5);%,'marker','d','MarkerSize',8,    'MarkerEdgeColor','b',...
+       % 'MarkerFaceColor','c');
+    hold on;
+    wavelet =0;%default value
+        %-------------------------------------------------------------------------
+    % Add a resizable legend to the main GUI axes.  
+    axes(pictureReach)
+    hLegend = legend([equalPlot, inflectionCplot, ...
+        intPoints1, maxCurv,upstream], ...
+      'Equally Spaced Data'         , ...
+      'Inflection Line'           , ...
+      'Intersection Points'         , ...
+      'Maximum Curvature Points'    , ...
+      'Upstream'                    , ...
+      'location', 'Best' );
+
+elseif sel==2
+    %   Plot of valley filter centerline (red-dashed line).  
+    wavelet = plot(x_sim(:,1),'--r','LineWidth',1.5); 
+    hold on;
+    inflectionCplot =0;%default value
+        %-------------------------------------------------------------------------
+    % Add a resizable legend to the main GUI axes.  
+    axes(pictureReach)
+    hLegend = legend([equalPlot, wavelet, ...
+        intPoints1, maxCurv,upstream], ...
+      'Equally Spaced Data'         , ...
+      'Mean Center Line'            , ...
+      'Intersection Points'         , ...
+      'Maximum Curvature Points'    , ...
+      'Upstream'                    , ...
+      'location', 'Best' );
+end
+
+
+
+
 
 %  scalebar
 

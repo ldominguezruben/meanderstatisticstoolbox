@@ -22,28 +22,12 @@ t1area=trapz(geovar{2}.equallySpacedX,geovar{2}.equallySpacedY);
 
 ArMigra.TotalA=abs(t1area-t0area);
 
-
-figure(3)
+%figure(3)
 plot(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,'-r')
 hold on
 plot(geovar{2}.equallySpacedX,geovar{2}.equallySpacedY,'-b')
 fill(linet0,linet1,'g')
 
-% x = 1 : 300;
-% curve1 = log(x);
-% curve2 = 2*log(x);
-% plot(x, curve1, 'r', 'LineWidth', 2);
-% hold on;
-% plot(x, curve2, 'b', 'LineWidth', 2);
-% x2 = [x, fliplr(x)];
-% inBetween = [curve1, fliplr(curve2)];
-% fill(x2, inBetween, 'g');
-
-% for i=1:length(ArMigra.xint)
-%     %create lineas
-%     
-%     ArMigra.xint
-% end
 
 
 

@@ -1,6 +1,6 @@
 function varargout = mStat_ConfluencesAnalyzer(varargin)
 %-----------------MEANDER STATISTICS TOOLBOX. MStaT------------------------
-% MSTAT CONFLUENCE AND DIFLUENCE ANALYZER  
+% MSTAT CONFLUENCE MODULE  
 %
 % This function evaluate the influences of the secondaries channels on 
 % confluence or bifurcation in the main channel and control in how long 
@@ -37,7 +37,7 @@ function mStat_ConfluencesAnalyzer_OpeningFcn(hObject, eventdata, handles, varar
 handles.output = hObject;
 set_enable(handles,'init')
 
-set(handles.figure1,'Name',['MStaT: Confluence and Difluence Analyzer '], ...
+set(handles.figure1,'Name',['MStaT: Confluence Module '], ...
     'DockControls','off')
 
 % Push messages to Log Window:
@@ -47,7 +47,7 @@ log_text = {...
     ['%----------- ' datestr(now) ' ------------%'];...
     'LETs START!!!'};
 statusLogging(handles.LogWindow, log_text)
-    
+  
 axes(handles.wavel_axes)
 grid on
 
@@ -92,12 +92,71 @@ function export_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function matfiles_Callback(hObject, eventdata, handles)
+[fileMAT,pathMAT] = uiputfile('*.mat','Save .mat file');
+
+if fileMAT==0
+else
+    str=['Exporting' fileMAT];
+    hwait = waitbar(0,str,'Name','MStaT');
+    Parameters.PathFileName  = fullfile(pathMAT,fileMAT); 
+    Parameters.geovar = getappdata(0,'geovar');
+    Parameters.Readvar = getappdata(0,'geovar');
+    Parameters.Conf = getappdata(0,'Conf');
+    Parameters.Sta = getappdata(0,'Sta');
+    waitbar(0.5,hwait)
+
+    save([pathMAT fileMAT], 'Parameters');
+    waitbar(1,hwait)
+    delete(hwait)
+    
+    % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Export .mat File Succesfully!'};
+            statusLogging(handles.LogWindow, log_text)
+end
+
+
+% --------------------------------------------------------------------
+function graphs_Callback(hObject, eventdata, handles)
 % empty
 
 
 % --------------------------------------------------------------------
-function excelfile_Callback(hObject, eventdata, handles)
-% empty
+function planviewgraph_Callback(hObject, eventdata, handles)
+h=figure('Name','MStaT: River Centerlines','NumberTitle','off');
+set(h, 'Position', [10 10 550 500])
+AxesH = handles.pictureReach;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.1 .1 .85 .8]);
+
+
+
+% --------------------------------------------------------------------
+function waveletgraphmain_Callback(hObject, eventdata, handles)
+h=figure('Name','MStaT: Wavelet of Main Channel','NumberTitle','off');
+set(h, 'Position', [10 10 550 300])
+AxesH = handles.wavel_axes;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.15 .15 .85 .75]);
+cc=colorbar;
+colormap('jet');
+
+
+% --------------------------------------------------------------------
+function waveletgraphtributary_Callback(hObject, eventdata, handles)
+
+h=figure('Name','MStaT: Wavelet of Tributary Channel','NumberTitle','off');
+set(h, 'Position', [10 10 550 300])
+AxesH = handles.tributary_axes;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.15 .15 .85 .75]);
+cc=colorbar;
+colormap('jet');
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,236 +165,15 @@ function excelfile_Callback(hObject, eventdata, handles)
 %Read data
 % --------------------------------------------------------------------
 function openfile_Callback(hObject, eventdata, handles)
-
+%activatemodule
 handles.Module = 3;
-handles.first = 1;
+
 %This function incorporate the initial data input
-handles.multisel='on';
+handles.multisel = 'on';
+handles.first = 1;
 guidata(hObject,handles)
 
 mStat_ReadInputFiles(handles);
-% 
-% persistent lastPath 
-% % If this is the first time running the function this session,
-% % Initialize lastPath to 0
-% if isempty(lastPath) 
-%     lastPath = 0;
-% end
-% 
-% 
-% if lastPath == 0
-%     [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
-%     'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel);
-% else %remember the lastpath
-%     [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
-%     'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},'Select Input File','MultiSelect',multisel,lastPath);
-% end
-% 
-% 
-% % Use the path to the last selected file
-% % If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-% if Path ~= 0
-%     lastPath = Path;
-% end
-% 
-% 
-% if handles.numfile==1%onefile
-%     [ReadVar{i}]=mStat_ReadInputFiles(handles.File,handles.Path);
-%     ReadVar{i}.File=handles.File{1};
-%     str=['Analyzing ' handles.File];
-%     hwait = waitbar(0,str,'Name','MStaT',...
-%          'CreateCancelBtn',...
-%             'setappdata(gcbf,''canceling'',1)');
-%     setappdata(hwait,'canceling',0)
-%     waitbar(1,hwait)
-%     delete(hwait)
-% else%multifiles
-%     [ReadVar{i}]=mStat_ReadInputFiles(handles.File{1}(i),handles.Path);
-%     ReadVar{i}.File=handles.File{1}(i);
-%         str=['Analyzing ' handles.File{1}(i) 'Progress' char(i) '/' char(handles.numfile)];
-%     hwait = waitbar(0,str,'Name','MStaT',...
-%          'CreateCancelBtn',...
-%             'setappdata(gcbf,''canceling'',1)');
-%     setappdata(hwait,'canceling',0)
-%     waitbar(1,hwait)
-%     delete(hwait)
-% end
-%         
-% 
-% if Path==0
-%     %empty file
-% else
-%     if iscell(File)%multifile
-%         handles.numfile=size(File,2); 
-%     else
-%         handles.numfile=1;
-%     end
-%     
-%     %Write file readed in multiselect tool
-%     mStat_AddXYData(File,Path,Module);
-%      
-%     handles.celltable=cell(handles.numfile,3); 
-%     handles.celltable(handles.numfile,3)={''};
-%     handles.celltable(:,1)={'None'};
-%     
-%     %Write File name
-%     for i=1:handles.numfile
-%         handles.celltable(i,2) = {File(i)};
-%         set_enable(handles,'loadfiles')
-%     end
-% 
-%     set(handles.inputtable,'Data',handles.celltable)
-%     guidata(hObject,handles)
-% end  
-% 
-
-% %Create celltable
-
-% 
-% if ReadVar.File==0
-%     
-% else
-%     
-%     % Push messages to Log Window:
-%     % ----------------------------
-%     log_text = {...
-%                 '';...
-%                 ['%--- ' datestr(now) ' ---%'];...
-%                 'Main Channel Centerline Loaded:';[cell2mat({ReadVar.File})]};
-%                 statusLogging(handles.LogWindow, log_text)
-%                 
-%     %Convert information
-%     handles.NameMain = {ReadVar.File};
-%     handles.xCoordMain = [];
-%     handles.yCoordMain = [];
-%     handles.xCoordMain(:,1) = ReadVar.xCoord{:,1};
-%     handles.yCoordMain(:,1) = ReadVar.yCoord{:,1};
-%     handles.formatfileread = ReadVar.comp;
-%     guidata(hObject, handles);    
-% 
-%     %Write File name
-%     handles.celltable(1,1) = {ReadVar.File};
-%     set(handles.inputtable,'Data',handles.celltable)
-%     guidata(hObject,handles)
-%     set_enable(handles,'loadfiles')
-%     set(handles.tributarychannel,'Enable','on');    
-%     
-%     %Plot
-%     axes(handles.pictureReach)
-%     plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
-%     hold on 
-%     plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob')   
-%     grid on
-%     legend('Main Channel','Initial point','Location','Best')
-%     xlabel('X');ylabel('Y')
-%     axis equal
-%     hold off
-%     
-% end
-
-
-
-% % --- Executes on button press in tributarychannel.
-% function tributarychannel_Callback(hObject, eventdata, handles)
-% %Advantages
-% msg='Please select all the secondary channels to analyze';
-% 
-% warndlg(msg)
-% 
-% %This function read the tributaries data
-% multisel='on';
-% persistent lastPath 
-% % If this is the first time running the function this session,
-% % Initialize lastPath to 0
-% if isempty(lastPath) 
-%     lastPath = 0;
-% end
-% 
-% [ReadVar]=mStat_ReadInputFiles(multisel,lastPath);
-% 
-% % Use the path to the last selected file
-% % If 'uigetfile' is called, but no item is selected, 'lastPath' is not overwritten with 0
-% if ReadVar.Path ~= 0
-%     lastPath = ReadVar.Path;
-% end
-% 
-% if isempty(ReadVar.File)
-%     
-% else
-%     if iscell(ReadVar.File)%determinate the number of secondary channels
-%         handles.numfile=size(ReadVar.File,2);
-%     else
-%         handles.numfile=1;
-%     end
-%     
-%     for i=1:handles.numfile
-%         if iscell(ReadVar.File)%Multi selection
-%             handles.celltable(i+1,1)={ReadVar.File{i}};
-%             Filename={ReadVar.File{i}};
-%             guidata(hObject,handles)
-%         else %Single selection
-%             handles.celltable(i+1,1)={ReadVar.File};
-%             Filename={ReadVar.File};
-%             guidata(hObject,handles)
-%         end
-% 
-%         %Convert information
-%         handles.NameTributary = {ReadVar.File};
-%         handles.xCoordTri=[];
-%         handles.yCoordTri=[];
-%         handles.xCoordTri=ReadVar.xCoord;
-%         handles.yCoordTri=ReadVar.yCoord;
-%         handles.formatfileread=ReadVar.comp;
-%         guidata(hObject, handles);    
-% 
-%         % Push messages to Log Window:
-%         % ----------------------------
-%         log_text = {...
-%                     '';...
-%                     ['%--- ' datestr(now) ' ---%'];...
-%                     'Tributary Channel Centerline Loaded:';[cell2mat(Filename)]};
-%                     statusLogging(handles.LogWindow, log_text)
-% 
-%         clear Filename
-%     end
-%     
-%     %Plot
-%     axes(handles.pictureReach)
-%     plot(handles.xCoordMain,handles.yCoordMain,'-k')%Main
-%     hold on 
-%     plot(handles.xCoordMain(1,1),handles.yCoordMain(1,1),'ob') 
-%     for i=1:handles.numfile
-%         plot(handles.xCoordTri{i},handles.yCoordTri{i},'-r')%Main
-%         sec = sprintf('Secondary%d',i);
-%         ee=text(handles.xCoordTri{i}(1,1),handles.yCoordTri{i}(1,1),sec);
-%         set(ee,'Clipping','on')
-%         clear sec
-%     end
-%     grid on
-%     legend('Main Channel','Initial point','Secondary Channels','Location','Best')
-%     xlabel('X');ylabel('Y')
-%     axis equal
-%     hold off
-%     
-%     guidata(hObject,handles)
-%     
-%     %write filename data
-%     set(handles.inputtable, 'Data', cell(handles.numfile+1,2));
-%     if handles.numfile==1
-%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1'});
-%     elseif handles.numfile==2
-%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2'});
-%     elseif handles.numfile==3
-%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3'});
-%     elseif handles.numfile==4
-%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4'});
-%     elseif handles.numfile==3
-%         set(handles.inputtable, 'RowName', {'Main Channel','Secondary1','Secondary2','Secondary3','Secondary4','Secondary5'});
-%     end
-%     
-%     set(handles.inputtable, 'Data', handles.celltable)
-%     
-% end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,16 +186,17 @@ geovar = getappdata(0, 'geovar');
 
 % Run the calculate function
 
-hwait = waitbar(0,'Confluence and Difluence Analyzer. Processing...','Name','MStaT ',...
-         'CreateCancelBtn',...
-            'setappdata(gcbf,''canceling'',1)');
-setappdata(hwait,'canceling',0)
-
 tableData = get(handles.inputtable, 'data');
 
-if size(tableData,1)==1
-    warndlg('You need incorporate almost one secondary channels')
+if nansum(strcmp('Main Channel',tableData(:,2)))==0
+    warndlg('You need incorporate almost one Main channel')
+elseif nansum(strcmp('Tributary Channel',tableData(:,2)))==0
+    warndlg('You need incorporate almost one Tributary channel')
 else
+    hwait = waitbar(0,'Confluence Module Analyzing. Processing...','Name',...
+        'MStaT ', 'CreateCancelBtn',...
+            'setappdata(gcbf,''canceling'',1)');
+    setappdata(hwait,'canceling',0)
     %Check what is main and secondary channels
     p=1;
     
@@ -365,7 +204,7 @@ else
         if strcmp(tableData(i,2),'Main Channel')
             widthMain=ReadVar{i}.width;
             Main=geovar{i};
-        elseif strcmp(tableData(i,2),'Secondary Channel')            
+        elseif strcmp(tableData(i,2),'Tributary Channel')            
             Tri{p}=geovar{i};
             LongTri(p)=Tri{p}.intS(end,1);
             widthTri{p}=ReadVar{i}.width;
@@ -391,129 +230,79 @@ else
         end
     end
     
-    waitbar(70/100,hwait);
+    waitbar(50/100,hwait);
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Obtain data to incorporate the 
+    %Obtain static data of confluence (only for mat export) 
     
     %relation BT/BM
     for t=1:size(tableData,1)-1
-        BTdivBM(t)=widthTri{t}./widthMain;
+        Sta.BTdivBM(t)=widthTri{t}./widthMain;
     end
     
     %Lambdas relations
     for t=1:size(tableData,1)-1
-        lambdaTdivlambdaM(t)=nanmean(Tri{t}.wavelengthOfBends)./nanmean(Main.wavelengthOfBends);
+        Sta.lambdaTdivlambdaM(t)=nanmean(Tri{t}.wavelengthOfBends)./nanmean(Main.wavelengthOfBends);
     end
     
     %Amplitude relations
     for t=1:size(tableData,1)-1
-        AmplitudeTdivAmplitudeM(t)=nanmean(Tri{t}.amplitudeOfBends)./nanmean(Main.amplitudeOfBends);
+        Sta.AmplitudeTdivAmplitudeM(t)=nanmean(Tri{t}.amplitudeOfBends)./nanmean(Main.amplitudeOfBends);
     end
 
+    setappdata(0, 'Sta', Sta); 
     waitbar(75/100,hwait);
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Wavelet analyzes
-    %go to wavelet analyzer
-    %%Plotting
-    SIGLVL=0.95;
-    sel=2;%Toolbox inflection points method by defect
-    filter=0;
-    axest=[handles.wavel_axes];
-    Tools=3;%Confluence and Difluence Analyzer
-    vars=[];
-
-    mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,vars)
-   
-    waitbar(80/100,hwait);
-    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Determinate the intersection o point close
-    [Conf]=mStat_ConfluencesInfluences(geovar);
-
-    waitbar(90/100,hwait);
+    handles.tableData = tableData;
+    handles.confluenceselected = 1;
+    [Conf]=mStat_ConfluencesInfluences(geovar,handles);
+    setappdata(0, 'Conf', Conf);   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %PLOT
-    axes(handles.pictureReach)
-    plot(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,'-k')%Main
-    hold on 
-    plot(geovar{1}.equallySpacedX(1,1),geovar{1}.equallySpacedY(1,1),'ob')
-    
-    if handles.numfile>1 %read multy files
-        for t=1:handles.numfile
-            plot(geovar{1+t}.equallySpacedX,geovar{1+t}.equallySpacedY,'-r')%secondary coordinate
-            plot(Conf.XINT{1+t},Conf.YINT{1+t},'or')%Intersection point
-            %Graph cicle
-            th = 0:pi/50:2.01*pi;
-            xunit = Conf.R(t) * cos(th) + Conf.XINT{1+t};
-            yunit = Conf.R(t) * sin(th) + Conf.XINT{1+t};
-            plot(xunit, yunit,'-b','Linewidth',2);%circle
-        end
-    else%single read file
-        plot(geovar{2}.equallySpacedX,geovar{2}.equallySpacedY,'-r')%secondary coordinate
-        plot(Conf.XINT{2},Conf.YINT{2},'or')%Intersection point
-        %Graph cicle
-        th = 0:pi/50:2.01*pi;
-        xunit = Conf.R(1) * cos(th) + Conf.XINT{2};
-        yunit = Conf.R(1) * sin(th) + Conf.YINT{2};
-        plot(xunit, yunit,'-b','Linewidth',2);%Circle
-    end
-    grid on
-    legend('Main Channel','Initial point','Secondary Channels','Intersection point',...
-        'Influences Region','Location','Best')
-    xlabel('X');ylabel('Y')
-    axis equal
-    hold off
-    
-    %Wavelet analyzes
-    %go to wavelet analyzer
-    %%Plotting
-    SIGLVL=0.95;
-    sel=2;%Toolbox inflection points method by defect
-    filter=0;
-    axest=[handles.wavel_axes];
-    Tools=3;%Confluence and Difluence Module
 
-    vars=Conf;
-
-    mStat_plotWavel(geovar{1},sel,SIGLVL,filter,axest,Tools,vars)
+    %Write in table    
+    set(handles.conftable,'Data',Conf.confdata)
     
+    %set enable results
+    set_enable(handles,'results')
+
+    % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+                '';...
+                ['%--- ' datestr(now) ' ---%'];...
+                'Calculate finalized';};
+
+            statusLogging(handles.LogWindow, log_text)
+
+    %Close waitbar        
+    waitbar(1,hwait)
+    delete(hwait)
 end
 
-set_enable(handles,'results')
+% --- Executes when selected cell(s) is changed in conftable.
+function conftable_CellSelectionCallback(hObject, eventdata, handles)
+%read input variables
+%ReadVar  = getappdata(0, 'ReadVar');
+geovar = getappdata(0, 'geovar');
+Conf = getappdata(0, 'Conf');
 
-% Push messages to Log Window:
-% ----------------------------
-log_text = {...
-            '';...
-            ['%--- ' datestr(now) ' ---%'];...
-            'Summary of CBA';...
-            'Total Length Analyzed [km]:';[cell2mat({(geovar{1}.intS(end,1)+nansum(LongTri))/1000})];...
-            'B_T/B_M:';[cell2mat({BTdivBM})];...
-            '\lambda_T/\lambda_M:';[cell2mat({lambdaTdivlambdaM})];...
-            '\Amp_T/Amp_M:';[cell2mat({AmplitudeTdivAmplitudeM})];...
-            'R [m]:';[cell2mat({Conf.R})];};
+%read the selection of confluence
+handles.confluenceselected = eventdata.Indices(:,1);
+guidata(hObject,handles)
 
-        statusLogging(handles.LogWindow, log_text)
+%Wavelet tributary channel
+%Plotting
+SIGLVL = 0.95;
+sel = 1;%Toolbox inflection points method by default
+filter = 'graphtributary';
+axest = [handles.tributary_axes];
+Tools = 3;%Confluence Module
+Conf.tribuselected = handles.confluenceselected;%rename the tributary selected
+vars = Conf;
+%by default plot wavelet of first confluence
+mStat_plotWavel(geovar{1+Conf.tribuselected},sel,SIGLVL,filter,axest,Tools,vars)
 
-%Close waitbar        
-waitbar(1,hwait)
-delete(hwait)
-
-
-function rm_Callback(hObject, eventdata, handles)
-% empty
-
-
-% --- Executes during object creation, after setting all properties.
-function rm_CreateFcn(hObject, eventdata, handles)
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -527,13 +316,17 @@ switch enable_state
         legend(handles.pictureReach,'hide')
         cla(handles.pictureReach)
         cla(handles.wavel_axes)
+        cla(handles.tributary_axes)
+        set(handles.conftable, 'Data', cell(2,2));
         set(handles.calculate,'Enable','off');
         set(handles.inputtable, 'Data', cell(2,2));
         set(handles.export,'Enable','off');
+        set(handles.conftable,'Enable','off');
     case 'loadfiles'
         set(handles.calculate,'Enable','on');
     case 'results'
         set(handles.export,'Enable','on');
+        set(handles.conftable,'Enable','on');
     otherwise
 end
 

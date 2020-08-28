@@ -45,7 +45,7 @@ guidata(hObject, handles);
 %set_enable(handles,'init')
 
 % Set the name and version
-set(handles.figure1,'Name',['MStaT: Migration Analyzer '], ...
+set(handles.figure1,'Name',['MStaT: Migration Module '], ...
     'DockControls','off')
 
 axes(handles.pictureReach);
@@ -78,9 +78,11 @@ function filefunctions_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function openfunctions_Callback(hObject, eventdata, handles)
+set_enable(handles,'init')
+
 handles.Module = 2;
 handles.multisel = 'on';
-handles.first = 1;
+handles.first=1;
 guidata(hObject,handles)
 
 %read file funtion
@@ -131,14 +133,53 @@ statusLogging(handles.LogWindow, log_text)
 
 
 % --------------------------------------------------------------------
-function summary_Callback(hObject, eventdata, handles)
-mStat_SummaryMigration(handles.Migra);
+function graphs_Callback(hObject, eventdata, handles)
+% empty
+
+
+% --------------------------------------------------------------------
+function plainviewgraph_Callback(hObject, eventdata, handles)
+h=figure('Name','MStaT: River Migration','NumberTitle','off');
+set(h, 'Position', [10 10 550 500])
+AxesH = handles.pictureReach;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.1 .1 .85 .8]);
+
+
+% --------------------------------------------------------------------
+function migrationgraph_Callback(hObject, eventdata, handles)
+h=figure('Name','MStaT: River Centerlines','NumberTitle','off');
+set(h, 'Position', [10 10 550 300])
+AxesH = handles.signalvariation;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.1 .15 .85 .75]);
+
+
+
+% --------------------------------------------------------------------
+function waveletgraph_Callback(hObject, eventdata, handles)
+h=figure('Name','MStaT: River Centerlines','NumberTitle','off');
+set(h, 'Position', [10 10 550 300])
+AxesH = handles.wavel_axes;
+fig=copyobj(AxesH,h);
+set(fig,'Units', 'normalized', 'Position', [.15 .15 .85 .75]);
+cc=colorbar;
+colormap('jet');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Calculate
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles)
+tableData = get(handles.sedtable, 'data');
+handles.year=str2double(cellstr(tableData(:,2)));
+if isnan(handles.year(1))
+    warndlg('Please add the year of t0 in format YYYY')
+elseif length(handles.year)==1
+    warndlg('Please add the river centerline of t1')
+elseif isnan(handles.year(2))
+    warndlg('Please add the year of t1 in format YYYY')
+else
 %Run the calculate function
 geovar = getappdata(0, 'geovar');
 ReadVar = getappdata(0, 'ReadVar');
@@ -201,14 +242,15 @@ log_text = {...
     ['%----------- ' datestr(now) ' ------------%'];...
     'Calculate finished';...
     'Summary:';...
-    'Mean Migration/year';[cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat})];...
-    'Maximum Migration';[cell2mat({nanmax(Migra.MigrationSignal)})];...
-    'Minimum Migration';[cell2mat({nanmin(Migra.MigrationSignal)})];...
+    'Mean Migration/year';[round(cell2mat({nanmean(Migra.MigrationSignal)/Migra.deltat}),2)];... 
+    'Maximum Migration';[round(cell2mat({nanmax(Migra.MigrationSignal)}),2)];...
+    'Minimum Migration';[round(cell2mat({nanmin(Migra.MigrationSignal)}),2)];...
     'Cutoff Found';[cell2mat({Migra.NumberOfCut})]};
 statusLogging(handles.LogWindow, log_text)
 
 waitbar(1,hwait)
 delete(hwait)
+end
 
 
 % --- Executes on button press in identifycutoff.
@@ -219,17 +261,18 @@ Migra=handles.Migra;
 %Indentify cutoff using wavelength
 
 if Migra.NumberOfCut == 0
-   warndlg('Doesn´t found Cutoff')
+   warndlg('Doesn�t found Cutoff')
   else     
     axes(handles.pictureReach)
     hold on
     ee=text(handles.ArMigra.xint_areat0(Migra.BendCutOff),handles.ArMigra.yint_areat0(Migra.BendCutOff),'Cutoff');
     set(ee,'Clipping','on')
-    handles.highlightPlot = line(Migra.linet1X{Migra.BendCutOff}.line, Migra.linet1Y{Migra.BendCutOff}.line,...
+    for i=1:length(Migra.BendCutOff)
+        handles.highlightPlot = line(Migra.linet1X{Migra.BendCutOff(i)}.line, Migra.linet1Y{Migra.BendCutOff(i)}.line,...
             'color', 'y', 'LineWidth',3); 
+    end
     hold off
  end
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -256,7 +299,7 @@ switch enable_state
         set(findall(handles.panelresults, '-property', 'enable'), 'enable', 'off')
         set(handles.vectorsgraph,'Enable','off');
         set(handles.export,'Enable','off');
-        set(handles.summary,'Enable','off');
+        %set(handles.summary,'Enable','off');
     case 'loadfiles'
         cla(handles.signalvariation)
         %set(handles.sedtable, 'Data', cell(2,3));
@@ -266,7 +309,7 @@ switch enable_state
         set(handles.vectorsgraph,'Enable','off');
     case 'results'
         set(findall(handles.cutoffpanel, '-property', 'enable'), 'enable', 'on')
-        set(handles.summary,'Enable','on');
+        %set(handles.summary,'Enable','on');
         set(handles.export,'Enable','on');
         set(handles.vectorsgraph,'Enable','on');
     otherwise
@@ -288,48 +331,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in predictor.
-function predictor_Callback(hObject, eventdata, handles)
-%Compare the arcwaelength with the width of the channel ande predict the
-%posibility of neck cut off
-%Read data 
-geovar = getappdata(0, 'geovarf');
-
-f=0;%doesnt have predictors
-
-for u=1:length(geovar{2}.wavelengthOfBends)
-    if geovar{2}.wavelengthOfBends(u)<2*geovar{2}.width
-        f=1;
-        % Call the "userSelectBend" function to get the index of intersection
-        % points and the highlighted bend limits.  
-
-        [highlightX, highlightY, ~] = userSelectBend(geovar{2}.intS, u,...
-            geovar{2}.equallySpacedX,geovar{2}.equallySpacedY,geovar{2}.newInflectionPts,...
-            geovar{2}.sResample);
-        handles.highlightX = highlightX;
-        handles.highlightY = highlightY;
-
-        axes(handles.pictureReach);
-        % hold on
-        handles.highlightPlot = line(handles.highlightX(1,:), handles.highlightY(1,:),...
-            'color', 'y', 'LineWidth',8); 
-
-        guidata(hObject,handles)
-    end
-end
-
-if f==1
-else
-    warndlg('Doesn´t found bends')
-end
-
-
-
 % --- Executes on button press in vectorsgraph.
 function vectorsgraph_Callback(hObject, eventdata, handles)
 
 switch get(handles.vectorsgraph,'value')   % Get Tag of selected object
-    case 0
+    case 0 %without vectors
                 %Run the calculate function
         hwait = waitbar(0,'Creating plot...','Name','MStaT',...
                  'CreateCancelBtn',...
@@ -343,8 +349,10 @@ switch get(handles.vectorsgraph,'value')   % Get Tag of selected object
         plot(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,'-b')%start
         hold on
         plot(geovar{2}.equallySpacedX,geovar{2}.equallySpacedY,'-k')%start
+        plot(geovar{1}.equallySpacedX(1,1), geovar{1}.equallySpacedY(1,1),'*',    'MarkerSize',14,...
+        'MarkerEdgeColor','b','MarkerFaceColor','b');
         plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
-        legend('t0','t1','Intersection','Location','Best')   
+        legend('t0','t1','Intersection','Upstream','Location','Best')   
         grid on
         axis equal
         xlabel('X [m]');ylabel('Y [m]')
@@ -352,8 +360,7 @@ switch get(handles.vectorsgraph,'value')   % Get Tag of selected object
         waitbar(1,hwait)
         delete(hwait)
         
-    case 1
-        
+    case 1 % with vectors        
         %Run the calculate function
         hwait = waitbar(0,'Creating plot...','Name','MStaT',...
                  'CreateCancelBtn',...
@@ -366,25 +373,26 @@ switch get(handles.vectorsgraph,'value')   % Get Tag of selected object
         ArMigra = getappdata(0, 'ArMigra');
         
         axes(handles.pictureReach)
+        %figure(5)
         plot(geovar{1}.equallySpacedX,geovar{1}.equallySpacedY,'-b')%start
         hold on
         plot(geovar{2}.equallySpacedX,geovar{2}.equallySpacedY,'-k')%start
+        plot(geovar{1}.equallySpacedX(1,1), geovar{1}.equallySpacedY(1,1),'*',    'MarkerSize',14,...
+        'MarkerEdgeColor','b','MarkerFaceColor','b');
         plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
-        legend('t0','t1','Intersection','Location','Best')   
+        legend('t0','t1','Intersection','Upstream','Location','Best')   
         grid on
         axis equal
         for t=2:length(Migra.xlinet1_int)
 
             D=[Migra.xlinet1_int(t) Migra.ylinet1_int(t)]-[Migra.xlinet0_int(t) Migra.ylinet0_int(t)];
-            quiver(Migra.xlinet0_int(t),Migra.ylinet0_int(t),D(1),D(2),0,'filled','color','k','MarkerSize',10)
+            quiver(Migra.xlinet0_int(t),Migra.ylinet0_int(t),D(1),D(2),0,'filled','color','k','MarkerSize',10,'MaxHeadSize',3)
 
-      %       waitbar(((t/length(Migra.xlinet1_int))/50)/100,hwait); 
         end
         waitbar(50/100,hwait); 
         % 
         xlabel('X [m]');ylabel('Y [m]')
         hold off
-
 
         %Plot maximum migration
         axes(handles.pictureReach)
@@ -434,27 +442,17 @@ function sedtable_CellEditCallback(hObject, eventdata, handles)
 
 % --- Executes during object creation, after setting all properties.
 function sedtable_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sedtable (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% empty
 
 
 % --- Executes on key press with focus on sedtable and none of its controls.
 function sedtable_KeyPressFcn(hObject, eventdata, handles)
-% hObject    handle to sedtable (see GCBO)
-% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
-% handles    structure with handles and user data (see GUIDATA)
+% empty
 
 
 % --- Executes when selected cell(s) is changed in sedtable.
 function sedtable_CellSelectionCallback(hObject, eventdata, handles)
-% hObject    handle to sedtable (see GCBO)
-% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
-%	Indices: row and column indices of the cell(s) currently selecteds
-% handles    structure with handles and user data (see GUIDATA)
+% empty
 
 
 % --------------------------------------------------------------------
@@ -478,5 +476,5 @@ axes(handles.pictureReach)
 
 % --------------------------------------------------------------------
 function ruler_OffCallback(hObject, eventdata, handles)
-delete(handles.ruler)
-delete(handles.Figruler)
+ delete(handles.ruler)
+ delete(handles.Figruler)

@@ -126,8 +126,7 @@ switch figuresel
         fig=copyobj(AxesH,h);
         cc=colorbar;
         colormap('jet');
-%          hcol=findobj(h,'Type','Colorbar');
-%         copyobj(hcol,fig); %copy to figure 2
+
         
     set(fig,'Units', 'normalized', 'Position', [.12 .12 .8 .8]);
     

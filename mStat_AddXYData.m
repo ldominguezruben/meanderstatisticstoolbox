@@ -1,7 +1,9 @@
 function varargout = mStat_AddXYData(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %-----------------MEANDER STATISTICS TOOLBOX. MStaT------------------------
-% This function read multi files and processes all data.
+% This function read single and multi files in different format .kml, 
+% .xlsx and .txt and. The user can define the components and in the case ok kml 
+%is projected to UTM system.
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,10 +62,8 @@ end
 
 %Initial settings
 set(handles.inputtable,'Data',filetable) 
-
 set(handles.currentfileradiobutton, 'Value', 1);
 set(handles.coordinatesystem, 'Value', ReadVar{1}.CS);
-
 set(handles.popupX, 'String', str,'Value',2);
 set(handles.popupY, 'String', str,'Value',3);
 set(handles.advancedsetting, 'Enable', 'off');
@@ -86,7 +86,7 @@ varargout{1} = handles.output;
 
 % --- Executes on button press in addfile.
 function addfile_Callback(hObject, eventdata, handles)
-
+%this function add new files to read
 handles.multisel='on';
 handles.Module=handles.Previous.Module;
 handles.Previous.first=0;
@@ -108,36 +108,10 @@ else
     set(handles.inputtable,'Data',filetable)
 end
     
-
-% % --- Executes on button press in addfiles.
-% function addfiles_Callback(hObject, eventdata, handles)
-% 
-% multisel='on';
-% 
-% mStat_ReadInputFiles(handles.Previous);
-% 
-% [File,Path] = uigetfile({'*.shp;*.kml;*.txt;*.xls;*.xlsx',...
-% 'MStaT Files (*.shp,*.kml,*.txt,*.xls,*.xlsx)';'*.*',  'All Files (*.*)'},...
-% 'Select Input File','MultiSelect',multisel,handles.Path{1});
-% 
-% if ischar(File)%empty file
-%     
-%     FileName=[handles.File{1} File];
-%     
-%     PathName=[handles.Path{1} Path];
-%     
-%     handles.File{1}=FileName;
-%     handles.Path=PathName;
-%     handles.numfile=handles.numfile+size(File,2);
-%     filetable(:,2)=handles.File{1}';
-%     filetable(1:handles.numfile,3)={''};
-%     guidata(hObject,handles)
-%     
-%     set(handles.inputtable,'Data',filetable)
-% end
     
 % --- Executes on button press in quitfiles.
 function quitfiles_Callback(hObject, eventdata, handles)
+%delete files 
 ReadVar  = getappdata(0, 'ReadVar');
 AdvancedSet  = getappdata(0, 'AdvancedSet');
 
@@ -164,18 +138,13 @@ end
 
 % --- Executes on button press in calculate.
 function calculate_Callback(hObject, eventdata, handles,varargout)
-
+%this function call the calculation function
 calculation(hObject,handles)
 
 
 % --- Executes on selection change in coordinatesystem.
 function coordinatesystem_Callback(hObject, eventdata, handles)
-% hObject    handle to coordinatesystem (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns coordinatesystem contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from coordinatesystem
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -234,12 +203,7 @@ end
 
 % --- Executes on selection change in popupXData.
 function popupXData_Callback(hObject, eventdata, handles)
-% hObject    handle to popupXData (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupXData contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupXData
+% empty
 
 
 % --- Executes during object creation, after setting all properties.
@@ -272,7 +236,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-function [ReadVar]=calculation(hObject,handles)
+function [ReadVar]=calculation(hObject,handles);
 %Read data
 ReadVar  = getappdata(0, 'ReadVar');
 AdvancedSet  = getappdata(0, 'AdvancedSet');
@@ -303,14 +267,14 @@ if Control==1
                             yCoord(o)=ReadVar{i}.yCoord(o);
                         end
                     end
-                        xCoord(xCoord==0)=[];
-                        yCoord(yCoord==0)=[];
-                        ReadVar{i}.Brad{p}.xCoord = xCoord;
-                        ReadVar{i}.Brad{p}.yCoord = yCoord;
-                        
-                        clear xCoord yCoord
+                    xCoord(xCoord==0)=[];
+                    yCoord(yCoord==0)=[];
+                    ReadVar{i}.Brad{p}.xCoord = xCoord;
+                    ReadVar{i}.Brad{p}.yCoord = yCoord;
+
+                    clear xCoord yCoord
                 end   
-                set(handles.Previous.inputtable,'ColumnEditable',[false false])
+                %set(handles.Previous.inputtable,'ColumnEditable',[false false])
                 
             else
                 for o=1:length(ReadVar{i}.xCoord)
@@ -319,11 +283,11 @@ if Control==1
                         yCoord(o)=ReadVar{i}.yCoord(o);
                     end
                 end
-                        xCoord(xCoord==0)=[];
-                        yCoord(yCoord==0)=[];
-                        ReadVar{i}.xCoord = xCoord;
-                        ReadVar{i}.yCoord = yCoord;
-                        clear xCoord yCoord
+                xCoord(xCoord==0)=[];
+                yCoord(yCoord==0)=[];
+                ReadVar{i}.xCoord = xCoord;
+                ReadVar{i}.yCoord = yCoord;
+                clear xCoord yCoord
                         
                 set(handles.Previous.inputtable,'ColumnEditable',[false true])
             end
@@ -331,14 +295,14 @@ if Control==1
         end
          
         %condition depending of the module
-        if ReadVar{1}.Module==1%initial panel
+        if ReadVar{1}.Module==1%Morphometrics module
             
             ReadVar{i}.width=str2double(cellstr(handles.width(i)));
              %Write in popupChannel
             str{1,1}=['Select Channel'];
             
-            for i=1:ReadVar{1}.numfile
-                str{i+1,1}=ReadVar{i}.File;
+            for uu=1:ReadVar{1}.numfile
+                str{uu+1,1}=ReadVar{uu}.File;
             end
             
             set(handles.Previous.popupChannel, 'String', str,'Enable','on');
@@ -350,15 +314,15 @@ if Control==1
         
             setappdata(0, 'geovar', geovar);
             setappdata(0, 'ReadVar', ReadVar);
-            close(handles.figure1)
             
-                % Push messages to Log Window:
+            
+            % Push messages to Log Window:
             %     % ----------------------------
              log_text = {...
                 '';...
                 ['%--- ' datestr(now) ' ---%'];...
                 'Loaded:';[cell2mat({ReadVar{i}.File})]};
-                statusLogging(handles.Previous.LogWindow, log_text) 
+                statusLogging(handles.Previous.LogWindow, log_text)
                 
          
         elseif ReadVar{1}.Module==2%Migration Module  
@@ -377,7 +341,7 @@ if Control==1
                  %plot
                  axes(handles.Previous.pictureReach)
                  hold on
-                 plot(ReadVar{i}.xCoord,ReadVar{i}.yCoord)%start   
+                 plot(geovar{i}.equallySpacedX,geovar{i}.equallySpacedY)%start
                  legend('t0','t1','Location','Best') 
                  grid on
                  axis equal 
@@ -386,7 +350,7 @@ if Control==1
                  setappdata(0, 'geovar', geovar);
                  setappdata(0, 'ReadVar', ReadVar);           
                  
-                 close(handles.figure1)
+                % close(handles.figure1)
                  
             % Push messages to Log Window:
             %     % ----------------------------
@@ -396,7 +360,7 @@ if Control==1
                         'Loaded:';[cell2mat({ReadVar{i}.File})]};
                         statusLogging(handles.Previous.LogWindow, log_text)
                         
-        elseif ReadVar{1}.Module==3% Module confluence and Difluence
+        elseif ReadVar{1}.Module==3% Confluence Module 
             
             ReadVar{i}.width=str2double(cellstr(handles.width(i)));
             %Calculate and plot planar variables
@@ -415,7 +379,8 @@ if Control==1
             axes(handles.Previous.pictureReach)
             hold on
             plot(ReadVar{i}.xCoord,ReadVar{i}.yCoord)
-            %legend('t0','t1','Location','Best') 
+            lgd=legend(celltable(:,1),'Location','Best'); 
+            lgd.FontSize = 7;
             grid on
             axis equal 
             xlabel('X [m]');ylabel('Y [m]')
@@ -426,73 +391,25 @@ if Control==1
             % Push messages to Log Window:
             %     % ----------------------------
             log_text = {...
-                        '';...
-                        ['%--- ' datestr(now) ' ---%'];...
-                        'Loaded:';[cell2mat({ReadVar{i}.File})]};
-                        statusLogging(handles.Previous.LogWindow, log_text)
+            '';...
+            ['%--- ' datestr(now) ' ---%'];...
+            'Loaded:';[cell2mat({ReadVar{i}.File})]};
+            statusLogging(handles.Previous.LogWindow, log_text);
                         
             set(handles.Previous.calculate,'Enable','on'); 
             
-            
-        elseif ReadVar{1}.Module==4;% Module braiding
-                
-                
-                ReadVar{i}.width=str2double(cellstr(handles.width(i)));
-
-                if handles.Previous.multi==1
-                    celltable(i,1)={ReadVar{i}.File};
-                    axes(handles.Previous.braiding_axes)
-                    StrPeak='Multi Select Option';
-                    xposFM=0.2;
-                    yposFM=0.5;
-                    text(xposFM,yposFM,StrPeak,'fontsize',15);
-                else 
-                    axes(handles.Previous.braiding_axes)
-                    hold on
-                    plot(ReadVar{i}.xCoord,ReadVar{i}.yCoord)%start
-                    grid on
-                    axis equal 
-                    xlabel('X [m]');ylabel('Y [m]')
-                    hold off    
-
-
-                        celltable(i,1)={ReadVar{i}.File};
-                    if str2double(TableFile{i,1})==1 
-                        celltable(i,2)={'Main Channel'};
-                    elseif str2double(TableFile{i,1})==2
-                        celltable(i,2)={'Secondary Channel'};
-                    end
-                end
-                
-                set(handles.Previous.inputtable,'Data',celltable) 
-                set(handles.Previous.calculate,'Enable','on'); 
-                
-                setappdata(0, 'ReadVar', ReadVar);
-
         end
         
     end
     
-%    if ReadVar{1}.Module==4% Module braiding
-%         if length(ReadVar)==1
-%            warndlg('Almost two file is necesary')
-%         end
-%    else
         %Store data file
-        guidata(hObject,handles)
-        close(handles.figure1)
-%    end
-   
-                
-                
-
+        close(handles.figure1)      
 end
 
 
 
 % --- Executes on button press in advancedsetting.
 function advancedsetting_Callback(hObject, eventdata, handles)
-
 %Read width data
 TableFile=get(handles.inputtable,'Data');
 
@@ -513,8 +430,8 @@ else
         else
             for o=1:length(ReadVar{handles.SelectFile}.xCoord)
                 if ReadVar{handles.SelectFile}.Ids(o) == str2double(TableFile{handles.SelectFile,1})                    
-                    xCoord(o)=ReadVar{handles.SelectFile}.xCoord(o);
-                    yCoord(o)=ReadVar{handles.SelectFile}.yCoord(o);
+                    xCoord(o) = ReadVar{handles.SelectFile}.xCoord(o);
+                    yCoord(o) = ReadVar{handles.SelectFile}.yCoord(o);
                 end
             end
             clear ReadVar{handles.SelectFile}.xCoord ReadVar{handles.SelectFile}.yCoord 

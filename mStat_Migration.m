@@ -59,7 +59,11 @@ for t=1:length(ArMigra.xint_areat0)-1
         elseif jout1(t)<r & jout1(t+1)>r %intern point of Migration area
             linex(m)=xstart(r);
             liney(m)=ystart(r);
-            distance(m)=((linex(m)-linex(m-1))^2+(liney(m)-liney(m-1))^2)^0.5;
+%              if m==1
+%                  distance(m)=nan;
+%              else
+                distance(m)=((linex(m)-linex(m-1))^2+(liney(m)-liney(m-1))^2)^0.5;
+%              end
             indexP(m)=r;
             m=m+1;
         elseif r>jout1(t+1) % last point of Migration area
@@ -76,13 +80,6 @@ for t=1:length(ArMigra.xint_areat0)-1
     Migra.Indext0{t}.ind = indexP;
     Migra.Distance{t}.DistanceSignal = distance;
     Migra.distancet0{t} = nansum(distance);
-    
-%     figure(3)
-%     plot(linex,liney,'-r','Linewidth',2)
-%     hold on
-%     plot(xstart,ystart,'-b')%start
-%     plot(xend,yend,'-k')
-%     plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
 
     clear m linex liney distance indexP
 end
@@ -106,7 +103,11 @@ for t=1:length(ArMigra.xint_areat1)-1%number of Migration areas found
         elseif r>jout0(t+1)%the last point of migration area
             linex(m)=ArMigra.xint_areat1(t+1);
             liney(m)=ArMigra.yint_areat1(t+1);
-            distance(m)=((linex(m)-linex(m-1))^2+(liney(m)-liney(m-1))^2)^0.5;
+%              if m==1
+%                  distance(m)=nan;
+%              else
+                distance(m)=((linex(m)-linex(m-1))^2+(liney(m)-liney(m-1))^2)^0.5;
+%              end
             indexP(m)=r;
             break
         end
@@ -116,12 +117,6 @@ for t=1:length(ArMigra.xint_areat1)-1%number of Migration areas found
     Migra.Indext1{t}.ind=indexP;
     Migra.distancet1{t}=nansum(distance);
     
-%     figure(3)
-%     plot(linex,liney,'-r','Linewidth',2)
-%     hold on
-%     plot(xstart,ystart,'-b')%start
-%     plot(xend,yend,'-k')
-%     plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'or')
     clear m liney linex distance indexP
 end    
 
@@ -178,14 +173,15 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
         Y22{t}(:,o)=[ystart_line1(o,1);yend_line1(o,1)];
 
         %Find the intersection
-        [xlinet1_int{t}(:,o),ylinet1_int{t}(:,o),~,~] = intersections(X11{t}(:,o),Y22{t}(:,o),Migra.linet1X{t}.line,Migra.linet1Y{t}.line,robust);
+        [xlinet1_int{t}(:,o),ylinet1_int{t}(:,o),~,~] = ...
+            intersections(X11{t}(:,o),Y22{t}(:,o),Migra.linet1X{t}.line,Migra.linet1Y{t}.line,robust);
 
         xlinet0_int{t}(:,o)=xx(o,:);%start point t0 Coordinate X
         ylinet0_int{t}(:,o)=yy(o,:);%start point t0 Coordinate Y       
         
         
-        if isnan(xlinet1_int{t}(:,o)) |  Migra.distancet1{t}<0.6*Migra.distancet0{t} %| length(Migra.linet0X{t}.line)<3  | length(Migra.linet1X{t}.line)<3
-            if  length(Migra.linet0X{t}.line)<3  | length(Migra.linet1X{t}.line)<3
+        if isnan(xlinet1_int{t}(:,o)) |  Migra.distancet1{t}<0.6*Migra.distancet0{t} %| 
+            if  length(Migra.linet0X{t}.line)<3  | length(Migra.linet1X{t}.line)<3%
                %Delete all data bend
                 xlinet1_int{t}(:,:)=nan;%delete area t1
                 ylinet1_int{t}(:,:)=nan;%delete area t1
@@ -193,7 +189,6 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
                 ylinet0_int{t}(:,:)=nan;%delete area t0
                 MigrationSignal{t}(:,:)=nan;
                 Direction{t}(:,:)=nan;
-                
             else
                 %%Define cut off
                 Migra.BendCutOff(l) = t;
@@ -215,8 +210,6 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
         else
             MigrationSignal{t}(o,1)=((xlinet1_int{t}(o)-xlinet0_int{t}(o))^2+...
                 (ylinet1_int{t}(o)-ylinet0_int{t}(o))^2)^0.5;
-            
-            
     
             u = xlinet1_int{t}(o)-xlinet0_int{t}(o);
             w = ylinet1_int{t}(o)-ylinet0_int{t}(o);
@@ -224,13 +217,6 @@ for t=1:length(ArMigra.xint_areat1)-1%each bend from second area first and final
             Angles360 = @(a) rem(360+a, 360);                       % For ‘atan2d’
             Direction{t}(o,1)= Angles360(anglq);
         end
-    
-%         figure(3)
-%         hold on
-%         axis equal
-%         plot(Migra.linet0X{t}.line,Migra.linet0Y{t}.line,'-r');%t0
-%         plot(Migra.linet1X{t}.line,Migra.linet1Y{t}.line,'-b');%t1        
-%         line([xstart_line1(o,1) xend_line1(o,1)],[ystart_line1(o,1) yend_line1(o,1)])
         
         clear  xx yy u v w xstart_line1 xend_line1 ystart_line1 yend_line1 ...
             startpoint endpoint
@@ -248,14 +234,11 @@ Migra.seg.xlinet1_int=xlinet1_int;
 Migra.seg.ylinet1_int=ylinet1_int;
 %%
 %Determinate distance
-
 Migra.MigrationDistance=cumsum(diff(geovar{1}.sResample(floor(iout0(1))+1:floor(iout0(end))+1)));
 
 % Resize the array to determinate a continuos signal
 e=1;
-for t=1:length(Migra.Distance)
-
-    
+for t=1:length(Migra.Distance)   
     for o=3:length(Migra.Distance{t}.DistanceSignal)
         if t==1 & o==2%first point
           %  Migra.MigrationDistance(e,1) = Migra.Distance{t}.DistanceSignal(1,o-1) + Migra.Distance{t}.DistanceSignal(1,o-1);
@@ -316,27 +299,12 @@ plot(xstart,ystart,'-b')%start
 hold on
 plot(xend,yend,'-r')%ended
 plot(ArMigra.xint_areat0,ArMigra.yint_areat0,'ok')
-plot(xstart(1),ystart(1),'or',    'MarkerSize',4,...
-    'MarkerEdgeColor','r','MarkerFaceColor','y');%start
-legend('t0','t1','Intersection','Init Data','Location','Best')   
+plot(xstart(1),ystart(1),'*',    'MarkerSize',14,...
+    'MarkerEdgeColor','b','MarkerFaceColor','b');
+
+legend('t0','t1','Intersection','Upstream','Location','Best')   
 grid on
 axis equal
-% for t=2:length(Migra.xlinet1_int)
-%     %line([xstart(t,1) xline1_int(1,t)],[ystart(t,1) ylinet1_int(1,t)])
-%     %line([xstart_line1(t) xend_line1(t)],[ystart_line1(t) yend_line1(t)])
-%     %line([xlinet0_int(t) xline1_int(t)],[ylinet0_int(t) ylinet1_int(t)])
-% 
-%     % figure(3)
-%     D=[Migra.xlinet1_int(t) Migra.ylinet1_int(t)]-[Migra.xlinet0_int(t) Migra.ylinet0_int(t)];
-%     quiver(Migra.xlinet0_int(t),Migra.ylinet0_int(t),D(1),D(2),0,'filled','color','k','MarkerSize',10)
-%     % plot(xline1_int{u}(1,i),ylinet1_int{u}(1,i),'or')
-%     % hold on
-%     % plot(xstart,ystart,'-r')
-%     % plot(xend,yend,'-g')
-%     % axis equal
-% 
-%     % waitbar(((t/length(Migra.xline1_int))/50)/100,hwait); 
-% end
 
 % 
 xlabel('X [m]');ylabel('Y [m]')
@@ -363,41 +331,34 @@ set(ee,'Clipping','on')
     
 hold off
 
-% waitbar(50/100,hwait);  
     
-% figure(3)
-% hold on
-% plot(Migra.MigrationDistance,Migra.MigrationSignal/Migra.deltat,'-r');
-% xlabel('Intrinsic Channel Lengths [m]','Fontsize',10);
-% ylabel('Migration/year [m/yr]','Fontsize',10) 
-
 %%
 % Plot migration signal
 % Define limits
 FileBed_dataMX=Migra.MigrationDistance;
 xmin=0;     
-DeltaCentS=FileBed_dataMX(1,1);  %units. 
+DeltaCentS=mean(diff(FileBed_dataMX));  %units. 
 n=length((Migra.MigrationSignal/Migra.deltat)');
 xlim = [xmin,(n-1)*DeltaCentS+xmin];  % plotting range
 Abscise = [1:length(FileBed_dataMX)] + xmin;
 
+%hold on
 axes(handles.signalvariation);
 dimlessx=Abscise*DeltaCentS;
 [hAx,hLine1,hLine2] = plotyy(dimlessx,Migra.MigrationSignal/Migra.deltat,dimlessx,Migra.Direction,'plot');
 hold on
-xlabel('Intrinsic Channel Lengths [m]','Fontsize',10);
-ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
+xlabel('Intrinsic Channel Lengths [m]');
+ylabel('Migration/year [m/yr]') % left y-axis
 set(hAx(1),'XLim',xlim(:));
 set(hAx(2),'XLim',xlim(:));
 set(hAx(1),'XGrid','on');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %grid on
-ylabel(hAx(1),'Migration/year [m/yr]','Fontsize',10) % left y-axis ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
-ylabel(hAx(2),'Direction [º]','Fontsize',10) % right y-axis
-%set(hAx(1),'YLim',[0 nanmax(Migra.MigrationSignal/Migra.deltat)],'YTick',[0 nanmax(Migra.MigrationSignal/Migra.deltat)/2  nanmax(Migra.MigrationSignal/Migra.deltat)])
-set(hAx(2),'YLim',[0 360],'YTick',[0 90 180 270 360])
+ylabel(hAx(1),'Migration/year [m/yr]') % left y-axis ylabel('Migration/year [m/yr]','Fontsize',10) % left y-axis
+ylabel(hAx(2),'Northward [º]') % right y-axis
+set(hAx(2),'YLim',[0 360],'YTick',[0 90 180 270 360])%,'ycolor','k')
 hold off
 
 hLine1.LineStyle = '-';
-hLine2.LineStyle = '-.';
+hLine2.LineStyle = '-';

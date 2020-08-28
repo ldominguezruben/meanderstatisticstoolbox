@@ -9,17 +9,23 @@
 % Angle Variation and the Global Wavelet Spectrum. The input data to use 
 % MStaT is the Centerline (in a Coordinate System) and the average Width of 
 % the study Channels. MStaT can analize a large number of bends in a short 
-% time. Also MStaT allows calculate the migration of a period, and analizes 
-% the migration signature. Finally MStaT has a Confluencer and Difuencer 
-% toolbox that allow calculate the influence due the presence of the 
-% tributary o distributary channel on the main channel. 
-% For more information you can reviewed the Gutierrez and Abad 2014a and 
-% Gutierrez and Abad 2014b.
+% calculation time. Also MStaT allows calculate the migration of a period, 
+% and analyzes the migration signature. Finally MStaT has a Confluence
+% Module that allow calculate the influence due the presence of the 
+% tributary channel on the main channel. 
 
 %% Collaborations
 % Lucas Dominguez. UNL, Argentina
+% Kensuke Naito. UTEC, Peru
 % Jorge Abad. UTEC, Peru
-% Ronald Gutierrez. UN, Colombia
+% Ronald Gutierrez. Universidad Pontificia de Peru
+%
+% Citation: (In progress)
+% Meander Statistics Toolbox (MStaT): A Toolbox for Geometry 
+% Characterization of Bends in Large Meandering Channels
+% Dominguez Ruben, L., Naito, K., Gutierrez, R. R., Szupiany, R. 
+% and Abad, J. D.
+
 %--------------------------------------------------------------------------
 
 %      Begin initialization code - DO NOT EDIT.
@@ -74,27 +80,12 @@ function mStat_OpeningFcn(hObject, eventdata, handles, varargin)
 %      however, the following input arguments apply.  
 addpath utils
 handles.output = hObject;
-handles.mStat_version='v1.00';
+handles.mStat_version='v1.1';
 % Set the name and version
 set(handles.figure1,'Name',['Meander Statistics Toolbox (MStaT) ' handles.mStat_version], ...
     'DockControls','off')
 
 set_enable(handles,'init')
-
-% Draw the mstat Background
-% -----------------
-% pos = get(handles.mStatBackground,'position');
-% axes(handles.mStatBackground);
-% % if ~isdeployed 
-%     X = imread('MStaT_background.png');
-%     imdisp(X,'size',[pos(4) pos(3)]) % Avoids problems with users not having Image Processing TB
-% % else
-% %     X = imread('MStaT_background.jpg');
-% %     X = imresize(X, [pos(4) pos(3)]);
-% %     X = uint8(X);
-% %     imshow(X,'Border','tight')
-% % end
-% uistack(handles.mStatBackground,'bottom')
 
 %%%%%%%%%
 %scalebar
@@ -125,19 +116,11 @@ pos = get(handles.mStatBackground,'position');
 % if ~isdeployed 
    X = imread('MStaT_background.png');
    imdisp(X,'size',[pos(4) pos(3)]) % Avoids problems with users not having Image Processing TB
-% else
-%    X = imread('MStaT_background.jpg');
-%    X = imresize(X, [pos(4) pos(3)]);
-%    X = uint8(X);
-%    imshow(X,'Border','tight')
-% end
-
-%axes(handles.pictureReach);
-%uistack(handles.mStatBackground,'bottom')
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % Hint: delete(hObject) closes the figure
+who_called = get(hObject,'tag');
 close_button = questdlg(...
     'You are about to exit MStaT. Any unsaved work will be lost. Are you sure?',...
     'Exit MStaT?','No');
@@ -166,7 +149,6 @@ axes(handles.pictureReach)
 cla(handles.pictureReach,'reset')
 set(gca,'xtick',[])
 set(gca,'ytick',[])
-%cla reset
 clear geovar
 clc
 
@@ -185,11 +167,12 @@ set_enable(handles,'init')
 function openfunction_Callback(hObject, eventdata, handles)
 %open function
 set_enable(handles,'init')
-handles.first = 1;
+
 handles.Module = 1;
 
 %This function incorporate the initial data input
 handles.multisel='on';
+handles.first=1;
 guidata(hObject,handles)
 
 mStat_ReadInputFiles(handles);
@@ -197,11 +180,11 @@ mStat_ReadInputFiles(handles);
 
 % --------------------------------------------------------------------
 function singlefile_Callback(hObject, eventdata, handles)
-
+%empty
 
 % --------------------------------------------------------------------
 function multifiles_Callback(hObject, eventdata, handles)
-
+%empty
 
 % --------------------------------------------------------------------
 function close_Callback(hObject, eventdata, handles)
@@ -279,7 +262,7 @@ end
 % --------------------------------------------------------------------
 function exportkmlfile_Callback(hObject, eventdata, handles)
 geovar = getappdata(0,'geovar');
-
+ReadVar = getappdata(0,'ReadVar');
 
 %This function esport the kmzfile for Google Earth
 [file,path] = uiputfile('*.kml','Save .kml File');
@@ -292,30 +275,32 @@ else
 
     % 3 file export function
     %first
-    [xcoord,ycoord]=utm2deg(handles.xCoord,handles.xCoord,char(handles.utmzone(:,1:4)));
+    [xcoord,ycoord]=utm2deg(ReadVar{handles.ChannelSel}.xCoord,...
+        ReadVar{handles.ChannelSel}.yCoord,char(ReadVar{handles.ChannelSel}.utmzone(:,1:4)));
     latlon1=[xcoord ycoord];
 
     %second
-    for i=1:length(handles.geovar.xValleyCenter)
-        utmzoneva(i,1)=cellstr(handles.utmzone(1,1:4));
+    for i=1:length(geovar{handles.ChannelSel}.xValleyCenter)
+        utmzoneva(i,1)=cellstr(ReadVar{handles.ChannelSel}.utmzone(1,1:4));
     end
     utmva=char(utmzoneva);
     waitbar(0.5,hwait)
-
     
-    [xvalley,yvalley]=utm2deg(handles.geovar.xValleyCenter,handles.geovar.yValleyCenter,char(utmzoneva));
+    [xvalley,yvalley]=utm2deg(geovar{handles.ChannelSel}.xValleyCenter,...
+        geovar{handles.ChannelSel}.yValleyCenter,char(utmzoneva));
     latlon2=[xvalley yvalley];
 
     %third
-    for i=1:length(handles.geovar.inflectionX)
-        utmzoneinf(i,1)=cellstr(handles.utmzone(1,1:4));
+    for i=1:length(geovar{handles.ChannelSel}.inflectionX)
+        utmzoneinf(i,1)=cellstr(ReadVar{handles.ChannelSel}.utmzone(1,1:4));
     end
 
-    [xinflectionY,yinflectionY]=utm2deg(handles.geovar.inflectionX,handles.geovar.inflectionY,char(utmzoneinf));
+    [xinflectionY,yinflectionY]=utm2deg(geovar{handles.ChannelSel}.inflectionX,...
+        geovar{handles.ChannelSel}.inflectionY,char(utmzoneinf));
     latlon3=[xinflectionY yinflectionY];
 
     % Write latitude and longitude into a KML file
-    mStat_Exportkml(namekml,latlon1,latlon2,latlon3);
+    mStat_ExportKml(namekml,latlon1,latlon2,latlon3);
     
     waitbar(1,hwait)
     delete(hwait)
@@ -330,11 +315,6 @@ else
 
 end
 
-    
-% --------------------------------------------------------------------
-function htmlfile_Callback(hObject, eventdata, handles)
-% empty
-
 
 %Export Figures    
 % --------------------------------------------------------------------
@@ -346,7 +326,7 @@ if file==0
 else
     F = getframe(handles.pictureReach);
     Image = frame2im(F);
-    imwrite(Image, fullfile(path,file),'Resolution',500)
+    imwrite(Image, fullfile(path,file),'Resolution',[1080,960])
 
     % Push messages to Log Window:
     % ----------------------------
@@ -388,7 +368,7 @@ handles.getRiverStats = mStat_StatisticsVariables(geovar{handles.ChannelSel});
 % --------------------------------------------------------------------
 function backgroundimage_Callback(hObject, eventdata, handles)
 % Add backgroud image
-[handles.FileImage,handles.PathImage] = uigetfile({'*.jpg';'*.tif';'*.*'},'Select Graphic File');
+[handles.FileImage,handles.PathImage] = uigetfile({'*.tif';'*.*'},'Select Graphic File');
 guidata(hObject,handles)
 
 if handles.FileImage==0
@@ -400,16 +380,23 @@ else
     hold on;
 
     geovar=getappdata(0, 'geovar');
+    sel=get(handles.selector,'Value')-1;%Decomposition method
     
     %Begin plot
      mStat_plotplanar(geovar{handles.ChannelSel}.equallySpacedX, geovar{handles.ChannelSel}.equallySpacedY,...
          geovar{handles.ChannelSel}.inflectionPts, geovar{handles.ChannelSel}.x0,...
          geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
      geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY,...
-     handles.pictureReach);
+     handles.pictureReach,sel);
  
-    msgbox(['Successfully update'],...
-        'Background Image');
+     % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+                '';...
+                ['%--- ' datestr(now) ' ---%'];...
+                'Background Image read succesfully!'};
+                statusLogging(handles.LogWindow, log_text)
+
         
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -422,13 +409,12 @@ function modules_Callback(hObject, eventdata, handles)
 % Empty
 
 % --------------------------------------------------------------------
-function braidinganalyzer_Callback(hObject, eventdata, handles)
-mStat_BraidingModule
 
 % --------------------------------------------------------------------
 function migrationanalyzer_Callback(hObject, eventdata, handles)
 %Migration Analyzer Tool
 mStat_MigrationAnalyzer;
+
 
 % --------------------------------------------------------------------
 function confluencesanalyzer_Callback(hObject, eventdata, handles)
@@ -445,102 +431,102 @@ function setti_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function unitsfunction_Callback(hObject, eventdata, handles)
-% Empty
-
-
-% --------------------------------------------------------------------
-function metricunits_Callback(hObject, eventdata, handles)
-% Metric factor function
-if handles.start==0
-    munits=1/0.3048;
-else
-    munits=1;
-end
-handles.geovar.lengthCurved=handles.geovar.lengthCurved*munits;
-handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*munits;
-handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*munits;
-handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*munits;
-handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*munits;
-handles.width=handles.width*munits;
-guidata(hObject,handles)
-
-set(handles.widthinput,'String',handles.width)
-
-% Retrieve the selected bend ID number from the "bendSelect" listbox.
-selectedBend = get(handles.bendSelect,'Value');
-
-% -------------------------------------------------------------------------
-
-% Assign the bend statistics to an output array.
-matrixOfBendStatistics = [handles.geovar.sinuosityOfBends(selectedBend),...
-    handles.geovar.lengthStraight(selectedBend),handles.geovar.lengthCurved(selectedBend),...
-    handles.geovar.wavelengthOfBends(selectedBend), handles.geovar.amplitudeOfBends(selectedBend),...
-    handles.geovar.downstreamSlength(selectedBend),handles.geovar.upstreamSlength(selectedBend)];
-
-matrixOfBendStatistics = matrixOfBendStatistics';
-
-% Setappdata is a function which allows the matrix of bend statistics
-% to be accessed by multiple GUI windows.  
-setappdata(0, 'matrixOfBendStatistics', matrixOfBendStatistics);
-guidata(hObject, handles);
-
-% Set the statistics to the "IndividualStats" table in 
-% the main GUI.  
-set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
-set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
-set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
-set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
-set(handles.dstreamL, 'String', round(handles.geovar.downstreamSlength(selectedBend),2));
-set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
-handles.munits=1;
-guidata(hObject, handles);
-
-
-% --------------------------------------------------------------------
-function englishunits_Callback(hObject, eventdata, handles)
-% English units
-
-eunits=0.3048;
-
-handles.geovar.lengthCurved=handles.geovar.lengthCurved*eunits;
-handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*eunits;
-handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*eunits;
-handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*eunits;
-handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*eunits;
-handles.width=handles.width*eunits;
-guidata(hObject,handles)
-
-set(handles.widthinput,'String',handles.width)
-
-% Retrieve the selected bend ID number from the "bendSelect" listbox.
-selectedBend = get(handles.bendSelect,'Value');
-
-% -------------------------------------------------------------------------
-
-% Assign the bend statistics to an output array.
-matrixOfBendStatistics = [handles.geovar.sinuosityOfBends(selectedBend),...
-    handles.geovar.lengthStraight(selectedBend),handles.geovar.lengthCurved(selectedBend),...
-    handles.geovar.wavelengthOfBends(selectedBend), handles.geovar.amplitudeOfBends(selectedBend),...
-    handles.geovar.downstreamSlength(selectedBend),handles.geovar.upstreamSlength(selectedBend)];
-
-matrixOfBendStatistics = matrixOfBendStatistics';
-
-% Setappdata is a function which allows the matrix of bend statistics
-% to be accessed by multiple GUI windows.  
-setappdata(0, 'matrixOfBendStatistics', matrixOfBendStatistics);
-guidata(hObject, handles);
-
-% Set the statistics to the "IndividualStats" table in 
-% the main GUI.  
-set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
-set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
-set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
-set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
-set(handles.dstreamL, 'String',round(handles.geovar.downstreamSlength(selectedBend),2));
-set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
-handles.eunits=0.3048;
-guidata(hObject, handles);
+% function unitsfunction_Callback(hObject, eventdata, handles)
+% % Empty
+% 
+% 
+% % --------------------------------------------------------------------
+% function metricunits_Callback(hObject, eventdata, handles)
+% % Metric factor function
+% if handles.start==0
+%     munits=1/0.3048;
+% else
+%     munits=1;
+% end
+% handles.geovar.lengthCurved=handles.geovar.lengthCurved*munits;
+% handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*munits;
+% handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*munits;
+% handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*munits;
+% handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*munits;
+% handles.width=handles.width*munits;
+% guidata(hObject,handles)
+% 
+% set(handles.widthinput,'String',handles.width)
+% 
+% % Retrieve the selected bend ID number from the "bendSelect" listbox.
+% selectedBend = get(handles.bendSelect,'Value');
+% 
+% % -------------------------------------------------------------------------
+% 
+% % Assign the bend statistics to an output array.
+% matrixOfBendStatistics = [handles.geovar.sinuosityOfBends(selectedBend),...
+%     handles.geovar.lengthStraight(selectedBend),handles.geovar.lengthCurved(selectedBend),...
+%     handles.geovar.wavelengthOfBends(selectedBend), handles.geovar.amplitudeOfBends(selectedBend),...
+%     handles.geovar.downstreamSlength(selectedBend),handles.geovar.upstreamSlength(selectedBend)];
+% 
+% matrixOfBendStatistics = matrixOfBendStatistics';
+% 
+% % Setappdata is a function which allows the matrix of bend statistics
+% % to be accessed by multiple GUI windows.  
+% setappdata(0, 'matrixOfBendStatistics', matrixOfBendStatistics);
+% guidata(hObject, handles);
+% 
+% % Set the statistics to the "IndividualStats" table in 
+% % the main GUI.  
+% set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
+% set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
+% set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
+% set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
+% set(handles.dstreamL, 'String', round(handles.geovar.downstreamSlength(selectedBend),2));
+% set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
+% handles.munits=1;
+% guidata(hObject, handles);
+% 
+% 
+% % --------------------------------------------------------------------
+% function englishunits_Callback(hObject, eventdata, handles)
+% % English units
+% 
+% eunits=0.3048;
+% 
+% handles.geovar.lengthCurved=handles.geovar.lengthCurved*eunits;
+% handles.geovar.wavelengthOfBends=handles.geovar.wavelengthOfBends*eunits;
+% handles.geovar.amplitudeOfBends=handles.geovar.amplitudeOfBends*eunits;
+% handles.geovar.downstreamSlength=handles.geovar.downstreamSlength*eunits;
+% handles.geovar.upstreamSlength=handles.geovar.upstreamSlength*eunits;
+% handles.width=handles.width*eunits;
+% guidata(hObject,handles)
+% 
+% set(handles.widthinput,'String',handles.width)
+% 
+% % Retrieve the selected bend ID number from the "bendSelect" listbox.
+% selectedBend = get(handles.bendSelect,'Value');
+% 
+% % -------------------------------------------------------------------------
+% 
+% % Assign the bend statistics to an output array.
+% matrixOfBendStatistics = [handles.geovar.sinuosityOfBends(selectedBend),...
+%     handles.geovar.lengthStraight(selectedBend),handles.geovar.lengthCurved(selectedBend),...
+%     handles.geovar.wavelengthOfBends(selectedBend), handles.geovar.amplitudeOfBends(selectedBend),...
+%     handles.geovar.downstreamSlength(selectedBend),handles.geovar.upstreamSlength(selectedBend)];
+% 
+% matrixOfBendStatistics = matrixOfBendStatistics';
+% 
+% % Setappdata is a function which allows the matrix of bend statistics
+% % to be accessed by multiple GUI windows.  
+% setappdata(0, 'matrixOfBendStatistics', matrixOfBendStatistics);
+% guidata(hObject, handles);
+% 
+% % Set the statistics to the "IndividualStats" table in 
+% % the main GUI.  
+% set(handles.sinuosity, 'String', round(handles.geovar.sinuosityOfBends(selectedBend),2));
+% set(handles.curvaturel, 'String', round(handles.geovar.lengthCurved(selectedBend),2));
+% set(handles.wavel, 'String', round(handles.geovar.wavelengthOfBends(selectedBend),2));
+% set(handles.amplitude, 'String', round(handles.geovar.amplitudeOfBends(selectedBend),2));
+% set(handles.dstreamL, 'String',round(handles.geovar.downstreamSlength(selectedBend),2));
+% set(handles.ustreamL, 'String', round(handles.geovar.upstreamSlength(selectedBend),2));
+% handles.eunits=0.3048;
+% guidata(hObject, handles);
     
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -611,7 +597,7 @@ end
 % --------------------------------------------------------------------
 function zoomextendedT_ClickedCallback(hObject, eventdata, handles)
 geovar=getappdata(0, 'geovar');
-
+sel=get(handles.selector,'Value')-1;%Decomposition method
 %Begin plot
 axes(handles.pictureReach)
 cla(handles.pictureReach)
@@ -619,12 +605,11 @@ cla(handles.pictureReach)
      geovar{handles.ChannelSel}.inflectionPts, geovar{handles.ChannelSel}.x0,...
      geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
  geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY,...
- handles.pictureReach);
+ handles.pictureReach,sel);
 
 
 % --------------------------------------------------------------------
 function panT_OnCallback(hObject, eventdata, handles)
-
 axes(handles.pictureReach)
 scalebar OFF
 
@@ -701,17 +686,6 @@ pos = get(0,'userdata');
 %Initial Panel
 %%%%%%%%%%%%%%%%%%%
 
-function widthinput_Callback(hObject, eventdata, handles)
-% Empty
-
-
-% --- Executes during object creation, after setting all properties.
-function widthinput_CreateFcn(hObject, eventdata, handles)
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
 
 % --- Executes during object creation, after setting all properties.
 function popupChannel_CreateFcn(hObject, eventdata, handles)
@@ -763,6 +737,7 @@ function popupChannel_Callback(hObject, eventdata, handles)
 
 handles.ChannelSel=get(handles.popupChannel,'Value')-1;
 guidata(hObject, handles);
+sel=get(handles.selector,'Value')-1;%Decomposition method
 
 geovar=getappdata(0, 'geovar');
 
@@ -800,7 +775,7 @@ else
          geovar{handles.ChannelSel}.inflectionPts, geovar{handles.ChannelSel}.x0,...
          geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
      geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY,...
-     handles.pictureReach);
+     handles.pictureReach,sel);
 
 
 %    enable results
@@ -825,44 +800,7 @@ end
 
 % --------------------------------------------------------------------
 function bendstatistics_Callback(hObject, eventdata, handles)
-% % This function executes when the user presses the Get Bend panel 
-% % button and requires the following input arguments.  
-% %
-% % Retrieve the selected bend ID number from the "bendSelect" listbox.
-% selectedBend = get(handles.bendSelect,'Value');
-% handles.selectedBend = num2str(selectedBend);
-% 
-% % Setappdata is a function which allows the selected bend
-% % to be accessed by multiple GUI windows.  
-% setappdata(0, 'selectedBend', handles.selectedBend);
-% guidata(hObject, handles);
-% 
-% % Start by retreiving the selected bend given the user input from the
-% % "bendSelect" listbox. 
-% handles.selectedBend = getappdata(0, 'selectedBend');
-% handles.selectedBend = str2double(handles.selectedBend);
-% 
-% % Call the "userSelectBend" function to get the index of intersection
-% % points and the highlighted bend limits.  
-% 
-% [highlightX, highlightY, ~] = userSelectBend(handles.geovar.intS, handles.selectedBend,...
-%     handles.geovar.equallySpacedX,handles.geovar.equallySpacedY,handles.geovar.newInflectionPts,...
-%     handles.geovar.sResample);
-% handles.highlightX = highlightX;
-% handles.highlightY = highlightY;
-% 
-% % -------------------------------------------------------------------------
-% % Set the statistics to the "IndividualStats" table in 
-% % the main GUI.  
-% set(handles.sinuosity, 'String', handles.geovar.sinuosityOfBends(selectedBend));
-% set(handles.curvaturel, 'String', handles.geovar.lengthCurved(selectedBend));
-% set(handles.wavel, 'String', handles.geovar.wavelengthOfBends(selectedBend));
-% set(handles.amplitude, 'String', handles.geovar.amplitudeOfBends(selectedBend));
-% guidata(hObject, handles);
-% % 
-% % Note:  This section is repeated if the user presses the 
-% % "Go to Bend Statistics" button again.    
-% uiresume(gcbf);
+% empty
 
 
 % --- Executes on button press in selectData.
@@ -969,12 +907,14 @@ function gobend_Callback(hObject, eventdata, handles)
 %This function go to bend selected and replot the picture
 geovar=getappdata(0, 'geovar');
 
+sel=get(handles.selector,'Value')-1;%Decomposition method
+
 cla(handles.pictureReach)
 mStat_plotplanar(geovar{handles.ChannelSel}.equallySpacedX, geovar{handles.ChannelSel}.equallySpacedY,...
     geovar{handles.ChannelSel}.inflectionPts,geovar{handles.ChannelSel}.x0,...
     geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
     geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY, ...
-    handles.pictureReach);
+    handles.pictureReach,sel);
 
 zoom out
 
@@ -985,10 +925,9 @@ selectedBend = get(handles.bendSelect,'Value');
     axes(handles.pictureReach); 
     set(gca, 'Color', 'w')
     %axis normal; 
-    dx = 2000;
-    dy = 2000;
     loc = find(geovar{handles.ChannelSel}.newMaxCurvS == geovar{handles.ChannelSel}.bend(selectedBend,2));
-    zoomcenter(geovar{handles.ChannelSel}.newMaxCurvX(loc),geovar{handles.ChannelSel}.newMaxCurvY(loc),10)
+    zoom out
+    zoomcenter(geovar{handles.ChannelSel}.newMaxCurvX(loc),geovar{handles.ChannelSel}.newMaxCurvY(loc),2)
  else 
  end
 
@@ -1104,66 +1043,68 @@ pan(handles.pictureReach)
 %%%%%%%%%%%%%%%%%%%%
 
 function set_enable(handles,enable_state)
+Readvar = getappdata(0,'Readvar');
+
 switch enable_state
-case 'init'
-    set(handles.sinuosity,'String','','Enable','off')
-    set(handles.curvaturel,'String','','Enable','off')
-    set(handles.wavel,'String','','Enable','off')
-    set(handles.amplitude,'String','','Enable','off')
-    set(handles.ustreamL,'String','','Enable','off')
-    set(handles.dstreamL,'String','','Enable','off')
-    set(handles.condition,'String','','Enable','off')
-    set(handles.bendSelect,'Visible','off','String','','Enable','off')
-    set(handles.exportfunction,'Enable','off')
-    set(handles.exportkmlfile,'Enable','off')
-    set(handles.setti,'Enable','off')  
-    set(handles.gobend,'Enable','off')   
-    set(handles.selector,'Enable','off','Value',1)  
-    set(handles.bendSelect,'Enable','off') 
-    set(handles.waveletanalysis,'Enable','off')
-    set(handles.riverstatistics,'Enable','off')
-    set(handles.backgroundimage,'Enable','off')
-    set(handles.savematfileT,'Enable','off')
-    set(handles.rulerT,'Enable','off')
-    set(handles.zoomextendedT,'Enable','off')
-    set(handles.zoominT,'Enable','off')
-    set(handles.zoomoutT,'Enable','off')
-    set(handles.channelname,'Enable','off')
-    set(handles.panT,'Enable','off')
-    set(handles.datacursorT,'Enable','off')
-    set(handles.popupChannel,'String','Select Channel','Enable','off','Value',1)
-    axes(handles.pictureReach)
-    cla(handles.pictureReach)
-    clear selectBend
-    clc
+    case 'init'
+        set(handles.sinuosity,'String','','Enable','off')
+        set(handles.curvaturel,'String','','Enable','off')
+        set(handles.wavel,'String','','Enable','off')
+        set(handles.amplitude,'String','','Enable','off')
+        set(handles.ustreamL,'String','','Enable','off')
+        set(handles.dstreamL,'String','','Enable','off')
+        set(handles.condition,'String','','Enable','off')
+        set(handles.bendSelect,'Visible','off','String','','Enable','off')
+        set(handles.exportfunction,'Enable','off')
+        set(handles.exportkmlfile,'Enable','off')
+        %set(handles.setti,'Enable','off')  
+        set(handles.gobend,'Enable','off')   
+        set(handles.selector,'Enable','off','Value',1)  
+        set(handles.bendSelect,'Enable','off') 
+        set(handles.waveletanalysis,'Enable','off')
+        set(handles.riverstatistics,'Enable','off')
+        set(handles.backgroundimage,'Enable','off')
+        set(handles.savematfileT,'Enable','off')
+        set(handles.rulerT,'Enable','off')
+        set(handles.zoomextendedT,'Enable','off')
+        set(handles.zoominT,'Enable','off')
+        set(handles.zoomoutT,'Enable','off')
+        set(handles.channelname,'Enable','off')
+        set(handles.panT,'Enable','off')
+        set(handles.datacursorT,'Enable','off')
+        set(handles.popupChannel,'String','Select Channel','Enable','off','Value',1)
+        axes(handles.pictureReach)
+        cla(handles.pictureReach)
+        clear selectBend
+        clc
     case 'loadfiles'
-    set(handles.sinuosity,'Enable','on')
-    set(handles.curvaturel,'Enable','on')
-    set(handles.wavel,'Enable','on')
-    set(handles.amplitude,'Enable','on')
-    set(handles.ustreamL,'Enable','on')
-    set(handles.dstreamL,'Enable','on')
-    set(handles.channelname,'Enable','on')
-    set(handles.bendSelect,'Visible','on','String','','Enable','on')
-    set(handles.condition,'String','','Enable','on')
-    set(handles.setti,'Enable','on')
-    set(handles.gobend,'Enable','on')
-    set(handles.selector,'Enable','on')  
-    set(handles.bendSelect,'Enable','on')  
-    set(handles.popupChannel,'Enable','on')
-    set(handles.savematfileT,'Enable','on')
-    set(handles.rulerT,'Enable','on')
-    set(handles.zoomextendedT,'Enable','on')
-    set(handles.zoominT,'Enable','on')
-    set(handles.zoomoutT,'Enable','on')
-    set(handles.panT,'Enable','on')
-    set(handles.datacursorT,'Enable','on')
+        set(handles.sinuosity,'Enable','on')
+        set(handles.curvaturel,'Enable','on')
+        set(handles.wavel,'Enable','on')
+        set(handles.amplitude,'Enable','on')
+        set(handles.ustreamL,'Enable','on')
+        set(handles.dstreamL,'Enable','on')
+        set(handles.channelname,'Enable','on')
+        set(handles.bendSelect,'Visible','on','String','','Enable','on')
+        set(handles.condition,'String','','Enable','on')
+       % set(handles.setti,'Enable','on')
+        set(handles.gobend,'Enable','on')
+        set(handles.selector,'Enable','on')  
+        set(handles.bendSelect,'Enable','on')  
+        set(handles.popupChannel,'Enable','on')
+        set(handles.savematfileT,'Enable','on')
+        set(handles.rulerT,'Enable','on')
+        set(handles.zoomextendedT,'Enable','on')
+        set(handles.zoominT,'Enable','on')
+        set(handles.zoomoutT,'Enable','on')
+        set(handles.panT,'Enable','on')
+        set(handles.datacursorT,'Enable','on')
     case 'results'
-    set(handles.waveletanalysis,'Enable','on')  
-    set(handles.riverstatistics,'Enable','on')  
-    set(handles.exportfunction,'Enable','on')
-    handles.start=0;
-    set(handles.backgroundimage,'Enable','on')
+        set(handles.waveletanalysis,'Enable','on')  
+        set(handles.riverstatistics,'Enable','on')  
+        set(handles.exportfunction,'Enable','on')
+        handles.start=0;
+        set(handles.backgroundimage,'Enable','on')
     otherwise                
 end
        
@@ -1206,51 +1147,48 @@ AdvancedSet=getappdata(0, 'AdvancedSet');
 
 %Read selector
 sel=get(handles.selector,'Value')-1;%Decomposition method
-
+    
 %Function of calculate
 %Calculate and plot planar variables
+if sel==0
+else
+    [geovar{handles.ChannelSel}]=mStat_planar(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,...
+        ReadVar{handles.ChannelSel}.width,ReadVar{handles.ChannelSel}.File,...
+        sel,handles.Module,ReadVar{handles.ChannelSel}.Level,AdvancedSet{handles.ChannelSel});
 
-[geovar{handles.ChannelSel}]=mStat_planar(ReadVar{handles.ChannelSel}.xCoord,ReadVar{handles.ChannelSel}.yCoord,...
-    ReadVar{handles.ChannelSel}.width,ReadVar{handles.ChannelSel}.File,...
-    sel,handles.Module,ReadVar{handles.ChannelSel}.Level,AdvancedSet{handles.ChannelSel});
-    
-%Begin plot
-     mStat_plotplanar(geovar{handles.ChannelSel}.equallySpacedX, geovar{handles.ChannelSel}.equallySpacedY,...
-         geovar{handles.ChannelSel}.inflectionPts, geovar{handles.ChannelSel}.x0,...
-         geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
-     geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY,...
-     handles.pictureReach);
- 
-%Store data file
-setappdata(0, 'geovar', geovar);
+    %Begin plot
+         mStat_plotplanar(geovar{handles.ChannelSel}.equallySpacedX, geovar{handles.ChannelSel}.equallySpacedY,...
+             geovar{handles.ChannelSel}.inflectionPts, geovar{handles.ChannelSel}.x0,...
+             geovar{handles.ChannelSel}.y0, geovar{handles.ChannelSel}.x_sim,...
+         geovar{handles.ChannelSel}.newMaxCurvX, geovar{handles.ChannelSel}.newMaxCurvY,...
+         handles.pictureReach,sel);
 
+    %Store data file
+    setappdata(0, 'geovar', geovar);
 
-% Push messages to Log Window:
-% ----------------------------
-log_text = {...
-            '';...
-            ['%--- ' datestr(now) ' ---%'];...
-            'MStaT Summary';...
-            'Width [m]:';[cell2mat({geovar{handles.ChannelSel}.width(end,1)})];...
-            'Total Length Analyzed [km]:';[round(cell2mat({geovar{handles.ChannelSel}.intS(end,1)/1000}),2)];...
-            'Bends Found:';[cell2mat({geovar{handles.ChannelSel}.nBends})];...
-            'Mean Sinuosity:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.sinuosityOfBends)}),2)];...
-            'Mean Amplitude [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.amplitudeOfBends)}),2)];...
-            'Mean Arc-Wavelength [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.lengthCurved)}),2)];...
-            'Mean Wavelength [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.wavelengthOfBends)}),2)]};
-            statusLogging(handles.LogWindow, log_text)
+    %update listt
+    bendListStr = geovar{handles.ChannelSel}.bendID1';
+    set (handles.bendSelect, 'string', bendListStr);
+
+    % Push messages to Log Window:
+    % ----------------------------
+    log_text = {...
+                '';...
+                ['%--- ' datestr(now) ' ---%'];...
+                'MStaT Summary';...
+                'Width [m]:';[cell2mat({geovar{handles.ChannelSel}.width(end,1)})];...
+                'Total Length Analyzed [km]:';[round(cell2mat({geovar{handles.ChannelSel}.intS(end,1)/1000}),2)];...
+                'Bends Found:';[cell2mat({geovar{handles.ChannelSel}.nBends})];...
+                'Mean Sinuosity:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.sinuosityOfBends)}),2)];...
+                'Mean Amplitude [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.amplitudeOfBends)}),2)];...
+                'Mean Arc-Wavelength [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.lengthCurved)}),2)];...
+                'Mean Wavelength [m]:';[round(cell2mat({nanmean(geovar{handles.ChannelSel}.wavelengthOfBends)}),2)]};
+                statusLogging(handles.LogWindow, log_text)
+end
                     
 
-
-
 function channelname_Callback(hObject, eventdata, handles)
-% hObject    handle to channelname (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of channelname as text
-%        str2double(get(hObject,'String')) returns contents of channelname as a double
-
+% empty
 
 % --- Executes during object creation, after setting all properties.
 function channelname_CreateFcn(hObject, eventdata, handles)

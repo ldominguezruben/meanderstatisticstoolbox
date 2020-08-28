@@ -1,19 +1,8 @@
-function mStat_plotWavel(geovar,sel1,SIGLVL,filter,axest,Tools,vars)
+function mStat_plotWavel(geovar,sel1,SIGLVL,filter,axest,Module,vars)
 
 riverName = getappdata(0, 'riverName');
 
-%SPECIFY THE FOLDER AND NAME OF THE FILE TO ANALYZE
-%BedFilesFolder = ['J:\Meander_toolbox\']; 
-%FileBed =[BedFilesFolder,'BigRiversCurvature.txt'];
 inodes = 500; jnodes = 1; deltaS = 1; deltaN=1; Jplot=1; 
-% If Jplot=-1, it plots all profiles, if not specify Jplot=Jwanted
-
-%FileBed =[BedFilesFolder,'CF16-nocyl-all-1518x32.dat'];
-%inodes = 1518; jnodes = 32; deltaS =1, deltaN=1; Jplot=31; %If Jplot=-1,
-%FileBed =[BedFilesFolder,'WA9-c-nocyl-all-2136x32.dat'];
-%inodes = 2136; jnodes = 32; deltaS =1, deltaN=1; Jplot=-1; %If Jplot=-1,   
-%J=1, 9, 20
-
 
 %Input for wavelet analysis
 dt = deltaS; 
@@ -33,10 +22,10 @@ LenFileName = length(riverName);
 FileBaseW = [riverName 'WaveLet'];
 
 %input data classic capture
-if Tools==1 | Tools==3;
-FileBed_dataMX = geovar.sResample(:,1); % S-coordinate
-FileBed_dataMZ = geovar.cResample(:,1); % C-curvature
-elseif Tools==2% Moigration Toolbox
+if Module==1 | Module==3;
+    FileBed_dataMX = geovar.sResample(:,1); % S-coordinate
+    FileBed_dataMZ = geovar.cResample(:,1); % C-curvature
+elseif Module==2% Migration Toolbox
     FileBed_dataMX = vars.MigrationDistance;
     vars.MigrationSignal(isnan(vars.MigrationSignal))=-999;%Change by value default
     FileBed_dataMZ = vars.MigrationSignal/vars.deltat;
@@ -48,11 +37,11 @@ for m=1:(lenRanges);
     Upper_Scale = Input_Band_Scale(m)+Epsilon; 
     jj=Jplot;
     
-    if Tools==2;
-        DeltaCentS=FileBed_dataMX(1,1);
+    if Module==2;
+        DeltaCentS=mean(diff(FileBed_dataMX));% DeltaCentS=FileBed_dataMX(1,1);
         xmin=0;
     else
-        DeltaCentS=FileBed_dataMX(2,1)-FileBed_dataMX(1,1);  %units.
+        DeltaCentS=mean(diff(FileBed_dataMX));%(2,1)-FileBed_dataMX(1,1);  %units.geovar.width;%geovar.width;%
         xmin=min(FileBed_dataMX(:,jj));
     end
     sst=transpose(FileBed_dataMZ(:,jj));
@@ -60,7 +49,7 @@ for m=1:(lenRanges);
    [period,power,sig95M,scale_avg,scaleavg_signif] = mStat_WaveletCenterline(...
        JProfile,jnodes,DeltaCentS,sst,OptSaveFig,FileBaseW,xmin,dt,dj,...
        Lower_Scale,Upper_Scale,SIGLVL,geovar.equallySpacedX,...
-       geovar.equallySpacedY,geovar.angle,geovar.width,sel1,filter,axest,Tools,vars); 
+       geovar.equallySpacedY,geovar.angle,geovar.width,sel1,filter,axest,Module,vars); 
 end  
 handles.sel1 = num2str(sel1);
 setappdata(0, 'sel1', handles.sel1);

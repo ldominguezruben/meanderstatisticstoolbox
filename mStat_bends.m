@@ -110,12 +110,12 @@ for i = 1:2:nBends
         end   
     else
     end
-%     Add last point of inflection of current bend to matrix of bend data.
-bend(i,m+1) = intS(i+1);
-bend(i+1,1) = intS(i+1); 
+    %     Add last point of inflection of current bend to matrix of bend data.
+    bend(i,m+1) = intS(i+1);
+    bend(i+1,1) = intS(i+1); 
 %     Add last inflection point of adjacent bend to matrix of bend data.
     if i+2 <= length(intS)
-    bend(i+1, n) = intS(i+2);
+        bend(i+1, n) = intS(i+2);
     else
     end
 end
@@ -130,7 +130,6 @@ n = 1;
 p = 1;
 cmpdIndex = 1;
 symmetricIndex = 0; 
-% simpleIndex=zeros(1,nBends);
 dStreamIndex=0;
 uStreamIndex=0;
 simpleIndex=0;
@@ -140,8 +139,8 @@ for i = 1:nBends
     if (bend(i,4)-bend(i,1)) < 0     
         simpleIndex(j) = i;
         if (bend(i,2)-bend(i,1)) > (bend(i,3)-bend(i,1))/2
-        dStreamIndex(m) = i; %Downstream oriented bends
-        m = m+1;
+            dStreamIndex(m) = i; %Downstream oriented bends
+            m = m+1;
         elseif (bend(i,2)-bend(i,1)) < (bend(i,3)-bend(i,1))/2
             uStreamIndex(n) = i; %Upstream oriented bends
             n = n+1;
@@ -149,7 +148,7 @@ for i = 1:nBends
             symmetricIndex(p) = i; %Symmetric bends
             p = p+1; 
         end
-        j= j+1;
+        j = j+1;
     else %Compound bends
         cmpdIndex(k) = i;
         k = k+1;

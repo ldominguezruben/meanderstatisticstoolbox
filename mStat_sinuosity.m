@@ -1,5 +1,5 @@
 function [sinuosityOfBends, lengthStraight, lengthCurved] = ...
-       sinuosity2(intS, nBends, newInflectionPts)
+       mStat_sinuosity(intS, nBends, newInflectionPts)
 %      This function finds the sinuosity of each individual bend in the
 %      graphical output plot (i.e. the length along the given centerline
 %      divided by the length of the chord centerline between the inflection
