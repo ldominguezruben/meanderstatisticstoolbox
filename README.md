@@ -11,9 +11,9 @@ Ensure you have Matlab 2015b or newer.
 Clone this repository using Git:
 
  # if you have a key associated with your github account
- git clone https://github.com/ldominguezruben/mstat.git
+ git clone https://github.com/ldominguezruben/meanderstatisticstoolbox.git
 
  # otherwise
- git clone https://github.com/ldominguezruben/mstat
+ git clone https://github.com/ldominguezruben/meanderstatisticstoolbox
 
 Run mstat.m in Matlab.
